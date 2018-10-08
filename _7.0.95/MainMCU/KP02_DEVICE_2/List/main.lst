@@ -1,0 +1,927 @@
+###############################################################################
+#
+# IAR ANSI C/C++ Compiler V7.40.2.8542/W32 for ARM        08/Oct/2018  09:57:54
+# Copyright 1999-2015 IAR Systems AB.
+#
+#    Cpu mode     =  thumb
+#    Endian       =  little
+#    Source file  =  D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\main.cpp
+#    Command line =  
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\main.cpp -D IAR_ARM_CM4
+#        -D USE_STDPERIPH_DRIVER -D STM32F40_41xxx -D HAVE_CONFIG_H -D
+#        SD_SPI_MODE -D USE_FULL_ASSERT -D DEVICE_2 -D TFT -D STENDBUY_NOT_USE
+#        -D SCREEN_NOT_ROTATE -D USE_ADS1292R -D DISPLAY_GPIO -D
+#        BUFFERED_TRANSFER -D LCD_TRACE -lCN
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\KP02_DEVICE_2\List\ -o
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\KP02_DEVICE_2\Obj\
+#        --no_unroll --no_inline --no_tbaa --no_scheduling --debug
+#        --endian=little --cpu=Cortex-M4F -e --fpu=VFPv4_sp --dlib_config
+#        "D:\Program Files (x86)\IAR Systems\Embedded Workbench
+#        7.2\arm\INC\c\DLib_Config_Normal.h" -I
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\ -I
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\FatFs\ -I
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\FreeRTOS\Source\include\
+#        -I
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\FreeRTOS\Source\portable\IAR\ARM_CM3\
+#        -I
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\Libraries\CMSIS\CM4\CoreSupport\
+#        -I
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\Libraries\CMSIS\CM4\DeviceSupport\STM32F4xx\
+#        -I
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\Libraries\STM32F4xx_StdPeriph_Driver\inc\
+#        -I
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\Libraries\STM32F10x_Speex_Lib\include\speex\
+#        -I
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\Libraries\STM32F10x_Speex_Lib\include\
+#        -I
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\Libraries\STM32F10x_Speex_Lib\libspeex\
+#        -I
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\Libraries\STM32F10x_Speex_Lib\STM32\include\speex\
+#        -I
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\Libraries\STM32F10x_Speex_Lib\STM32\include\
+#        -I
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\Libraries\STM32F10x_Speex_Lib\STM32\
+#        -I
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\Libraries\STM32F10x_Speex_Lib\STM32\libspeex\
+#        -I
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\Libraries\STM32F10x_Speex_Lib\STM32\libspeex\iar\
+#        -I D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\Fonts\ -Om --ec++
+#    List file    =  
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\KP02_DEVICE_2\List\main.lst
+#    Object file  =  
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\KP02_DEVICE_2\Obj\main.o
+#
+###############################################################################
+
+D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\main.cpp
+      1          /************************************************************************************/
+      2          /* @title		MAIN application file												*/
+      3          /* @author		Cyber Genius														*/
+      4          /* @version		0.5.1																*/
+      5          /* @date		10.07.2012															*/
+      6          /************************************************************************************/
+      7          /* @brief		Application for holter KP-01WTF										*/
+      8          /* @cpu			STM32F103VE															*/
+      9          /* @IDE			IAR 6.30 С++ Embedded												*/
+     10          /* @OS			FreeRTOS 7.2.0														*/
+     11          /************************************************************************************/
+     12          #include "main.h"
+
+   \                                 In section .text, align 2
+   \   __interwork __softfp void __delay_cycles(int)
+   \                     _Z14__delay_cyclesi: (+1)
+   \   00000000   0xB401             PUSH     {R0}
+   \   00000002   0x2000             MOVS     R0,#+0
+   \   00000004   0xE001             B.N      ??__delay_cycles_0
+   \                     ??__delay_cycles_1: (+1)
+   \   00000006   0xBF00             Nop      
+   \   00000008   0x1C40             ADDS     R0,R0,#+1
+   \                     ??__delay_cycles_0: (+1)
+   \   0000000A   0x9900             LDR      R1,[SP, #+0]
+   \   0000000C   0x4288             CMP      R0,R1
+   \   0000000E   0xDBFA             BLT.N    ??__delay_cycles_1
+   \   00000010   0xB001             ADD      SP,SP,#+4
+   \   00000012   0x4770             BX       LR               ;; return
+     13          #include "common.h"
+     14          
+     15          #include "THardware.h"
+     16          #include "TAppProcessor.h"
+     17          #include "TSDProcessor.h"
+     18          #include "TLcd.h"
+     19          #include "TAudio.h"
+     20          #include "IAP.h"
+     21          #include "TDevice.h"
+     22          //#include "dosfs.h"
+     23          #include "TInterpreter.h"
+     24          
+     25          extern "C" uint32_t __checksum;                                 // импортируем контрольную сумму
+     26          #pragma section=".intvec"                                       // говорим, что будем использовать
+     27          #pragma section=".checksum"                                     // информацию о секциях
+     28          
+     29          bool StopMode = false;
+
+   \                                 In section .bss, align 1
+     30          bool EnterStopMode = false;
+   \                     EnterStopMode:
+   \   00000000                      DS8 1
+
+   \                                 In section .data, align 1
+   \                     StopMode:
+   \   00000000   0x00               DC8 0
+     31          bool StopModePeriod = true;
+   \                     StopModePeriod:
+   \   00000001   0x01               DC8 1
+     32          #include "TGuiObjectsV2.h"
+     33          
+     34          
+
+   \                                 In section .text, align 2, keep-with-next
+     35          void SetClock(void)
+     36          {
+   \                     _Z8SetClockv: (+1)
+   \   00000000   0xB500             PUSH     {LR}
+   \   00000002   0xB083             SUB      SP,SP,#+12
+     37          //******************************************************************************
+     38          //            PLL (clocked by HSE) used as System clock source                **
+     39          //******************************************************************************
+     40            __IO uint32_t StartUpCounter = 0, HSEStatus = 0;
+   \   00000004   0x2000             MOVS     R0,#+0
+   \   00000006   0x9001             STR      R0,[SP, #+4]
+   \   00000008   0x9000             STR      R0,[SP, #+0]
+     41            
+     42            __delay_cycles(	5000000 );
+   \   0000000A   0x....             LDR.N    R0,??DataTable7  ;; 0x4c4b40
+   \   0000000C   0x.... 0x....      BL       _Z14__delay_cyclesi
+     43            
+     44            // Enable HSE 
+     45            RCC->CR |= ((uint32_t)RCC_CR_HSEBYP);
+   \   00000010   0x....             LDR.N    R0,??DataTable7_1  ;; 0x40023800
+   \   00000012   0x6801             LDR      R1,[R0, #+0]
+   \   00000014   0xF441 0x2180      ORR      R1,R1,#0x40000
+   \   00000018   0x6001             STR      R1,[R0, #+0]
+     46            RCC->CR |= ((uint32_t)RCC_CR_HSEON);
+   \   0000001A   0x6801             LDR      R1,[R0, #+0]
+   \   0000001C   0xF441 0x3180      ORR      R1,R1,#0x10000
+   \   00000020   0x6001             STR      R1,[R0, #+0]
+     47           
+     48            // Wait till HSE is ready and if Time out is reached exit 
+     49            do
+     50            {
+     51              HSEStatus = RCC->CR & RCC_CR_HSERDY;
+   \                     ??SetClock_0: (+1)
+   \   00000022   0x6801             LDR      R1,[R0, #+0]
+   \   00000024   0xF401 0x3100      AND      R1,R1,#0x20000
+   \   00000028   0x9100             STR      R1,[SP, #+0]
+     52              StartUpCounter++;
+   \   0000002A   0x9901             LDR      R1,[SP, #+4]
+   \   0000002C   0x1C49             ADDS     R1,R1,#+1
+   \   0000002E   0x9101             STR      R1,[SP, #+4]
+     53            } while((HSEStatus == RESET) && (StartUpCounter < HSE_STARTUP_TIMEOUT));
+   \   00000030   0x9900             LDR      R1,[SP, #+0]
+   \   00000032   0x2900             CMP      R1,#+0
+   \   00000034   0xD103             BNE.N    ??SetClock_1
+   \   00000036   0x9901             LDR      R1,[SP, #+4]
+   \   00000038   0xF5B1 0x4FA0      CMP      R1,#+20480
+   \   0000003C   0xD3F1             BCC.N    ??SetClock_0
+     54          
+     55            if ((RCC->CR & RCC_CR_HSERDY) != RESET)
+   \                     ??SetClock_1: (+1)
+   \   0000003E   0x6801             LDR      R1,[R0, #+0]
+     56            {
+     57              HSEStatus = (uint32_t)0x01;
+     58            }
+     59            else
+     60            {
+     61              HSEStatus = (uint32_t)0x00;
+   \   00000040   0x0C49             LSRS     R1,R1,#+17
+   \   00000042   0xF001 0x0101      AND      R1,R1,#0x1
+   \   00000046   0x9100             STR      R1,[SP, #+0]
+     62            }
+     63          
+     64            if (HSEStatus == (uint32_t)0x01)
+   \   00000048   0x9900             LDR      R1,[SP, #+0]
+   \   0000004A   0x2901             CMP      R1,#+1
+   \   0000004C   0xD12A             BNE.N    ??SetClock_2
+     65            {
+     66              // Select regulator voltage output Scale 1 mode 
+     67              RCC->APB1ENR |= RCC_APB1ENR_PWREN;
+   \   0000004E   0x6C01             LDR      R1,[R0, #+64]
+   \   00000050   0xF041 0x5180      ORR      R1,R1,#0x10000000
+   \   00000054   0x6401             STR      R1,[R0, #+64]
+     68              __DSB();
+   \   00000056   0xF3BF 0x8F4F      DSB      
+     69          //    PWR->CR |= PWR_CR_VOS;
+     70              PWR->CR &= ~PWR_CR_VOS;
+   \   0000005A   0x....             LDR.N    R1,??DataTable7_2  ;; 0x40007000
+   \   0000005C   0x680A             LDR      R2,[R1, #+0]
+   \   0000005E   0xF422 0x4240      BIC      R2,R2,#0xC000
+   \   00000062   0x600A             STR      R2,[R1, #+0]
+     71          
+     72              // HCLK = SYSCLK / 1
+     73              RCC->CFGR |= RCC_CFGR_HPRE_DIV1;
+   \   00000064   0x6881             LDR      R1,[R0, #+8]
+   \   00000066   0x6081             STR      R1,[R0, #+8]
+     74          
+     75              // PCLK2 = HCLK / 1
+     76              RCC->CFGR |= RCC_CFGR_PPRE2_DIV1;
+   \   00000068   0x6881             LDR      R1,[R0, #+8]
+   \   0000006A   0x6081             STR      R1,[R0, #+8]
+     77              
+     78              // PCLK1 = HCLK / 1
+     79              RCC->CFGR |= RCC_CFGR_PPRE1_DIV1;
+   \   0000006C   0x6881             LDR      R1,[R0, #+8]
+   \   0000006E   0x6081             STR      R1,[R0, #+8]
+     80             
+     81              // Configure the main PLL 
+     82              RCC->PLLCFGR = PLL_M | (PLL_N << 6) | (((PLL_P >> 1) -1) << 16) |
+     83              (RCC_PLLCFGR_PLLSRC_HSE) | (PLL_Q << 24);
+   \   00000070   0x....             LDR.N    R1,??DataTable7_3  ;; 0x8434e02
+   \   00000072   0x6041             STR      R1,[R0, #+4]
+     84          
+     85              // Enable the main PLL 
+     86              RCC->CR |= RCC_CR_PLLON;
+   \   00000074   0x6801             LDR      R1,[R0, #+0]
+   \   00000076   0xF041 0x7180      ORR      R1,R1,#0x1000000
+   \   0000007A   0x6001             STR      R1,[R0, #+0]
+     87          
+     88              // Wait till the main PLL is ready 
+     89              while((RCC->CR & RCC_CR_PLLRDY) == 0)
+   \                     ??SetClock_3: (+1)
+   \   0000007C   0x6801             LDR      R1,[R0, #+0]
+   \   0000007E   0x0189             LSLS     R1,R1,#+6
+   \   00000080   0xD5FC             BPL.N    ??SetClock_3
+     90              {
+     91              }
+     92             
+     93          
+     94              // Configure Flash prefetch, Instruction cache, Data cache and wait state 
+     95          //    FLASH->ACR = FLASH_ACR_PRFTEN | FLASH_ACR_ICEN |FLASH_ACR_DCEN |FLASH_ACR_LATENCY_0WS;
+     96              FLASH->ACR = FLASH_ACR_PRFTEN | FLASH_ACR_ICEN |FLASH_ACR_DCEN |FLASH_ACR_LATENCY_1WS;
+   \   00000082   0xF240 0x7101      MOVW     R1,#+1793
+   \   00000086   0x....             LDR.N    R2,??DataTable7_4  ;; 0x40023c00
+   \   00000088   0x6011             STR      R1,[R2, #+0]
+     97          
+     98          
+     99              // Select the main PLL as system clock source 
+    100              RCC->CFGR &= (uint32_t)((uint32_t)~(RCC_CFGR_SW));
+   \   0000008A   0x6881             LDR      R1,[R0, #+8]
+   \   0000008C   0x0889             LSRS     R1,R1,#+2
+   \   0000008E   0x0089             LSLS     R1,R1,#+2
+   \   00000090   0x6081             STR      R1,[R0, #+8]
+    101              RCC->CFGR |= RCC_CFGR_SW_PLL;
+   \   00000092   0x6881             LDR      R1,[R0, #+8]
+   \   00000094   0xF041 0x0102      ORR      R1,R1,#0x2
+   \   00000098   0x6081             STR      R1,[R0, #+8]
+    102          
+    103              // Wait till the main PLL is used as system clock source 
+    104              while ((RCC->CFGR & (uint32_t)RCC_CFGR_SWS ) != RCC_CFGR_SWS_PLL);
+   \                     ??SetClock_4: (+1)
+   \   0000009A   0x6881             LDR      R1,[R0, #+8]
+   \   0000009C   0xF001 0x010C      AND      R1,R1,#0xC
+   \   000000A0   0x2908             CMP      R1,#+8
+   \   000000A2   0xD1FA             BNE.N    ??SetClock_4
+    105              {
+    106              }
+    107            }
+    108          
+    109          }
+   \                     ??SetClock_2: (+1)
+   \   000000A4   0xBD07             POP      {R0-R2,PC}       ;; return
+    110          
+    111          
+
+   \                                 In section .text, align 2, keep-with-next
+    112          static void MCO_Config(void)
+    113          {
+   \                     _Z10MCO_Configv: (+1)
+   \   00000000   0xB51C             PUSH     {R2-R4,LR}
+    114            GPIO_InitTypeDef GPIO_InitStructure;
+    115          
+    116            RCC_AHB1PeriphClockCmd( RCC_AHB1Periph_GPIOA, ENABLE);
+   \   00000002   0x2101             MOVS     R1,#+1
+   \   00000004   0x4608             MOV      R0,R1
+   \   00000006   0x.... 0x....      BL       RCC_AHB1PeriphClockCmd
+    117          
+    118            GPIO_ResetBits( GPIOA, GPIO_Pin_8 );
+   \   0000000A   0x....             LDR.N    R4,??DataTable7_5  ;; 0x40020000
+   \   0000000C   0xF44F 0x7180      MOV      R1,#+256
+   \   00000010   0x4620             MOV      R0,R4
+   \   00000012   0x.... 0x....      BL       GPIO_ResetBits
+    119            GPIO_InitStructure.GPIO_Pin = GPIO_Pin_8;
+   \   00000016   0xF44F 0x7080      MOV      R0,#+256
+   \   0000001A   0x9000             STR      R0,[SP, #+0]
+    120          //  GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF;
+    121            GPIO_InitStructure.GPIO_Mode = GPIO_Mode_OUT;
+   \   0000001C   0x2001             MOVS     R0,#+1
+   \   0000001E   0xF88D 0x0004      STRB     R0,[SP, #+4]
+    122            GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+   \   00000022   0x2002             MOVS     R0,#+2
+   \   00000024   0xF88D 0x0005      STRB     R0,[SP, #+5]
+    123            GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
+   \   00000028   0x2000             MOVS     R0,#+0
+   \   0000002A   0xF88D 0x0006      STRB     R0,[SP, #+6]
+    124            GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_UP ;
+   \   0000002E   0x2001             MOVS     R0,#+1
+   \   00000030   0xF88D 0x0007      STRB     R0,[SP, #+7]
+    125            GPIO_Init(GPIOA, &GPIO_InitStructure);
+   \   00000034   0xA900             ADD      R1,SP,#+0
+   \   00000036   0x4620             MOV      R0,R4
+   \   00000038   0x.... 0x....      BL       GPIO_Init
+    126          
+    127          /*
+    128            GPIO_InitStructure.GPIO_Pin = GPIO_Pin_9;
+    129            GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF;
+    130            GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+    131            GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
+    132            GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_UP ;
+    133            GPIO_Init(GPIOC, &GPIO_InitStructure);
+    134          */
+    135          
+    136          //  GPIO_PinAFConfig(GPIOA, GPIO_PinSource8, GPIO_AF_MCO);
+    137          //  GPIO_PinAFConfig(GPIOC, GPIO_PinSource9, GPIO_AF_MCO);
+    138          
+    139            RCC_MCO1Config(RCC_MCO1Source_PLLCLK, RCC_MCO1Div_1);
+   \   0000003C   0x2100             MOVS     R1,#+0
+   \   0000003E   0xF44F 0x00C0      MOV      R0,#+6291456
+   \   00000042   0x.... 0x....      BL       RCC_MCO1Config
+    140          //  RCC_MCO2Config(RCC_MCO2Source_SYSCLK, RCC_MCO1Div_1);
+    141          }
+   \   00000046   0xBD13             POP      {R0,R1,R4,PC}    ;; return
+    142          
+    143          
+    144          
+
+   \                                 In section .text, align 2, keep-with-next
+    145          bool chekCRC(uint32_t* begin, uint32_t* end, uint32_t read_crc)
+    146          {
+   \                     _Z7chekCRCPjS_j: (+1)
+   \   00000000   0xB430             PUSH     {R4,R5}
+    147            uint32_t* ptr = begin;
+    148            RCC->AHB1ENR  |= RCC_AHB1ENR_CRCEN;                             // включаем такирование модуля CRC
+   \   00000002   0x....             LDR.N    R3,??DataTable7_6  ;; 0x40023830
+   \   00000004   0x681C             LDR      R4,[R3, #+0]
+   \   00000006   0xF444 0x5480      ORR      R4,R4,#0x1000
+   \   0000000A   0x601C             STR      R4,[R3, #+0]
+    149            __DSB();
+   \   0000000C   0xF3BF 0x8F4F      DSB      
+    150            CRC->CR |= CRC_CR_RESET;                                      // Сбрасываем модуль. 
+   \   00000010   0x....             LDR.N    R4,??DataTable7_7  ;; 0x40023000
+   \   00000012   0x68A5             LDR      R5,[R4, #+8]
+   \   00000014   0xF045 0x0501      ORR      R5,R5,#0x1
+   \   00000018   0x60A5             STR      R5,[R4, #+8]
+    151            do 
+    152            {
+    153              CRC->DR = *ptr;                                             // добавляем всю прошивку в CRC
+   \                     ??chekCRC_0: (+1)
+   \   0000001A   0xF850 0x5B04      LDR      R5,[R0], #+4
+   \   0000001E   0x6025             STR      R5,[R4, #+0]
+    154            } while(++ptr != end);
+   \   00000020   0x4288             CMP      R0,R1
+   \   00000022   0xD1FA             BNE.N    ??chekCRC_0
+    155            
+    156            uint32_t calculated_crc = CRC->DR; 
+   \   00000024   0x6820             LDR      R0,[R4, #+0]
+    157            RCC->AHB1ENR  &= ~RCC_AHB1ENR_CRCEN;                            // отключаем тактирование
+   \   00000026   0x6819             LDR      R1,[R3, #+0]
+   \   00000028   0xF421 0x5180      BIC      R1,R1,#0x1000
+   \   0000002C   0x6019             STR      R1,[R3, #+0]
+    158            __DSB();
+   \   0000002E   0xF3BF 0x8F4F      DSB      
+    159            if (calculated_crc != read_crc) return false;                 // плохо :(
+   \   00000032   0x4290             CMP      R0,R2
+   \   00000034   0xD001             BEQ.N    ??chekCRC_1
+   \   00000036   0x2000             MOVS     R0,#+0
+   \   00000038   0xE000             B.N      ??chekCRC_2
+    160            else return true;
+   \                     ??chekCRC_1: (+1)
+   \   0000003A   0x2001             MOVS     R0,#+1
+   \                     ??chekCRC_2: (+1)
+   \   0000003C   0xBC30             POP      {R4,R5}
+   \   0000003E   0x4770             BX       LR               ;; return
+    161          }
+    162          
+    163          /*----------------------------------------------------------------------------------*/
+    164          /* @brief	Функция простоя у FreeRTOS												*/
+    165          /* @param	None																	*/
+    166          /* @return	None																	*/
+    167          /*----------------------------------------------------------------------------------*/
+
+   \                                 In section .text, align 2, keep-with-next
+    168          void vApplicationIdleHook( void )
+    169          {
+   \                     _Z20vApplicationIdleHookv: (+1)
+   \   00000000   0xB570             PUSH     {R4-R6,LR}
+    170          
+    171          //	if(TAppProcessor::RecordInProgress && TLcd::LcdOff) 
+    172          //	if(EnterStopMode) 
+    173          	if((TGuiObjects::GUIMode == guioRecMode) 
+    174               && (GPIO_ReadInputDataBit(DISP_BL_PORT, DISP_BL_PIN) == Bit_RESET) 
+    175               && (StopModePeriod == false)) 
+   \   00000002   0x....             LDR.N    R0,??DataTable7_8
+   \   00000004   0x6800             LDR      R0,[R0, #+0]
+   \   00000006   0x2808             CMP      R0,#+8
+   \   00000008   0xD12B             BNE.N    ??vApplicationIdleHook_0
+   \   0000000A   0x2140             MOVS     R1,#+64
+   \   0000000C   0x....             LDR.N    R0,??DataTable7_9  ;; 0x40020800
+   \   0000000E   0x.... 0x....      BL       GPIO_ReadInputDataBit
+   \   00000012   0x2800             CMP      R0,#+0
+   \   00000014   0xD125             BNE.N    ??vApplicationIdleHook_0
+   \   00000016   0x....             LDR.N    R4,??DataTable7_10
+   \   00000018   0x7860             LDRB     R0,[R4, #+1]
+   \   0000001A   0x2800             CMP      R0,#+0
+   \   0000001C   0xD121             BNE.N    ??vApplicationIdleHook_0
+    176            {
+    177          //    GPIO_ResetBits( GPIOA, GPIO_Pin_8 );
+    178          		StopMode = true;
+   \   0000001E   0x2001             MOVS     R0,#+1
+   \   00000020   0x7020             STRB     R0,[R4, #+0]
+    179              SysTick->CTRL &= ~SysTick_CTRL_ENABLE_Msk;
+   \   00000022   0x....             LDR.N    R5,??DataTable7_11  ;; 0xe000e010
+   \   00000024   0x6828             LDR      R0,[R5, #+0]
+   \   00000026   0x0840             LSRS     R0,R0,#+1
+   \   00000028   0x0040             LSLS     R0,R0,#+1
+   \   0000002A   0x6028             STR      R0,[R5, #+0]
+    180              GPIO_SetBits( GPIOA, GPIO_Pin_8 );
+   \   0000002C   0x....             LDR.N    R6,??DataTable7_5  ;; 0x40020000
+   \   0000002E   0xF44F 0x7180      MOV      R1,#+256
+   \   00000032   0x4630             MOV      R0,R6
+   \   00000034   0x.... 0x....      BL       GPIO_SetBits
+    181          		PWR_EnterSTOPMode(PWR_Regulator_ON, PWR_STOPEntry_WFI);
+   \   00000038   0x2101             MOVS     R1,#+1
+   \   0000003A   0x2000             MOVS     R0,#+0
+   \   0000003C   0x.... 0x....      BL       PWR_EnterSTOPMode
+    182              GPIO_ResetBits( GPIOA, GPIO_Pin_8 );
+   \   00000040   0xF44F 0x7180      MOV      R1,#+256
+   \   00000044   0x4630             MOV      R0,R6
+   \   00000046   0x.... 0x....      BL       GPIO_ResetBits
+    183          //		if (StopMode) SetClock();
+    184              SysTick->CTRL |= SysTick_CTRL_ENABLE_Msk;
+   \   0000004A   0x6828             LDR      R0,[R5, #+0]
+   \   0000004C   0xF040 0x0001      ORR      R0,R0,#0x1
+   \   00000050   0x6028             STR      R0,[R5, #+0]
+    185          		StopMode = false;
+   \   00000052   0x2000             MOVS     R0,#+0
+   \   00000054   0x7020             STRB     R0,[R4, #+0]
+    186          		vTaskResume(TGuiObjects::xGUIObj);
+   \   00000056   0x....             LDR.N    R0,??DataTable7_12
+   \   00000058   0x6800             LDR      R0,[R0, #+0]
+   \   0000005A   0xE8BD 0x4070      POP      {R4-R6,LR}
+   \   0000005E   0x.... 0x....      B.W      vTaskResume
+    187          	} 
+    188            else 
+    189            {
+    190          //    GPIO_SetBits( GPIOA, GPIO_Pin_8 );
+    191          		__WFI();	// Enter idle mode 
+   \                     ??vApplicationIdleHook_0: (+1)
+   \   00000062   0xBF30             WFI      
+    192          //    GPIO_ResetBits( GPIOA, GPIO_Pin_8 );
+    193          	}
+    194          }
+   \   00000064   0xBD70             POP      {R4-R6,PC}       ;; return
+    195          
+    196          /*----------------------------------------------------------------------------------*/
+    197          /* @brief	Main																	*/
+    198          /* @param	None																	*/
+    199          /* @return	None																	*/
+    200          /*----------------------------------------------------------------------------------*/
+
+   \                                 In section .text, align 2, keep-with-next
+    201          int main( void )
+    202          { 
+   \                     main: (+1)
+   \   00000000   0xB51F             PUSH     {R0-R4,LR}
+    203          //PWR_EnterSTANDBYMode();
+    204          //PWR_EnterSTOPMode(PWR_Regulator_ON, PWR_STOPEntry_WFI);
+    205            
+    206            SetClock();
+   \   00000002   0x.... 0x....      BL       _Z8SetClockv
+    207          
+    208            MCO_Config();
+   \   00000006   0x.... 0x....      BL       _Z10MCO_Configv
+    209          
+    210            RCC_APB1PeriphClockCmd(RCC_APB1Periph_PWR, ENABLE);
+   \   0000000A   0x2101             MOVS     R1,#+1
+   \   0000000C   0xF04F 0x5080      MOV      R0,#+268435456
+   \   00000010   0x.... 0x....      BL       RCC_APB1PeriphClockCmd
+    211          	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_BKPSRAM, ENABLE);
+   \   00000014   0x2101             MOVS     R1,#+1
+   \   00000016   0xF44F 0x2080      MOV      R0,#+262144
+   \   0000001A   0x.... 0x....      BL       RCC_AHB1PeriphClockCmd
+    212            
+    213            DBGMCU_Config(uint32_t DBGMCU_STOP, DISABLE);
+   \   0000001E   0x2100             MOVS     R1,#+0
+   \   00000020   0x2002             MOVS     R0,#+2
+   \   00000022   0x.... 0x....      BL       DBGMCU_Config
+    214            
+    215          #ifdef BOOTLOADER
+    216          	NVIC_SetVectorTable( NVIC_VectTab_FLASH, BOOTLSTART_ADDR );
+    217          
+    218            volatile uint32_t read_crc = __checksum;
+    219            uint32_t* begin = (uint32_t*)__section_begin(".intvec");      // получаем начало прошивки
+    220            uint32_t* end = (uint32_t*)__section_begin(".checksum");      // получаем начало CRC (конец прошивки)
+    221            if(!chekCRC(begin, end, read_crc)) 
+    222              while(1);
+    223          
+    224          	IAP_Start();
+    225          	while( 1 );
+    226          
+    227          #else
+    228                  
+    229            NVIC_SetVectorTable( NVIC_VectTab_FLASH, APPSTART_ADDR );
+   \   00000026   0x....             LDR.N    R1,??DataTable7_13  ;; 0x8020000
+   \   00000028   0xF04F 0x6000      MOV      R0,#+134217728
+   \   0000002C   0x.... 0x....      BL       NVIC_SetVectorTable
+    230            RCC->CSR |= RCC_CSR_RMVF;
+   \   00000030   0x....             LDR.N    R0,??DataTable7_14  ;; 0x40023874
+   \   00000032   0x6801             LDR      R1,[R0, #+0]
+   \   00000034   0xF041 0x7180      ORR      R1,R1,#0x1000000
+   \   00000038   0x6001             STR      R1,[R0, #+0]
+    231            NVIC_PriorityGroupConfig(NVIC_PriorityGroup_4);
+   \   0000003A   0xF44F 0x7040      MOV      R0,#+768
+   \   0000003E   0x.... 0x....      BL       NVIC_PriorityGroupConfig
+    232            
+    233          //  Включение MCO для теста тактовой частоты
+    234          //  MCO_Config();
+    235          
+    236          /* Init backup registers */
+    237          //	RCC_APB1PeriphClockCmd( RCC_APB1Periph_PWR | RCC_APB1Periph_BKP, ENABLE );
+    238          //	PWR_BackupAccessCmd( ENABLE );
+    239          //	BKP_TamperPinCmd( DISABLE );
+    240          //	BKP_WriteBackupRegister(BKP_DR2,BOOTLOADER_IN_MARKER);
+    241          
+    242          	TDevice::SystemLowLevelInit();
+   \   00000042   0x.... 0x....      BL       _ZN7TDevice18SystemLowLevelInitEv
+    243            
+    244            PWR_BackupAccessCmd(ENABLE);
+   \   00000046   0x2001             MOVS     R0,#+1
+   \   00000048   0x.... 0x....      BL       PWR_BackupAccessCmd
+    245           	RTC_TamperCmd(RTC_Tamper_1, DISABLE); /* To output RTCCLK/64 on Tamper pin, the tamper
+   \   0000004C   0x2100             MOVS     R1,#+0
+   \   0000004E   0x2001             MOVS     R0,#+1
+   \   00000050   0x.... 0x....      BL       RTC_TamperCmd
+    246          	                                 functionality must be disabled */
+    247            
+    248            uint16_t  rec_lb = RTC_ReadBackupRegister(RTC_BKP_DR3); 
+   \   00000054   0x2003             MOVS     R0,#+3
+   \   00000056   0x.... 0x....      BL       RTC_ReadBackupRegister
+   \   0000005A   0xB280             UXTH     R0,R0
+    249            
+    250            if(rec_lb == 0x5555) TAppProcessor::ExitFromRecordMode = true;
+   \   0000005C   0x....             LDR.N    R1,??DataTable7_15
+   \   0000005E   0xF245 0x5255      MOVW     R2,#+21845
+   \   00000062   0x4290             CMP      R0,R2
+   \   00000064   0xD102             BNE.N    ??main_0
+   \   00000066   0x2201             MOVS     R2,#+1
+   \   00000068   0x700A             STRB     R2,[R1, #+0]
+   \   0000006A   0xE001             B.N      ??main_1
+    251            else TAppProcessor::ExitFromRecordMode = false;
+   \                     ??main_0: (+1)
+   \   0000006C   0x2200             MOVS     R2,#+0
+   \   0000006E   0x700A             STRB     R2,[R1, #+0]
+    252          
+    253            if(rec_lb == 0xAAAA) TAppProcessor::ErrorInRecordMode = true;
+   \                     ??main_1: (+1)
+   \   00000070   0x....             LDR.N    R1,??DataTable7_16
+   \   00000072   0xF64A 0x22AA      MOVW     R2,#+43690
+   \   00000076   0x4290             CMP      R0,R2
+   \   00000078   0xD102             BNE.N    ??main_2
+   \   0000007A   0x2001             MOVS     R0,#+1
+   \   0000007C   0x7008             STRB     R0,[R1, #+0]
+   \   0000007E   0xE001             B.N      ??main_3
+    254            else TAppProcessor::ErrorInRecordMode = false;
+   \                     ??main_2: (+1)
+   \   00000080   0x2000             MOVS     R0,#+0
+   \   00000082   0x7008             STRB     R0,[R1, #+0]
+    255            
+    256            RTC_WriteBackupRegister(RTC_BKP_DR3,0xFFFF);
+   \                     ??main_3: (+1)
+   \   00000084   0xF64F 0x71FF      MOVW     R1,#+65535
+   \   00000088   0x2003             MOVS     R0,#+3
+   \   0000008A   0x.... 0x....      BL       RTC_WriteBackupRegister
+    257          
+    258            TDevice::DEVICE->Lcd.Enable();
+   \   0000008E   0x....             LDR.N    R4,??DataTable7_17
+   \   00000090   0x6820             LDR      R0,[R4, #+0]
+   \   00000092   0x6800             LDR      R0,[R0, #+0]
+   \   00000094   0x4780             BLX      R0
+    259            TDevice::DEVICE->BattMeter.Enable();
+   \   00000096   0x6820             LDR      R0,[R4, #+0]
+   \   00000098   0x68C0             LDR      R0,[R0, #+12]
+   \   0000009A   0x4780             BLX      R0
+    260            TDevice::DEVICE->Keyboard.Enable();
+   \   0000009C   0x6820             LDR      R0,[R4, #+0]
+   \   0000009E   0x6A40             LDR      R0,[R0, #+36]
+   \   000000A0   0x4780             BLX      R0
+    261            TDevice::DEVICE->Bluetooth.Enable();
+   \   000000A2   0x6820             LDR      R0,[R4, #+0]
+   \   000000A4   0x6980             LDR      R0,[R0, #+24]
+   \   000000A6   0x4780             BLX      R0
+    262            TDevice::DEVICE->Ecg.Enable();
+   \   000000A8   0x6820             LDR      R0,[R4, #+0]
+   \   000000AA   0x6B00             LDR      R0,[R0, #+48]
+   \   000000AC   0x4780             BLX      R0
+    263          
+    264          //TDevice::DEVICE->SD.Enable();
+    265            
+    266            TDevice::DEVICE->Hartbeat->Enable();
+   \   000000AE   0x6820             LDR      R0,[R4, #+0]
+   \   000000B0   0x6C80             LDR      R0,[R0, #+72]
+   \   000000B2   0x6800             LDR      R0,[R0, #+0]
+   \   000000B4   0x4780             BLX      R0
+    267            TDevice::DEVICE->DebugTools->Enable();
+   \   000000B6   0x6820             LDR      R0,[R4, #+0]
+   \   000000B8   0x6CC0             LDR      R0,[R0, #+76]
+   \   000000BA   0x6800             LDR      R0,[R0, #+0]
+   \   000000BC   0x4780             BLX      R0
+    268            
+    269            TInterpreter::UartInit();
+   \   000000BE   0x.... 0x....      BL       _ZN12TInterpreter8UartInitEv
+    270            TInterpreter::TurnOnUart();
+   \   000000C2   0x.... 0x....      BL       _ZN12TInterpreter10TurnOnUartEv
+    271          
+    272          //TDevice::DEVICE->Audio.Enable();
+    273                        /* задача инициализации устройства */
+    274           // xTaskCreate( TAppProcessor::TASK_Init, "Init", configMINIMAL_STACK_SIZE+128, NULL,
+    275          //	tskIDLE_PRIORITY+0, NULL );
+    276            
+    277            xTaskCreate( TAppProcessor::TASK_StartUp, "Startup", configMINIMAL_STACK_SIZE+128, NULL,
+    278          		tskIDLE_PRIORITY+0, NULL );
+   \   000000C6   0x2000             MOVS     R0,#+0
+   \   000000C8   0x9003             STR      R0,[SP, #+12]
+   \   000000CA   0x9002             STR      R0,[SP, #+8]
+   \   000000CC   0x9001             STR      R0,[SP, #+4]
+   \   000000CE   0x9000             STR      R0,[SP, #+0]
+   \   000000D0   0x4603             MOV      R3,R0
+   \   000000D2   0xF44F 0x7280      MOV      R2,#+256
+   \   000000D6   0x.... 0x....      ADR.W    R1,?_0
+   \   000000DA   0x....             LDR.N    R0,??DataTable7_18
+   \   000000DC   0x.... 0x....      BL       xTaskGenericCreate
+    279          
+    280          	/* задача загрузки приложения */
+    281            //xTaskCreate( TAppProcessor::TASK_Loading, "Startup", configMINIMAL_STACK_SIZE+128, NULL,
+    282          //		tskIDLE_PRIORITY+0, NULL );
+    283          
+    284            xTaskCreate( TFrame::TASK_CheckISRFlag, "CheckISR", configMINIMAL_STACK_SIZE+128, NULL,
+    285          		tskIDLE_PRIORITY+2, NULL );
+   \   000000E0   0x2000             MOVS     R0,#+0
+   \   000000E2   0x9003             STR      R0,[SP, #+12]
+   \   000000E4   0x9002             STR      R0,[SP, #+8]
+   \   000000E6   0x9001             STR      R0,[SP, #+4]
+   \   000000E8   0x2002             MOVS     R0,#+2
+   \   000000EA   0x9000             STR      R0,[SP, #+0]
+   \   000000EC   0x2300             MOVS     R3,#+0
+   \   000000EE   0xF44F 0x7280      MOV      R2,#+256
+   \   000000F2   0x.... 0x....      ADR.W    R1,?_1
+   \   000000F6   0x....             LDR.N    R0,??DataTable7_19
+   \   000000F8   0x.... 0x....      BL       xTaskGenericCreate
+    286            
+    287            xTaskCreate( TInterpreter::TASK_CmdProcessor, "InterpProcessor", 
+    288          				configMINIMAL_STACK_SIZE+1, NULL, 
+    289          				tskIDLE_PRIORITY+2, NULL );  
+   \   000000FC   0x2000             MOVS     R0,#+0
+   \   000000FE   0x9003             STR      R0,[SP, #+12]
+   \   00000100   0x9002             STR      R0,[SP, #+8]
+   \   00000102   0x9001             STR      R0,[SP, #+4]
+   \   00000104   0x2002             MOVS     R0,#+2
+   \   00000106   0x9000             STR      R0,[SP, #+0]
+   \   00000108   0x2300             MOVS     R3,#+0
+   \   0000010A   0x2281             MOVS     R2,#+129
+   \   0000010C   0x.... 0x....      ADR.W    R1,?_2
+   \   00000110   0x....             LDR.N    R0,??DataTable7_20
+   \   00000112   0x.... 0x....      BL       xTaskGenericCreate
+    290          
+    291          
+    292          //	/* задача сканирования клавиатуры */
+    293          //	if( TDevice::DEVICE->Keyboard.Status == true ){
+    294          //		xTaskCreate( TAppProcessor::TASK_KeyProcessor, "KeyProcessor", configMINIMAL_STACK_SIZE, NULL,
+    295          //			tskIDLE_PRIORITY+0, &TAppProcessor::xKeyProcessor );
+    296          //	}
+    297          
+    298          //	/* задача мигания светодиодом */
+    299          //	xTaskCreate( TAppProcessor::TASK_LEDblink, "LEDblink", configMINIMAL_STACK_SIZE, NULL,
+    300          //		tskIDLE_PRIORITY+0, &TAppProcessor::xLEDblink );
+    301          
+    302          
+    303          //	TAudio::Speex_WriteInit();
+    304          
+    305          //	xTaskCreate( TAudio::TASK_WriteOnSD, "sound", configMINIMAL_STACK_SIZE+512, NULL,
+    306          //			tskIDLE_PRIORITY+1, &TAudio::xWriteOnSD );
+    307          
+    308          //	xTaskCreate(  TASK_TEST_SDCARD, "test", configMINIMAL_STACK_SIZE, NULL, tskIDLE_PRIORITY, NULL );
+    309          
+    310          //Buzzer();
+    311                  
+    312          	vTaskStartScheduler();
+   \   00000116   0x.... 0x....      BL       vTaskStartScheduler
+    313          	
+    314          	while( 1 ){
+   \                     ??main_4: (+1)
+   \   0000011A   0xE7FE             B.N      ??main_4
+    315          	}
+    316          #endif /* BOOTLOADER */
+    317          }
+    318          
+    319          /*----------------------------------------------------------------------------------*/
+    320          /* @brief	Обработка ошибок использования StdPeriphDriver							*/
+    321          /* @param	Not used																*/
+    322          /* @return	None																	*/
+    323          /*----------------------------------------------------------------------------------*/
+    324          #ifdef USE_FULL_ASSERT
+
+   \                                 In section .text, align 2, keep-with-next
+    325          void assert_failed( uint8_t* file, uint32_t line )
+    326          {
+    327          //	while( 1 ){
+    328          		__no_operation();
+   \                     assert_failed: (+1)
+   \   00000000   0xBF00             Nop      
+    329          //		ITM_EVENT8_WITH_PC( 2, 0xAF );
+    330          //	}
+    331          }
+   \   00000002   0x4770             BX       LR               ;; return
+
+   \                                 In section .text, align 4, keep-with-next
+   \                     ??DataTable7:
+   \   00000000   0x004C4B40         DC32     0x4c4b40
+
+   \                                 In section .text, align 4, keep-with-next
+   \                     ??DataTable7_1:
+   \   00000000   0x40023800         DC32     0x40023800
+
+   \                                 In section .text, align 4, keep-with-next
+   \                     ??DataTable7_2:
+   \   00000000   0x40007000         DC32     0x40007000
+
+   \                                 In section .text, align 4, keep-with-next
+   \                     ??DataTable7_3:
+   \   00000000   0x08434E02         DC32     0x8434e02
+
+   \                                 In section .text, align 4, keep-with-next
+   \                     ??DataTable7_4:
+   \   00000000   0x40023C00         DC32     0x40023c00
+
+   \                                 In section .text, align 4, keep-with-next
+   \                     ??DataTable7_5:
+   \   00000000   0x40020000         DC32     0x40020000
+
+   \                                 In section .text, align 4, keep-with-next
+   \                     ??DataTable7_6:
+   \   00000000   0x40023830         DC32     0x40023830
+
+   \                                 In section .text, align 4, keep-with-next
+   \                     ??DataTable7_7:
+   \   00000000   0x40023000         DC32     0x40023000
+
+   \                                 In section .text, align 4, keep-with-next
+   \                     ??DataTable7_8:
+   \   00000000   0x........         DC32     _ZN11TGuiObjects7GUIModeE
+
+   \                                 In section .text, align 4, keep-with-next
+   \                     ??DataTable7_9:
+   \   00000000   0x40020800         DC32     0x40020800
+
+   \                                 In section .text, align 4, keep-with-next
+   \                     ??DataTable7_10:
+   \   00000000   0x........         DC32     StopMode
+
+   \                                 In section .text, align 4, keep-with-next
+   \                     ??DataTable7_11:
+   \   00000000   0xE000E010         DC32     0xe000e010
+
+   \                                 In section .text, align 4, keep-with-next
+   \                     ??DataTable7_12:
+   \   00000000   0x........         DC32     _ZN11TGuiObjects7xGUIObjE
+
+   \                                 In section .text, align 4, keep-with-next
+   \                     ??DataTable7_13:
+   \   00000000   0x08020000         DC32     0x8020000
+
+   \                                 In section .text, align 4, keep-with-next
+   \                     ??DataTable7_14:
+   \   00000000   0x40023874         DC32     0x40023874
+
+   \                                 In section .text, align 4, keep-with-next
+   \                     ??DataTable7_15:
+   \   00000000   0x........         DC32     _ZN13TAppProcessor18ExitFromRecordModeE
+
+   \                                 In section .text, align 4, keep-with-next
+   \                     ??DataTable7_16:
+   \   00000000   0x........         DC32     _ZN13TAppProcessor17ErrorInRecordModeE
+
+   \                                 In section .text, align 4, keep-with-next
+   \                     ??DataTable7_17:
+   \   00000000   0x........         DC32     _ZN7TDevice6DEVICEE
+
+   \                                 In section .text, align 4, keep-with-next
+   \                     ??DataTable7_18:
+   \   00000000   0x........         DC32     _ZN13TAppProcessor12TASK_StartUpEPv
+
+   \                                 In section .text, align 4, keep-with-next
+   \                     ??DataTable7_19:
+   \   00000000   0x........         DC32     _ZN6TFrame17TASK_CheckISRFlagEPv
+
+   \                                 In section .text, align 4, keep-with-next
+   \                     ??DataTable7_20:
+   \   00000000   0x........         DC32     _ZN12TInterpreter17TASK_CmdProcessorEPv
+
+   \                                 In section .text, align 4, keep-with-next
+   \                     ?_0:
+   \   00000000   0x53 0x74          DC8 "Startup"
+   \              0x61 0x72    
+   \              0x74 0x75    
+   \              0x70 0x00    
+
+   \                                 In section .text, align 4, keep-with-next
+   \                     ?_1:
+   \   00000000   0x43 0x68          DC8 "CheckISR"
+   \              0x65 0x63    
+   \              0x6B 0x49    
+   \              0x53 0x52    
+   \              0x00         
+   \   00000009   0x00 0x00          DC8 0, 0, 0
+   \              0x00         
+
+   \                                 In section .text, align 4, keep-with-next
+   \                     ?_2:
+   \   00000000   0x49 0x6E          DC8 "InterpProcessor"
+   \              0x74 0x65    
+   \              0x72 0x70    
+   \              0x50 0x72    
+   \              0x6F 0x63    
+   \              0x65 0x73    
+   \              0x73 0x6F    
+   \              0x72 0x00    
+    332          #endif /* USE_FULL_ASSERT */
+    333          
+    334          
+    335          
+    336          
+
+   Maximum stack usage in bytes:
+
+   .cstack Function
+   ------- --------
+      16   MCO_Config()
+        16   -> GPIO_Init
+        16   -> GPIO_ResetBits
+        16   -> RCC_AHB1PeriphClockCmd
+        16   -> RCC_MCO1Config
+      16   SetClock()
+        16   -> __delay_cycles(int)
+       4   __delay_cycles(int)
+       0   assert_failed
+       8   chekCRC(uint32_t *, uint32_t *, uint32_t)
+      24   main()
+        24   -- Indirect call
+        24   -> DBGMCU_Config
+        24   -> MCO_Config()
+        24   -> NVIC_PriorityGroupConfig
+        24   -> NVIC_SetVectorTable
+        24   -> PWR_BackupAccessCmd
+        24   -> RCC_AHB1PeriphClockCmd
+        24   -> RCC_APB1PeriphClockCmd
+        24   -> RTC_ReadBackupRegister
+        24   -> RTC_TamperCmd
+        24   -> RTC_WriteBackupRegister
+        24   -> SetClock()
+        24   -> TDevice::SystemLowLevelInit()
+        24   -> TInterpreter::TurnOnUart()
+        24   -> TInterpreter::UartInit()
+        24   -> vTaskStartScheduler
+        24   -> xTaskGenericCreate
+      16   vApplicationIdleHook()
+        16   -> GPIO_ReadInputDataBit
+        16   -> GPIO_ResetBits
+        16   -> GPIO_SetBits
+        16   -> PWR_EnterSTOPMode
+
+
+   Section sizes:
+
+   Bytes  Function/Label
+   -----  --------------
+       4  ??DataTable7
+       4  ??DataTable7_1
+       4  ??DataTable7_10
+       4  ??DataTable7_11
+       4  ??DataTable7_12
+       4  ??DataTable7_13
+       4  ??DataTable7_14
+       4  ??DataTable7_15
+       4  ??DataTable7_16
+       4  ??DataTable7_17
+       4  ??DataTable7_18
+       4  ??DataTable7_19
+       4  ??DataTable7_2
+       4  ??DataTable7_20
+       4  ??DataTable7_3
+       4  ??DataTable7_4
+       4  ??DataTable7_5
+       4  ??DataTable7_6
+       4  ??DataTable7_7
+       4  ??DataTable7_8
+       4  ??DataTable7_9
+       8  ?_0
+      12  ?_1
+      16  ?_2
+       1  EnterStopMode
+      72  MCO_Config()
+     166  SetClock()
+       2  StopMode
+          StopModePeriod
+      20  __delay_cycles(int)
+       4  assert_failed
+      64  chekCRC(uint32_t *, uint32_t *, uint32_t)
+     284  main()
+     102  vApplicationIdleHook()
+
+ 
+   1 byte  in section .bss
+   2 bytes in section .data
+ 832 bytes in section .text
+ 
+ 812 bytes of CODE memory (+ 20 bytes shared)
+   3 bytes of DATA memory
+
+Errors: none
+Warnings: none

@@ -1,0 +1,151 @@
+[Stack]
+FillEnabled=0
+OverflowWarningsEnabled=1
+WarningThreshold=90
+SpWarningsEnabled=1
+WarnLogOnly=1
+UseTrigger=1
+TriggerName=main
+LimitSize=0
+ByteLimit=50
+[DebugChecksum]
+Checksum=-2100340009
+[Exceptions]
+StopOnUncaught=_ 0
+StopOnThrow=_ 0
+[CallStack]
+ShowArgs=1
+[Disassembly]
+MixedMode=1
+[SWOTraceHWSettings]
+OverrideDefaultClocks=0
+CpuClock=24000000
+ClockAutoDetect=1
+ClockWanted=2000000
+JtagSpeed=2000000
+Prescaler=12
+TimeStampPrescIndex=0
+TimeStampPrescData=0
+PcSampCYCTAP=0
+PcSampPOSTCNT=0
+PcSampIndex=31
+DataLogMode=0
+ITMportsEnable=-2
+ITMportsTermIO=254
+ITMportsLogFile=0
+ITMlogFile=$PROJ_DIR$\ITM.log
+[SfrWindow]
+Show=1 1
+Sort=4 0
+[JLinkDriver]
+WatchCond=_ 0
+Watch0=_ 0 "" 0 "" 0 "" 0 "" 0 0 0 0
+Watch1=_ 0 "" 0 "" 0 "" 0 "" 0 0 0 0
+CStepIntDis=_ 0
+[Interrupts]
+Enabled=1
+[MemoryMap]
+Enabled=0
+Base=0
+UseAuto=0
+TypeViolation=1
+UnspecRange=1
+ActionState=1
+[Trace1]
+Enabled=0
+ShowSource=1
+[PowerLog]
+LogEnabled=0
+GraphEnabled=0
+ShowTimeLog=1
+ShowTimeSum=0
+Title0=I0
+Symbol0=0 4 1
+LiveEnabled=0
+LiveFile=PowerLogLive.log
+[EventLog]
+LogEnabled=0
+SumEnabled=0
+GraphEnabled=0
+ShowTimeLog=1
+ShowTimeSum=1
+Title0=Ch0
+Symbol0=0 4 1
+Title1=Ch1
+Symbol1=0 4 1
+Title2=Ch2
+Symbol2=0 4 1
+Title3=Ch3
+Symbol3=0 4 1
+SumSortOrder=0
+[PowerProbe]
+Frequency=10000
+Probe0=I0
+ProbeSetup0=2 1 1 2 0 0
+[DriverProfiling]
+Enabled=0
+Mode=0
+Graph=0
+Symbiont=0
+Exclusions=
+[stlink]
+stlinkserialNo=AB8288CF
+stlinkfoundProbes=
+[CodeCoverage]
+Enabled=_ 0
+[array_types]
+Fmt0=int16_t[15872]	4	0
+Fmt1=int[2]	3	0
+Fmt2=uint16_t[2]	4	0
+[watch_formats]
+Fmt0={W}0:Data	4	0
+Fmt1={W}0:Ecg1	3	0
+Fmt2={W}0:Ecg2	4	0
+Fmt3={W}0:Ecg3	4	0
+Fmt4={W}0:data	4	0
+Fmt5={W}0:temp	3	0
+[Trace2]
+Enabled=1
+ShowSource=0
+[SWOTraceWindow]
+PcSampling=1
+InterruptLogs=0
+ForcedTimeStamps=1
+EventCPI=0
+EventEXC=0
+EventFOLD=0
+EventLSU=0
+EventSLEEP=0
+[DataLog]
+LogEnabled=1
+GraphEnabled=0
+ShowTimeLog=0
+SumEnabled=1
+ShowTimeSum=1
+[InterruptLog]
+LogEnabled=1
+GraphEnabled=0
+ShowTimeLog=1
+SumEnabled=1
+ShowTimeSum=1
+SumSortOrder=0
+[Log file]
+LoggingEnabled=_ 1
+LogFile=_ "$PROJ_DIR$\LogFile.log"
+Category=_ 0
+[TermIOLog]
+LoggingEnabled=_ 1
+LogFile=_ "$PROJ_DIR$\Terminal_IO.log"
+[CallStackLog]
+Enabled=0
+[CallStackStripe]
+ShowTiming=1
+[Disassemble mode]
+mode=0
+[Breakpoints2]
+Count=0
+[Aliases]
+A0=_ "D:\Aleksis Work\KR_01_TFT\MainMCU\TRespProcessor.cpp" ""
+A1=_ "D:\Aleksis Work\KR_01_TFT\MainMCU\system_stm32f4xx.c" ""
+Count=2
+SuppressDialog=0

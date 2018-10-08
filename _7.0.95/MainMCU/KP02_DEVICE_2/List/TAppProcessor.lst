@@ -1,0 +1,1800 @@
+###############################################################################
+#
+# IAR ANSI C/C++ Compiler V7.40.2.8542/W32 for ARM        08/Oct/2018  10:15:22
+# Copyright 1999-2015 IAR Systems AB.
+#
+#    Cpu mode     =  thumb
+#    Endian       =  little
+#    Source file  =  
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\TAppProcessor.cpp
+#    Command line =  
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\TAppProcessor.cpp -D
+#        IAR_ARM_CM4 -D USE_STDPERIPH_DRIVER -D STM32F40_41xxx -D HAVE_CONFIG_H
+#        -D SD_SPI_MODE -D USE_FULL_ASSERT -D DEVICE_2 -D TFT -D
+#        STENDBUY_NOT_USE -D SCREEN_NOT_ROTATE -D USE_ADS1292R -D DISPLAY_GPIO
+#        -D BUFFERED_TRANSFER -D LCD_TRACE -lCN
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\KP02_DEVICE_2\List\ -o
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\KP02_DEVICE_2\Obj\
+#        --no_unroll --no_inline --no_tbaa --no_scheduling --debug
+#        --endian=little --cpu=Cortex-M4F -e --fpu=VFPv4_sp --dlib_config
+#        "D:\Program Files (x86)\IAR Systems\Embedded Workbench
+#        7.2\arm\INC\c\DLib_Config_Normal.h" -I
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\ -I
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\FatFs\ -I
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\FreeRTOS\Source\include\
+#        -I
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\FreeRTOS\Source\portable\IAR\ARM_CM3\
+#        -I
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\Libraries\CMSIS\CM4\CoreSupport\
+#        -I
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\Libraries\CMSIS\CM4\DeviceSupport\STM32F4xx\
+#        -I
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\Libraries\STM32F4xx_StdPeriph_Driver\inc\
+#        -I
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\Libraries\STM32F10x_Speex_Lib\include\speex\
+#        -I
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\Libraries\STM32F10x_Speex_Lib\include\
+#        -I
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\Libraries\STM32F10x_Speex_Lib\libspeex\
+#        -I
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\Libraries\STM32F10x_Speex_Lib\STM32\include\speex\
+#        -I
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\Libraries\STM32F10x_Speex_Lib\STM32\include\
+#        -I
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\Libraries\STM32F10x_Speex_Lib\STM32\
+#        -I
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\Libraries\STM32F10x_Speex_Lib\STM32\libspeex\
+#        -I
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\Libraries\STM32F10x_Speex_Lib\STM32\libspeex\iar\
+#        -I D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\Fonts\ -Om --ec++
+#    List file    =  
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\KP02_DEVICE_2\List\TAppProcessor.lst
+#    Object file  =  
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\KP02_DEVICE_2\Obj\TAppProcessor.o
+#
+###############################################################################
+
+D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\TAppProcessor.cpp
+      1          /************************************************************************************/
+      2          /* Title:    Main application command and task processor              */
+      3          /* Author:    Cyber Genius                            */
+      4          /* Version:    0.1                                  */
+      5          /* Date:    10.07.2012                              */
+      6          /************************************************************************************/
+      7          /*                                          */
+      8          /************************************************************************************/
+      9          #include "TAppProcessor.h"
+     10          #include "TSDProcessor.h"
+     11          #include "TAudio.h"
+     12          #include "TDevice.h"
+     13          #include "TFlash.h"
+     14          #include "TString.h"
+     15          #include "TLcdTrace.h"
+     16          //#include "dosfs.h"
+     17          #include "TPoolingNand.h"
+     18          #include "TGuiObjectsV2.h"
+     19          //#include "TADS1292.h"
+     20          #include "TInterpreter.h"
+     21          #include "TRtc.h"
+     22          #include "EcgMcu.h"
+     23          #include "TSpiSram.h"
+     24          #include "TSound.h"
+     25          
+     26          //#define MSG_ERROR "Произошла ошибка.\nПерезапустите\nрегистратор.\nПри повторении\nобратитесь в\nсервисный центр."
+     27          
+     28          /*----------------------------------------------------------------------------------*/
+     29          extern BYTE CardType;
+     30          
+     31          extern void SystemInit();
+     32          
+     33          extern TBitMap const* SysFont;
+     34          
+     35          xTaskHandle TAppProcessor::xKeyProcessor;
+     36          xTaskHandle TAppProcessor::xScreenHandler;
+     37          xTaskHandle TAppProcessor::xLEDblink;
+     38          
+     39          int DTstamp = 0;
+     40          
+     41          volatile int HFH_ev = 0;
+     42          
+     43          bool SD_On_Sound = true;
+     44          
+     45          bool SD_Off_Sound = true;
+     46          
+     47          bool TAppProcessor::StartNow = false;
+     48          
+     49          bool TAppProcessor::ECGRecordingStarted = false;
+     50          
+     51          /*----------------------------------------------------------------------------------*/
+     52          stufSerialNumber TAppProcessor::ufSerialNumber =
+     53          {
+     54            "Cardian KR01-SNXXXX-XXXX",
+     55            2000,
+     56            732872,
+     57            "XXXX",
+     58            "XXXX"
+     59          };
+     60          
+     61          uint8_t  TAppProcessor::BatVoltageLevel = 0;
+     62          uint16_t TAppProcessor::BatVoltageValue = 0;
+     63          uint16_t TAppProcessor::LiVoltageValue = 0;
+     64          uint16_t TAppProcessor::AnalogVoltageValue = 0;
+     65          uint16_t TAppProcessor::SysVoltageValue = 0;
+     66          
+     67          stPatientCardV1 TAppProcessor::PatientCard =
+     68          {
+     69            CARD_VERSION,
+     70            DEVICE_VERSION,
+     71            "none",
+     72            "01.01.2001",
+     73            0,
+     74            "/",
+     75            "none",
+     76            "none",
+     77            "none",
+     78            0,
+     79            0,
+     80            1,
+     81            0x00010001,
+     82            0
+     83          };
+     84          
+     85          stUFramDeviceMap TAppProcessor::UFrameReqDeviceMap;
+     86          TTimeStampEV TAppProcessor::DeviceDateTime =
+     87          {
+     88            0,
+     89            1
+     90          };
+     91          
+     92          stSetup TAppProcessor::Setup = {0,0,0,0,0,0,0,0};
+     93          
+     94          volatile int mutx = 0;
+     95          //xSemaphoreHandle  f_mutex;
+     96          
+     97          FATFS FATFS_Obj;
+     98          FIL TrvFile;
+     99          FIL PatCardFile;
+    100          
+    101          int sndTakeN = 0;
+    102          
+    103          BYTE led_mode = 0;
+    104          
+    105          bool TAppProcessor::StartRecording = false;
+    106          bool TAppProcessor::AudioRec = false;
+    107          
+    108          int TAppProcessor::AX_X_Coord = 0;
+    109          int TAppProcessor::AX_Y_Coord = 0;
+    110          int TAppProcessor::AX_Z_Coord = 0;
+    111          
+    112          int TAppProcessor::cable_state = ctNoCable;
+    113          uint8_t TAppProcessor::ecg_format = 7;
+    114          
+    115          volatile bool TAppProcessor::audio_rec_start = false;
+    116          
+    117          
+    118          
+    119          volatile uint8_t TAppProcessor::AX_CoordWr[3] = {0,0,0};
+    120          
+    121          BYTE karta[1024];
+    122          const char inst1[]="KP-01      V 3.0";  //Версия 2.0(10 разрядов), 3.0(11 разрядов)
+    123          const char inst2_3[]="00000003";
+    124          const char inst3_3[]="Отведений-3,разрядов-12";
+    125          const char inst4[]="KP-01";
+    126          //const char inst5[]="ЭКГ по 2 груд.отвед."; //20
+    127          const char inst5_3[]="ЭКГ по 3 ортог.отвед";
+    128          //const char Fio[]="KR02 Test                      ";
+    129          //const char Year[]="01.01.1977       ";
+    130          const char vozr[]="53               ";
+    131          //const char Data[]="16.05.2011       ";
+    132          //const char Time[]="15:59:03         ";
+    133          const char dlit_v[]="04:09:26         ";
+    134          const char exDate[]="01.01.2014       ";
+    135          const char exTime[]="09:00:00         ";
+    136          
+    137          bool TAppProcessor::StartECGRecording = false;
+    138          bool TAppProcessor::RecordInProgress = false;
+    139          
+    140          bool TAppProcessor::ExitFromRecordMode = true;
+    141          bool TAppProcessor::ErrorInRecordMode = true;
+    142          
+    143          const BYTE _ff_array[64] = {0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,
+    144                                      0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,
+    145                                      0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,
+    146                                      0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,
+    147                                      0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,
+    148                                      0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,
+    149                                      0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,
+    150                                      0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF};
+    151          
+    152          void TAppProcessor::RCC_Configuration_Main(void)
+    153          {   
+    154          //  /* Setup the microcontroller system. Initialize the Embedded Flash Interface,  
+    155          //     initialize the PLL and update the SystemFrequency variable. */
+    156          //  SystemInit();
+    157          
+    158            RCC_ClearFlag();
+    159          
+    160            /* RCC system reset(for debug purpose) */
+    161            RCC_DeInit();
+    162          
+    163            /* Enable Prefetch Buffer */
+    164            FLASH_PrefetchBufferCmd(ENABLE);
+    165          
+    166            /* Flash 2 wait state */
+    167            FLASH_SetLatency(FLASH_Latency_0);
+    168            
+    169            /* HCLK = SYSCLK */
+    170            RCC_HCLKConfig(RCC_SYSCLK_Div1); 
+    171            
+    172            /* PCLK2 = HCLK */
+    173            RCC_PCLK2Config(RCC_HCLK_Div1); 
+    174          
+    175            /* PCLK1 = HCLK */
+    176            RCC_PCLK1Config(RCC_HCLK_Div1);
+    177          
+    178            /* PLLCLK = 16MHz / 16 * 192 / 8 = 24 MHz */
+    179            RCC_PLLConfig(RCC_PLLSource_HSI, 16, 192, 8, 4);
+    180          
+    181            /* Enable PLL */ 
+    182            RCC_PLLCmd(ENABLE);
+    183          
+    184            /* Wait till PLL is ready */
+    185            while(RCC_GetFlagStatus(RCC_FLAG_PLLRDY) == RESET)
+    186            {
+    187            }
+    188          
+    189            /* Select PLL as system clock source */
+    190            RCC_SYSCLKConfig(RCC_SYSCLKSource_PLLCLK);
+    191          
+    192            /* Wait till PLL is used as system clock source */
+    193            while(RCC_GetSYSCLKSource() != 0x08)
+    194            {
+    195            }
+    196          
+    197            RCC_APB1PeriphClockCmd(RCC_APB1Periph_PWR, ENABLE);
+    198            RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_BKPSRAM, ENABLE);
+    199          
+    200            /* Configure HCLK clock as SysTick clock source. */
+    201            SysTick_CLKSourceConfig( SysTick_CLKSource_HCLK );
+    202          }
+    203          
+    204          /*----------------------------------------------------------------------------------*/
+    205          /* @brief  Обработка команд блютуза                        */
+    206          /* @param  None                                  */
+    207          /* @return  None                                  */
+    208          /*----------------------------------------------------------------------------------*/
+    209          
+    210          
+    211          void TAppProcessor::App_ParceEvents( uint8_t pckt, uint8_t _datalen, uint8_t *_gdata )
+    212          {
+    213            uint8_t c_s;
+    214                  c_s = (uint8_t)cable_state;
+    215            HFH_ev = 0;
+    216            
+    217            switch( pckt )
+    218            {
+    219              case CMD_NULL_COMMAND:
+    220          //      SendFrameToHost( RPL_NULL );
+    221                SendFrameToHost( RPL_NULL, 1, c_s );
+    222                break;
+    223          
+    224              case CMD_UNIFIED_FRAME:
+    225                HFH_ev = 1;
+    226                UnifiedFrameRcvHandler();
+    227                break;
+    228          
+    229              case CMD_RESET:
+    230          #ifdef LCD_TRACE
+    231                TLcdTrace::AddLine("RESET COMMAND");
+    232          #endif
+    233                SendFrameToHost(RPL_RESET);
+    234                vTaskDelay(2000/portTICK_RATE_MS); 
+    235                TDevice::SystemReset();
+    236                break;
+    237              case CMD_GO_BLD:
+    238          #ifdef LCD_TRACE
+    239                TLcdTrace::AddLine("GOTO BOOTLOADER");
+    240                TLcdTrace::AddLine("Reseting...");
+    241          #endif
+    242                SendFrameToHost(RPL_BLD);
+    243                RTC_WriteBackupRegister(RTC_BKP_DR2,BOOTLOADER_IN_MARKER);
+    244                vTaskDelay(1000/portTICK_RATE_MS); 
+    245                TDevice::SystemReset();
+    246                break;
+    247          
+    248              default:
+    249                SendFrameToHost( RPL_UNDEFINED_CMD );
+    250                break;
+    251            }
+    252          }
+    253          
+    254          /*----------------------------------------------------------------------------------*/
+    255          /* @brief  None                                  */
+    256          /* @param  None                                  */
+    257          /* @return  None                                  */
+    258          /* @info    Format of UFrame                            */
+    259          /*       0 - Frame type - always 1                        */
+    260          /*      1 - Sets Hi byte                            */
+    261          /*      2 - Sets Lo byte                            */
+    262          /*      3 - Req Hi byte                             */
+    263          /*      4 - Req Lo byte                              */
+    264          /*      -- blocks where 0 - block lenght in bytes 1... block array        */
+    265          /*----------------------------------------------------------------------------------*/
+    266          void TAppProcessor::UnifiedFrameRcvHandler( void )
+    267          {
+    268            /*************************/
+    269            /* Confirmation of setup */
+    270            SendFrameToHost(RPL_UNIFIED_CONFIRM);
+    271          
+    272            stUFrameHostSetsMap UFrameHostSetsMap;
+    273            BYTE gDataIndx = 0;
+    274            CharInt uMap;
+    275          
+    276            uMap.Char[0] = gData[HOST_SETS_MAP_HIBYTE];
+    277            uMap.Char[1] = gData[HOST_SETS_MAP_LOBYTE];
+    278            UFrameHostSetsMap.u._word.value = uMap.Int;
+    279          
+    280            uMap.Char[0] = gData[DIVICE_REQUEST_MAP_HIBYTE];
+    281            uMap.Char[1] = gData[DIVICE_REQUEST_MAP_LOBYTE];
+    282            UFrameReqDeviceMap.u._word.value = uMap.Int;
+    283          
+    284            gDataIndx = UFRAME_BLOCKS_BEGIN;
+    285          
+    286            HFH_ev = 3;
+    287          
+    288          
+    289          /* Setting patient action */
+    290            if(UFrameHostSetsMap.u._bits.fmSetPatientAction)  /* 0002 */
+    291            {
+    292              __no_operation();  /* Empty */
+    293            }
+    294          
+    295            /* Setting maximum record lenght */
+    296            if(UFrameHostSetsMap.u._bits.fmSetRecordLenght)    /* 0004 */
+    297            {
+    298              __no_operation();  /* Empty */
+    299            }
+    300          
+    301            /* Setting travel file */
+    302            if(UFrameHostSetsMap.u._bits.fmSetTravelFile)    /* 0008 */
+    303            {
+    304          //    TSDProcessor::ReplaceECGFile = true;
+    305              TSDProcessor::NoAskReplaceECGFileQuestion = true;  /* Да переписать и не спрашивать больше */
+    306            }
+    307          
+    308            HFH_ev = 4;
+    309          //  if(!Setup.u._bits.UseWriteToCard && !Setup.u._bits.UseMonitoring)
+    310            {
+    311              /* Setting serial number of device */
+    312              if(UFrameHostSetsMap.u._bits.fmSerialNumber)  /* 0200 */
+    313              {
+    314                HFH_ev = 5;
+    315                gDataIndx = ReadBlockIntoBuffer( (uint8_t *)&ufSerialNumber, gDataIndx );
+    316                
+    317                TFlash::SF_UpdatePage();
+    318                TFlash::SF_StoreDataArray( SERIAL_NUM, (uint8_t *)&ufSerialNumber, sizeof(stufSerialNumber));
+    319                TFlash::SF_CommitPage();      
+    320                
+    321                PatientCard.Token.Bits._DeviceSerialID = ufSerialNumber.Serial;
+    322              }
+    323          
+    324              /* Setting device Date/Time */
+    325              if(UFrameHostSetsMap.u._bits.fmDateTime)    
+    326              {
+    327                HFH_ev = 6;
+    328                gDataIndx = ReadBlockIntoBuffer( (uint8_t *)&DeviceDateTime, gDataIndx );
+    329                
+    330                //send date/time to f0 controller
+    331              
+    332                BYTE EnRtc[4];
+    333                
+    334                /*
+    335                int DTstamp = ((ts.Date - ts2010.Date) * 3600 * 24) + ((ts.Time - ts2010.Time)/1000);
+    336                  if(DTstamp < 0) DTstamp = 0;
+    337                */
+    338                
+    339                TInterpreter::IntDateTime = DeviceDateTime;
+    340                
+    341                DTstamp = ((DeviceDateTime.Date - 733773) * 3600 * 24) + ((DeviceDateTime.Time)/1000);
+    342                  //if(DTstamp < 0) DTstamp = 0;
+    343                
+    344                EnRtc[3] = ((DTstamp & 0xFF000000) >> 24);
+    345                EnRtc[2] = ((DTstamp & 0x00FF0000) >> 16);
+    346                EnRtc[1] = ((DTstamp & 0x0000FF00) >> 8);
+    347                EnRtc[0] = (DTstamp & 0x000000FF);
+    348                      
+    349                TInterpreter::SendFrameToHost(CMD_SET_RTC,4,EnRtc);
+    350              }
+    351          
+    352              /* Setting patient card (without RecordLenght,DateTimeOfStart,Token,StartPosition) */
+    353              if(UFrameHostSetsMap.u._bits.fmPatientCard)    /* 0400 */
+    354              {
+    355                HFH_ev = 7;
+    356                gDataIndx = ReadBlockIntoBuffer( (uint8_t *)&PatientCard, gDataIndx );    /* Принимает карту пациента по блютузу */
+    357              }
+    358          
+    359              /* Setting BT configurations */
+    360              if(UFrameHostSetsMap.u._bits.fmBTConfiguration)  /* 1000 */
+    361              {
+    362                HFH_ev = 8;
+    363                gData[gDataIndx++];    /* Skip data count 7 - default */
+    364          
+    365                for(BYTE i = 0;i < 6;i++)
+    366                {
+    367                  TLMX9838::BDAddress[i] = gData[gDataIndx++];
+    368                }
+    369          
+    370                TLMX9838::RemoteBTPort = gData[gDataIndx++];      /* BD Port */
+    371              }
+    372          
+    373              /* Setting notes */
+    374              if(UFrameHostSetsMap.u._bits.fmNotes)      /* 2000 */
+    375              {
+    376                __no_operation();  /* Empty */
+    377              }
+    378          
+    379              /* Setting ADC Calibrations */
+    380              if(UFrameHostSetsMap.u._bits.fmCalibrations)  /* 4000 */
+    381              {
+    382                __no_operation();  /* Empty */
+    383              }
+    384          
+    385              /* Testing device - direct signal settings */
+    386              if(UFrameHostSetsMap.u._bits.fmTestingSignals) /* 8000 */
+    387              {
+    388                __no_operation();  /* Empty */
+    389              }
+    390          
+    391              /* Clear log */
+    392              if(UFrameHostSetsMap.u._bits.fmClearLog)     /* 0001 */
+    393              {
+    394                __no_operation();  /* Empty */
+    395              }
+    396          
+    397              /* Voice */
+    398              if(UFrameHostSetsMap.u._bits.fmVoice)     /* 0010 */
+    399              {
+    400                HFH_ev = 9;
+    401                TAudio::VoiceRec = true;
+    402              }
+    403              else
+    404              {
+    405                TAudio::VoiceRec = false;
+    406              }
+    407          
+    408              /* Axelerometer */
+    409              if(UFrameHostSetsMap.u._bits.fmAxel)     /* 0020 */
+    410              {
+    411                __no_operation();  /* Empty */
+    412              }
+    413          
+    414              /* Respiration */
+    415              if(UFrameHostSetsMap.u._bits.fmResp)     /* 0040 */
+    416              {
+    417                  TInterpreter::SendFrameToHost(CMD_RESP_ON);
+    418              }
+    419              else
+    420              {
+    421                  TInterpreter::SendFrameToHost(CMD_RESP_OFF);
+    422              }
+    423          
+    424              if(UFrameHostSetsMap.u._bits.fmStartNow)     /* 0080 */
+    425              {
+    426                  TAppProcessor::StartNow = true;
+    427              }
+    428          
+    429          
+    430          
+    431            }
+    432          
+    433            /* Setting device mode */
+    434            if( UFrameHostSetsMap.u._bits.fmSetup )        /* 0100 */
+    435            {
+    436              HFH_ev = 10;
+    437              gDataIndx++;  /* Skip size byte */
+    438          
+    439              Setup.u._word.value = gData[gDataIndx++];
+    440          
+    441              /* Setup Handler */
+    442              if( Setup.u._bits.EP_Enable )
+    443              {
+    444              HFH_ev = 11;
+    445                if( Setup.u._bits.UseMonitoring )
+    446                {
+    447              HFH_ev = 12;
+    448                  StartMonitioring = true;
+    449                  if (TFrame::StartMonitioring /*|| TSDProcessor::SDStartWrPool*/ || TGuiObjects::EcgOnScreen) TInterpreter::SetStartUSARTMonitioring(true);
+    450                  else TInterpreter::SetStartUSARTMonitioring(false);
+    451          
+    452              HFH_ev = 30;
+    453          //        vTaskResume( xhECGDataSend );
+    454              HFH_ev = 31;
+    455          //        TInterpreter::SendFrameToHost(CMD_START_MONITORING);
+    456          
+    457                }
+    458                else
+    459                {
+    460              HFH_ev = 13;
+    461                  StartMonitioring = false;
+    462                  if (TFrame::StartMonitioring /*|| TSDProcessor::SDStartWrPool*/ || TGuiObjects::EcgOnScreen) TInterpreter::SetStartUSARTMonitioring(true);
+    463                  else TInterpreter::SetStartUSARTMonitioring(false);
+    464          
+    465          //        vTaskSuspend( xhECGDataSend );
+    466                
+    467          //        TInterpreter::SendFrameToHost(CMD_STOP_MONITORING);
+    468                }
+    469          
+    470                if( Setup.u._bits.UseWriteToCard )        /* Write to Card enable */
+    471                {
+    472              HFH_ev = 14;
+    473                  if(TSDProcessor::SDPresent) 
+    474                  {
+    475              HFH_ev = 15;
+    476                    StartECGRecording = true;
+    477                    TFrame::TurnOffAfterLinkDisconnected = true;
+    478                  }
+    479                  
+    480          //        if( TSDProcessor::StartWriting() == 0 )    /* начало записи 0 - ошибка */
+    481          //        {
+    482          //          StartMonitioring = false;
+    483          //          vTaskSuspend( xhECGDataSend );
+    484          //          TSDProcessor::StopWriting();
+    485          //        }
+    486                }
+    487                else
+    488                {
+    489              HFH_ev = 16;
+    490                  StartECGRecording = false;
+    491                  TFrame::TurnOffAfterLinkDisconnected = false;
+    492          //        TDevice::SystemReset();
+    493          
+    494          //        TSDProcessor::StopWriting();
+    495                }
+    496              }
+    497              else
+    498              {
+    499              HFH_ev = 17;
+    500                StartMonitioring = false;
+    501                if (TFrame::StartMonitioring /*|| TSDProcessor::SDStartWrPool*/ || TGuiObjects::EcgOnScreen) TInterpreter::SetStartUSARTMonitioring(true);
+    502                else TInterpreter::SetStartUSARTMonitioring(false);
+    503          
+    504                StartECGRecording = false;
+    505                TFrame::TurnOffAfterLinkDisconnected = false;
+    506          //      vTaskSuspend( xhECGDataSend );
+    507          //      TSDProcessor::StopWriting();
+    508              }
+    509            }
+    510          
+    511            
+    512            /****************************/
+    513            /* Request flags processing */
+    514            /****************************/
+    515            gDataIndx = 2;
+    516          
+    517            if(!Setup.u._bits.UseWriteToCard && !Setup.u._bits.UseMonitoring)
+    518            {
+    519              HFH_ev = 18;
+    520              /* Request Device Log */
+    521              if(UFrameReqDeviceMap.u._bits.fmrLog)  /* 0002 */
+    522              {
+    523                __no_operation();  /* Empty */
+    524              }
+    525              
+    526              /* Request Test Signals */
+    527              if(UFrameReqDeviceMap.u._bits.fmrTestingSignals)  /* 8000 */
+    528              {
+    529                __no_operation();  /* Empty */
+    530              }
+    531              
+    532              /* Request device serial number */
+    533              if( UFrameReqDeviceMap.u._bits.fmrSerialNumber )  /* 0200 */
+    534              {
+    535              HFH_ev = 19;
+    536                gData[gDataIndx++] = sizeof(ufSerialNumber);
+    537                gDataIndx = UploadBlockIntoBuffer( (uint8_t *)&ufSerialNumber, gDataIndx, sizeof(ufSerialNumber) );
+    538              }
+    539              
+    540              /* Request BT configurations */
+    541              if(UFrameReqDeviceMap.u._bits.fmrBTConfiguration)  /* 1000 */
+    542              {
+    543              HFH_ev = 20;
+    544                gData[gDataIndx++] = 6+1;  /* +1; */
+    545                /* BD Address return */
+    546                gDataIndx = UploadBlockIntoBuffer( BDAddress, gDataIndx, 6 );
+    547                /* BD Port */
+    548                gData[gDataIndx++] = RemoteBTPort;
+    549              }
+    550              
+    551              /* Request Device Notes */
+    552              if(UFrameReqDeviceMap.u._bits.fmrNotes)        /* 2000 */
+    553              {
+    554                __no_operation();  /* Empty */
+    555              }
+    556              
+    557              /* Request ADC Calibrations */
+    558              if(UFrameReqDeviceMap.u._bits.fmrCalibrations)    /* 4000 */
+    559              {
+    560                __no_operation();  /* Empty */
+    561              }
+    562            }
+    563          
+    564            /* Request device mode */
+    565            if(UFrameReqDeviceMap.u._bits.fmrSetup)      /* 0100 */
+    566            {
+    567              HFH_ev = 21;
+    568              gData[gDataIndx++] = 1;
+    569              gData[gDataIndx++] = Setup.u._word.value;
+    570            }
+    571            
+    572            /* Request Patient Card */
+    573            if(UFrameReqDeviceMap.u._bits.fmrPatientCard)  /* 0400 */
+    574            {
+    575              HFH_ev = 22;
+    576              gData[gDataIndx++] = sizeof(PatientCard);
+    577              gDataIndx = UploadBlockIntoBuffer( (uint8_t *)&PatientCard, gDataIndx, sizeof(PatientCard) );
+    578            }
+    579            
+    580            /* Request Device Date/Time */
+    581            if(UFrameReqDeviceMap.u._bits.fmrDateTime)    /* 0800 */
+    582            {
+    583              HFH_ev = 23;
+    584              gData[gDataIndx++] = sizeof(DeviceDateTime);
+    585              gDataIndx = UploadBlockIntoBuffer( (BYTE *)&DeviceDateTime, gDataIndx, sizeof(DeviceDateTime) );
+    586            }
+    587            
+    588            /* Request Device FW Info */
+    589            if( UFrameReqDeviceMap.u._bits.fmrInfo )    /* 0001 */
+    590            {    
+    591              HFH_ev = 24;
+    592              gData[gDataIndx++] = 2 + 2 + 1 + 1 + 2 + 4 + 1 + 4;
+    593              gData[gDataIndx++] = FW_RELEASE & 0x00FF;
+    594              gData[gDataIndx++] = (FW_RELEASE & 0xFF00)>>8;
+    595              gData[gDataIndx++] = 0 & 0x00FF;
+    596              gData[gDataIndx++] = (0 & 0xFF00)>>8;
+    597              
+    598              if( TSDProcessor::SDPresent == true )
+    599                gData[gDataIndx++] = 0;    /* card present */
+    600              else
+    601                gData[gDataIndx++] = 2;    /* no card present */
+    602              
+    603              gData[gDataIndx++] = TSDProcessor::FATFS_Obj.csize;
+    604              gData[gDataIndx++] = TSDProcessor::FATFS_Obj.database;
+    605              gData[gDataIndx++] = TSDProcessor::FATFS_Obj.database >> 8;
+    606              
+    607              CharLong recLenght;
+    608              recLenght.Long = 291762034L;
+    609              gData[gDataIndx++] = recLenght.Char[0];
+    610              gData[gDataIndx++] = recLenght.Char[1];
+    611              gData[gDataIndx++] = recLenght.Char[2];
+    612              gData[gDataIndx++] = recLenght.Char[3];
+    613              
+    614              /* Send ECG file travel info */
+    615              if( TSDProcessor::NoAskReplaceECGFileQuestion == true )
+    616                gData[gDataIndx++] = trverrGood;
+    617              else{
+    618          //      if(TSDProcessor::Def == true )
+    619          //        TSDProcessor::TrMode = trverrGood;  
+    620                gData[gDataIndx++] = TSDProcessor::TrMode;
+    621              }
+    622              
+    623              CharLong trToken;
+    624              
+    625              trToken.Long = 0x00000001;
+    626              gData[gDataIndx++] = trToken.Char[0];
+    627              gData[gDataIndx++] = trToken.Char[1];
+    628              gData[gDataIndx++] = trToken.Char[2];
+    629              gData[gDataIndx++] = trToken.Char[3];
+    630            }
+    631            
+    632            /* Request Device Batteries Voltages */
+    633            if( UFrameReqDeviceMap.u._bits.fmrBatteries )    /* 0004 */
+    634            {
+    635              HFH_ev = 25;
+    636                
+    637              gData[gDataIndx++] = 2 + 2;
+    638          
+    639              CharInt tVB;
+    640              tVB.Int = (uint16_t) ((uint32_t)(BatVoltageValue * 5539) >> 16);  //5484
+    641              gData[gDataIndx++] = tVB.Char[0];
+    642              gData[gDataIndx++] = tVB.Char[1];
+    643              tVB.Int = (uint16_t) ((uint32_t)(BatVoltageValue * 10582) >> 16);  //9828
+    644              gData[gDataIndx++] = tVB.Char[0];
+    645              gData[gDataIndx++] = tVB.Char[1];
+    646            }
+    647            
+    648            /* Request Device Write Started */
+    649            if( UFrameReqDeviceMap.u._bits.fmrWrStarted )    /* 0008 */
+    650            {
+    651              HFH_ev = 27;
+    652                
+    653              if( ECGRecordingStarted == true )
+    654                gData[gDataIndx++] = 0xFF;
+    655              else
+    656                gData[gDataIndx++] = 0x00;
+    657            }
+    658          
+    659            uMap.Int = UFrameReqDeviceMap.u._word.value;
+    660            gData[0] = uMap.Char[0];
+    661            gData[1] = uMap.Char[1];
+    662              HFH_ev = 26;
+    663          
+    664            SendFrameToHost( RPL_UNIFIED_FRAME, gDataIndx, gData );
+    665            
+    666          }
+    667          
+    668          
+    669          
+    670          /*----------------------------------------------------------------------------------*/
+    671          /* @brief  Read data from BT recieve buffer                    */
+    672          /* @param  None                                  */
+    673          /* @return  None                                  */
+    674          /*----------------------------------------------------------------------------------*/
+    675          uint8_t TAppProcessor::ReadBlockIntoBuffer( uint8_t *Buffer, uint8_t Indx )
+    676          {
+    677            uint8_t BlockDataCount;
+    678            
+    679            BlockDataCount = gData[Indx++];
+    680            
+    681            for( uint8_t i = 0;i < BlockDataCount;i++ )
+    682            {
+    683              uint8_t bT = gData[Indx++];
+    684              Buffer[i] = bT;
+    685            }
+    686            return Indx;
+    687          }
+    688          
+    689          
+    690          
+    691          /*----------------------------------------------------------------------------------*/
+    692          /* @brief  Загружает данные в буффер блютуза для отправки              */
+    693          /* @param  None                                  */
+    694          /* @return  None                                  */
+    695          /*----------------------------------------------------------------------------------*/
+    696          BYTE TAppProcessor::UploadBlockIntoBuffer( uint8_t *Buffer, uint8_t Indx, uint8_t DataCount )
+    697          {
+    698            for(BYTE i = 0;i < DataCount;i++)
+    699            {
+    700              gData[Indx++] = Buffer[i];
+    701            }
+    702            return Indx;
+    703          }
+    704          
+    705          /*
+    706          void RTC_TimeStampToTDMY(uint32_t ttime,int *year,int *month, int *day,int *hours,int *minutes,int *seconds)
+    707          {
+    708            //find year
+    709            uint32_t yearIndx = 0;
+    710            int i;
+    711            for(i = 0;i < 27;i++)
+    712            {
+    713              yearIndx += (YearsDaysArray[i]*86400L);
+    714              if(yearIndx > ttime) break;
+    715            }
+    716            yearIndx -= (YearsDaysArray[i]*86400L);
+    717            *year = 2010 + i;
+    718            i *= 12;//get month start Indx
+    719            int j;
+    720            uint32_t monthIndx = yearIndx;
+    721            for(j = 0;j < 12;j++)
+    722            {
+    723              monthIndx += (YearsMonthArray[i++]*86400L);
+    724              if(monthIndx > ttime) break;
+    725            }
+    726            monthIndx -= (YearsMonthArray[i - 1]*86400L);
+    727            *month = j + 1;
+    728            *day = (ttime - monthIndx) / (86400L);
+    729            int daysec = *day * 86400L;
+    730            *day += 1;
+    731            monthIndx += daysec;
+    732            daysec = (ttime - monthIndx);
+    733            *hours = daysec / 3600L;
+    734            int minsec = *hours * 3600L;
+    735            monthIndx += minsec;
+    736            minsec = (ttime - monthIndx);
+    737            *minutes = minsec / 60L;
+    738            *seconds = minsec % 60L;
+    739          }
+    740          */
+    741          
+    742          
+    743          /*----------------------------------------------------------------------------------*/
+    744          /* @brief  Задача инициализации                      */
+    745          /* @param  None                                  */
+    746          /* @return  None                                  */
+    747          /*----------------------------------------------------------------------------------*/
+    748          void TAppProcessor::TASK_Init( void *pvParameters )
+    749          {
+    750           
+    751            
+    752            TSound::SoundInit();
+    753            TSound::PlaySound(_modiStartUp);
+    754            TDevice::LedOn();
+    755            GPIO_SetBits( TEST_PORT, TEST_PIN );
+    756            
+    757            
+    758            
+    759            while( 1 )
+    760            {  
+    761              if(GPIO_ReadInputDataBit(UB2_BUTTON_PORT, UB2_BUTTON_PIN) == 0)
+    762              {
+    763                
+    764              }
+    765            }
+    766          }
+    767          
+    768          
+    769          
+    770          /*----------------------------------------------------------------------------------*/
+    771          
+    772          /*----------------------------------------------------------------------------------*/
+    773          /* @brief  Задача инициализации-2                      */
+    774          /* @param  None                                  */
+    775          /* @return  None                                  */
+    776          /*----------------------------------------------------------------------------------*/
+    777          
+    778          void TAppProcessor::TASK_StartUp(void *pvParameters)
+    779          {
+    780                bool buttonState = false;
+    781                bool start = false;
+    782                if(!start){
+    783                              if(GPIO_ReadInputDataBit(UB2_BUTTON_PORT, UB2_BUTTON_PIN) == 0)
+    784                                  {
+    785                                    
+    786                                     start = true;
+    787                                  
+    788                                  }
+    789                }
+    790                
+    791                
+    792                if(start){
+    793            
+    794          	#ifdef LCD_TRACE
+    795          		char str1[10];
+    796          		char str2[20];
+    797          	#endif
+    798          
+    799          	TSound::SoundInit();
+    800          	TSound::PlaySound(_modiStartUp);	
+    801          	
+    802          	
+    803          
+    804          	TFlash::SF_Init();	
+    805          
+    806              #ifdef LCD_TRACE
+    807          		TLcdTrace::AddLine("Starting up system...");
+    808          		//TLcdTrace::AddLine("(C) CARDIAN 2016 BRU");
+    809          		strcpy(str2,"Firmware Ver:");
+    810          		itos((int)FW_RELEASE,str1,6,DECIMAL);
+    811          		strcat(str2,str1);
+    812          		#ifdef POWER_5V
+    813          			strcat(str2," 5V");
+    814          		#else
+    815          			strcat(str2," 3V");
+    816          		#endif
+    817          		#ifdef PUMP_CAP
+    818          			strcat(str2,"C");
+    819          		#endif
+    820          		TLcdTrace::AddLine(str2);
+    821          		
+    822          		#ifdef TWAIN
+    823          			strcpy(str2,"ECG Driver Ver:");
+    824          			itos((int)FW_ECG_RELEASE,str1,6,DECIMAL);
+    825          			strcat(str2,str1);
+    826          			TLcdTrace::AddLine(str2);
+    827          		#endif		
+    828          
+    829          		stufSerialNumber *sn;
+    830          		sn = (stufSerialNumber*)TFlash::SF_GetDataPtr(SERIAL_NUM);
+    831          		int u = 0;
+    832          		int h = 0;
+    833          		for(u = 0;u < 11;u++)
+    834          		{
+    835          			str2[u] = (char)sn->DeviceName[h++];
+    836          		}
+    837          		str2[u] = 0;	
+    838          		TLcdTrace::AddLine(str2);
+    839          		strcpy(str2,(const char*)&sn->DeviceName[h]);
+    840          		TLcdTrace::AddLine(str2);
+    841          	#endif		
+    842          
+    843                   vTaskDelay(1000/portTICK_RATE_MS);
+    844          
+    845          	#ifdef LCD_TRACE
+    846          		TLcdTrace::AddLine("Here and bellow");
+    847                          TLcdTrace::AddLine("push button to continue...");
+    848                          while(!buttonState){
+    849                              if(GPIO_ReadInputDataBit(UB2_BUTTON_PORT, UB2_BUTTON_PIN) == 0)
+    850                                  {
+    851                                     buttonState = true;
+    852                                  }
+    853                          }
+    854                          buttonState = false;
+    855          	#endif
+    856          
+    857          	
+    858          
+    859          	#ifdef LCD_TRACE
+    860          		TLcdTrace::AddLine(1,"Start GUI Task.");
+    861                          while(!buttonState){
+    862                              if(GPIO_ReadInputDataBit(UB2_BUTTON_PORT, UB2_BUTTON_PIN) == 0)
+    863                                  {
+    864                                     buttonState = true;
+    865                                  }
+    866                          }
+    867                          buttonState = false;
+    868                          TLcdTrace::Clear();
+    869          	#endif
+    870          	TGuiObjects::GUIObj_Init();
+    871          
+    872            
+    873            TLcdTrace::AddLine("START_UP_SYSTEM:");
+    874            itos((int)TFlash::SF_GetData8(START_UP_SYSTEM),str2,19,DECIMAL);
+    875          	TLcdTrace::AddLine(str2);
+    876            
+    877            
+    878          	#ifdef GUI_ENABLED
+    879                
+    880              if(TFlash::SF_GetData8(START_UP_SYSTEM) == 0x55)
+    881          		{
+    882          			#ifdef LCD_TRACE
+    883          					TLcdTrace::AddLine("GUI Init...");
+    884          					          
+    885                    vTaskDelay(200/portTICK_RATE_MS);
+    886          			#endif
+    887          		
+    888          			TGui::GUI_Init();
+    889          			TGuiObjects::GUIDesktopShowProgressBar();
+    890          		}
+    891          	#endif		
+    892          	
+    893          	#ifdef LCD_TRACE
+    894          		TLcdTrace::AddLine(1,"PWR Managment config...");
+    895          	#endif
+    896          	
+    897          		
+    898          	#ifdef LCD_TRACE
+    899          		TLcdTrace::AddLine(1,"RT Clocks config...");
+    900                          TRtc::Rtc_Init();
+    901                          itos((int)TRtc::RTC_TimeRead(),str2,19,DECIMAL);
+    902          		TLcdTrace::AddLine(str2);
+    903                          //TRtc::RTC_TimeRead();
+    904          	#endif		
+    905          		
+    906          
+    907          	#ifdef LCD_TRACE
+    908          		TLcdTrace::AddLine(1,"AD7799 Init...");
+    909                          while(!buttonState){
+    910                              if(GPIO_ReadInputDataBit(UB2_BUTTON_PORT, UB2_BUTTON_PIN) == 0)
+    911                                  {
+    912                                     buttonState = true;
+    913                                  }
+    914                          }
+    915                          buttonState = false;
+    916                          TLcdTrace::Clear();
+    917          	#endif
+    918          		
+    919          		
+    920          
+    921          	#ifdef LCD_TRACE
+    922          		TLcdTrace::AddLine(1,"Pressure Sensor Init...");
+    923          	#endif
+    924          	
+    925          		
+    926          	#ifdef ENABLE_WATCHDOG
+    927          	  IWDG_ReloadCounter();
+    928          	#endif
+    929          
+    930          	#ifdef LCD_TRACE
+    931          		TLcdTrace::AddLine(1,"Bluetooth config...");
+    932          	#endif		
+    933          	
+    934          	xTaskCreate(TFrame::TASK_CmdProcessor,
+    935          							(signed char *) "CMD",
+    936          							configMINIMAL_STACK_SIZE+200,
+    937          							NULL,
+    938          							tskIDLE_PRIORITY+1,
+    939          							&TFrame::xhCmdProcessor);
+    940          
+    941          	TLMX9838::BluetoothInit();
+    942          	
+    943          	#ifdef LCD_TRACE
+    944          		TLcdTrace::AddLine(1,"NAND Init...");
+    945          	#endif
+    946          
+    947          	
+    948          		
+    949          	#ifdef LCD_TRACE
+    950          		TLcdTrace::AddLine(1,"EEPROM(93Cxx) Init...");
+    951                          while(!buttonState){
+    952                              if(GPIO_ReadInputDataBit(UB2_BUTTON_PORT, UB2_BUTTON_PIN) == 0)
+    953                                  {
+    954                                     buttonState = true;
+    955                                  }
+    956                          }
+    957                          buttonState = false;
+    958                          TLcdTrace::Clear();
+    959          	#endif
+    960          	
+    961          		
+    962          	#ifdef LCD_TRACE
+    963          		TLcdTrace::AddLine(1,"Pump&Valve Init...");
+    964          	#endif
+    965          	
+    966          //  TLMX9838::TurnOffBluetooth();
+    967          //  TWinstarLcd::LcdBkLightOff();
+    968          	
+    969          		
+    970          //  TWinstarLcd::LcdBkLightOn();
+    971            	
+    972          	#ifdef LCD_TRACE
+    973          		TLcdTrace::AddLine(1,"P Processor Init...");
+    974          	#endif
+    975          	
+    976          
+    977          	#ifdef LCD_TRACE
+    978          		TLcdTrace::AddLine(1,"T Sensor & BattZond...");
+    979          	#endif
+    980          	
+    981          
+    982          	#ifdef LCD_TRACE
+    983          		TLcdTrace::AddLine(1,"DataRead Init...");
+    984          	#endif
+    985          	
+    986          
+    987          	#ifdef LCD_TRACE
+    988          		TLcdTrace::AddLine(1,"DataWrite Init...");
+    989                          while(!buttonState){
+    990                              if(GPIO_ReadInputDataBit(UB2_BUTTON_PORT, UB2_BUTTON_PIN) == 0)
+    991                                  {
+    992                                     buttonState = true;
+    993                                  }
+    994                          }
+    995                          buttonState = false;
+    996                          TLcdTrace::Clear();
+    997          	#endif
+    998          	TNandWrite::NW_Init();
+    999          
+   1000          	#ifdef LCD_TRACE
+   1001          		TLcdTrace::AddLine(1,"Nibp Store Init...");
+   1002          	#endif
+   1003          	
+   1004          
+   1005          	#ifdef LCD_TRACE
+   1006          		TLcdTrace::AddLine(1,"Virtual Machine Init.");
+   1007          	#endif
+   1008          	
+   1009          
+   1010              #ifdef LCD_TRACE
+   1011          		TLcdTrace::AddLine(1,"StartUp Completed.");
+   1012          	#endif
+   1013          			
+   1014              #ifdef LCD_TRACE
+   1015          		TLcdTrace::AddLine(1,"Free heap size:");
+   1016          		itos((int)xPortGetFreeHeapSize(),str2,19,DECIMAL);
+   1017          		TLcdTrace::AddLine(str2);
+   1018          	#endif
+   1019                          while(!buttonState){
+   1020                              if(GPIO_ReadInputDataBit(UB2_BUTTON_PORT, UB2_BUTTON_PIN) == 0)
+   1021                                  {
+   1022                                     buttonState = true;
+   1023                                  }
+   1024                          }
+   1025                          buttonState = false;
+   1026                          TLcdTrace::Clear();
+   1027                          xTaskCreate( TAppProcessor::TASK_Loading, "Startup", configMINIMAL_STACK_SIZE+128, NULL,
+   1028                                        tskIDLE_PRIORITY+0, NULL );
+   1029                }
+   1030                else{
+   1031                      xTaskCreate( TAppProcessor::TASK_Loading, "Startup", configMINIMAL_STACK_SIZE+128, NULL,
+   1032                                        tskIDLE_PRIORITY+0, NULL );
+   1033                      xTaskCreate( TFrame::TASK_CheckISRFlag, "CheckISR", configMINIMAL_STACK_SIZE+128, NULL,
+   1034          		tskIDLE_PRIORITY+2, NULL );
+   1035            
+   1036            xTaskCreate( TInterpreter::TASK_CmdProcessor, "InterpProcessor", 
+   1037          				configMINIMAL_STACK_SIZE+1, NULL, 
+   1038          				tskIDLE_PRIORITY+2, NULL ); 
+   1039            
+   1040            //vTaskStartScheduler();
+   1041                }
+   1042          
+   1043          		
+   1044          	vTaskSuspend(NULL);
+   1045          }
+   1046          //------------------------------------------------------------------------------------
+   1047          
+   1048          /*----------------------------------------------------------------------------------*/
+   1049          /* @brief  Задача запуска                              */
+   1050          /* @param  None                                  */
+   1051          /* @return  None                                  */
+   1052          /*----------------------------------------------------------------------------------*/
+   1053          void TAppProcessor::TASK_Loading( void *pvParameters )
+   1054          {
+   1055            int prevCableCheck = ct5Leads; 
+   1056            char str2[20];
+   1057            
+   1058            SCB_DEMCR  |= 0x01000000;
+   1059            DWT_CYCCNT  = 0;
+   1060            DWT_CONTROL|= 1; // enable the counter
+   1061          
+   1062            vTaskDelay(100/portTICK_RATE_MS);
+   1063          
+   1064            TSound::SoundInit();
+   1065            TSound::PlaySound(_modiStartUp);
+   1066           
+   1067            while( 1 )
+   1068            {
+   1069              // загрузка заставки
+   1070          //    if( TDevice::DEVICE->Lcd.Status == true )
+   1071          //    {
+   1072          //      TGui::GUI_PutBitmap( 0, 0, &_start_BMP, LCD_PIXEL_ON );
+   1073          //      vTaskResume( TLcd::xLcdInvalidate );
+   1074          //    }
+   1075              if(!ExitFromRecordMode)
+   1076              {  
+   1077          //      TLcdTrace::AddLine("Starting up system...");
+   1078          //      TLcdTrace::AddLine("CARDIAN 2014");
+   1079          //      TLcdTrace::AddLine(FW_RELEASE_STR);
+   1080          
+   1081                stufSerialNumber *sn;
+   1082                sn = (stufSerialNumber*)TFlash::SF_GetDataPtr(SERIAL_NUM);
+   1083                if(sn->DeviceName[0] != 0xFF)
+   1084                {  
+   1085                  int u = 0;
+   1086                  int h = 0;
+   1087                  for(u = 0;u < 13;u++)
+   1088                  {
+   1089                    str2[u] = (char)sn->DeviceName[h++];
+   1090                  }
+   1091                  str2[u] = 0;  
+   1092          //        TLcdTrace::AddLine(str2);
+   1093                  strcpy(str2,(const char*)&sn->DeviceName[h]);
+   1094          //        TLcdTrace::AddLine(str2);
+   1095          //        TLcdTrace::AddLine(" ");
+   1096                }
+   1097                vTaskDelay(800/portTICK_RATE_MS); 
+   1098              }
+   1099              
+   1100          #ifndef DISABLE_GUI
+   1101              TLcdTrace::DisableLcdTrace = true;
+   1102          #endif //DISABLE_GUI
+   1103          
+   1104              TLcdTrace::AddLine(1,"Start GUI Task");
+   1105              TGuiObjects::GUIDesktopShowNone();
+   1106              TGuiObjects::GUIObj_Init();    
+   1107              vTaskDelay(200/portTICK_RATE_MS); 
+   1108              TGuiObjects::GUIDesktopShowWait();
+   1109              vTaskDelay( 100 / portTICK_RATE_MS );
+   1110          
+   1111              // Подключение к ECGMCU
+   1112              TLcdTrace::AddLine(1,"Reseting ECGMCU...");
+   1113              for(int i = 0; i < 3; i++)
+   1114              {
+   1115                TInterpreter::SendFrameToHost(CMD_STOP_MONITORING);
+   1116                vTaskDelay( 200 / portTICK_RATE_MS );
+   1117              }
+   1118              TLcdTrace::AddLine(1,"Connection to ECGMCU...");
+   1119              int h;
+   1120              for(h = 0;h < 10;h++)
+   1121              {
+   1122                TInterpreter::SendFrameToHost(CMD_NULL_CMD);
+   1123                vTaskDelay( 500 / portTICK_RATE_MS );
+   1124                if(TInterpreter::Fx_Online) break;
+   1125              }
+   1126              if(h >= 9) 
+   1127              {
+   1128                TLcdTrace::AddLine(1,"FAIL");
+   1129                TGuiObjects::GUIDesktopShowError();
+   1130          //      TGuiObjects::MessageBox(MSG_ERROR, false, "Да", "Нет", 30);
+   1131                while(1) 
+   1132                {  
+   1133                  vTaskDelay( 30000 / portTICK_RATE_MS );
+   1134                  PWR_EnterSTANDBYMode();
+   1135                }  
+   1136              }
+   1137              else
+   1138              {
+   1139                TLcdTrace::AddLine(1,"OK");
+   1140                vTaskDelay( 1200 / portTICK_RATE_MS );
+   1141              }
+   1142          
+   1143          
+   1144              TLcdTrace::AddLine(1,"Getting power status...");
+   1145              for(h = 0;h < 25;h++)
+   1146              {
+   1147                TInterpreter::SetStartUSARTMonitioring(true);
+   1148                vTaskDelay( 200 / portTICK_RATE_MS );
+   1149                TInterpreter::SetStartUSARTMonitioring(false);
+   1150                if(TAppProcessor::SysVoltageValue > 100) break;
+   1151              }
+   1152              if(h >= 25) 
+   1153              {
+   1154                TLcdTrace::AddLine(1,"FAIL");
+   1155                TGuiObjects::GUIDesktopShowError();
+   1156          //      TGuiObjects::MessageBox(MSG_ERROR, false, "Да", "Нет", 30);
+   1157                while(1) 
+   1158                {  
+   1159                  vTaskDelay( 30000 / portTICK_RATE_MS );
+   1160                  PWR_EnterSTANDBYMode();
+   1161                }  
+   1162              }
+   1163              else
+   1164              {
+   1165                TLcdTrace::AddLine(1,"OK");
+   1166              }
+   1167          
+   1168              
+   1169              
+   1170              
+   1171              
+   1172              
+   1173              
+   1174              
+   1175              
+   1176              
+   1177          
+   1178              if(TAppProcessor::SysVoltageValue < 3100)
+   1179              {
+   1180                TLcdTrace::AddLine(1,"Waiting Li-Pol charging...");
+   1181                TGuiObjects::GUIDesktopShowCharge();
+   1182                for(h = 0;h < 900;h++)
+   1183                {
+   1184                  TInterpreter::SetStartUSARTMonitioring(true);
+   1185                  vTaskDelay( 100 / portTICK_RATE_MS );
+   1186                  TInterpreter::SetStartUSARTMonitioring(false);
+   1187                  vTaskDelay( 100 / portTICK_RATE_MS );
+   1188                  if(TAppProcessor::SysVoltageValue > 3100) break;
+   1189                  vTaskDelay( 800 / portTICK_RATE_MS );
+   1190                }
+   1191                if(h >= 899) 
+   1192                {
+   1193                  TLcdTrace::AddLine(1,"FAIL");
+   1194                  TGuiObjects::GUIDesktopShowError();
+   1195          //        TGuiObjects::MessageBox(MSG_ERROR, false, "Да", "Нет", 30);
+   1196                  while(1) 
+   1197                  {  
+   1198                    vTaskDelay( 30000 / portTICK_RATE_MS );
+   1199                    PWR_EnterSTANDBYMode();
+   1200                  }  
+   1201                }
+   1202                else
+   1203                {
+   1204                  TLcdTrace::AddLine(1,"OK");
+   1205                }
+   1206              }
+   1207          
+   1208          //    TInterpreter::SendFrameToHost(CMD_STOP_MONITORING);
+   1209          
+   1210              TLcdTrace::AddLine(1,"Getting ECGMCU CRC...");
+   1211              for(h = 0;h < 10;h++)
+   1212              {
+   1213                TInterpreter::SendFrameToHost(CMD_GETFLASHCRC);
+   1214                vTaskDelay( 500 / portTICK_RATE_MS );
+   1215                if(TInterpreter::Fx_CRC != 0) break;
+   1216              }
+   1217              if(h >= 9) 
+   1218              {
+   1219                TLcdTrace::AddLine(1,"FAIL");
+   1220                TGuiObjects::GUIDesktopShowError();
+   1221          //      TGuiObjects::MessageBox(MSG_ERROR, false, "Да", "Нет", 30);
+   1222                while(1) 
+   1223                {  
+   1224                  vTaskDelay( 30000 / portTICK_RATE_MS );
+   1225                  PWR_EnterSTANDBYMode();
+   1226                }  
+   1227              }
+   1228              else
+   1229              {
+   1230                TLcdTrace::AddLine(1,"OK");
+   1231              }
+   1232              
+   1233          #ifndef ECGMCUDONTFWUPDATE
+   1234              if(TInterpreter::Fx_CRC != ECGMCUFW_bin[ECGMCUFW_size/4-1])
+   1235              {
+   1236                TLcdTrace::AddLine(1,"ECGMCU FW updating...");
+   1237                TGuiObjects::GUIDesktopShowFirmwareUpdate();
+   1238                vTaskDelay( 100 / portTICK_RATE_MS );
+   1239                TSPISRAM::WriteSeq( 0, 4, (uint8_t *) &ECGMCUFW_size );
+   1240                TSPISRAM::WriteSeq( 4, ECGMCUFW_size, (uint8_t *) &ECGMCUFW_bin[0] );
+   1241                TInterpreter::SendFrameToHost(CMD_BOOTLOAD);
+   1242          
+   1243                for(h = 0;h < 10;h++)
+   1244                {
+   1245                  TInterpreter::SendFrameToHost(CMD_NULL_CMD);
+   1246                  vTaskDelay( 200 / portTICK_RATE_MS );
+   1247                  if(TInterpreter::Fx_Online) break;
+   1248                }
+   1249                if(h >= 9) 
+   1250                {
+   1251                  TLcdTrace::AddLine(1,"FAIL");
+   1252                  TGuiObjects::GUIDesktopShowError();
+   1253          //        TGuiObjects::MessageBox(MSG_ERROR, false, "Да", "Нет", 30);
+   1254                  while(1) 
+   1255                  {  
+   1256                    vTaskDelay( 30000 / portTICK_RATE_MS );
+   1257                    PWR_EnterSTANDBYMode();
+   1258                  }  
+   1259                }
+   1260                else
+   1261                {
+   1262                    TLcdTrace::AddLine(1,"OK");
+   1263                }
+   1264              }
+   1265          #endif //ECGMCUDONTFWUPDATE
+   1266          
+   1267              TGuiObjects::GUIDesktopShowProgressBar();
+   1268              vTaskDelay( 100 / portTICK_RATE_MS );
+   1269          
+   1270              /* Включение блютуза */
+   1271              if( TDevice::DEVICE->Bluetooth.Status == true )
+   1272              {
+   1273                /* задача отсылки данных через блютуз */
+   1274                xTaskCreate( TFrame::TASK_SendDataToHost, "EDS",
+   1275                  configMINIMAL_STACK_SIZE, NULL,
+   1276                  tskIDLE_PRIORITY+2, &TFrame::xhECGDataSend);
+   1277          
+   1278                /* задача обработки команд с блютуза */
+   1279                xTaskCreate( TFrame::TASK_CmdProcessor, "CmdProcessor", 
+   1280                  configMINIMAL_STACK_SIZE+64, NULL, 
+   1281                  tskIDLE_PRIORITY+3, &TFrame::xhCmdProcessor );
+   1282          
+   1283                /* инициализация блютуза */
+   1284                TLMX9838::BluetoothInit();
+   1285          
+   1286          
+   1287          #ifdef LCD_TRACE
+   1288                if(TLMX9838::LMX9838_Ready)
+   1289                {
+   1290                  TLcdTrace::AddLine("LMX READY");
+   1291                }
+   1292                else
+   1293                {    
+   1294                  TLcdTrace::AddLine("LMX FAIL");
+   1295                }   
+   1296          #endif //LCD_TRACE
+   1297              }
+   1298              
+   1299              if( TDevice::DEVICE->Ecg.Status == true ){
+   1300              }
+   1301              
+   1302              vTaskDelay( 1000 / portTICK_RATE_MS );
+   1303          
+   1304              /* начать снятие ЭКГ сигнала с отведений */
+   1305          #ifdef LCD_TRACE
+   1306              TLcdTrace::AddLine(1,"Start ECG.");
+   1307          #endif //LCD_TRACE
+   1308              if( TDevice::DEVICE->Ecg.Status == true )
+   1309              {
+   1310                xTaskCreate( TEcgProcessor::TASK_WrProcessing, "ECGWrProcessing",
+   1311                  configMINIMAL_STACK_SIZE+0, NULL,
+   1312                  tskIDLE_PRIORITY+3, &TEcgProcessor::xhECGWrProcessing);
+   1313          
+   1314          /*
+   1315          #ifdef USE_ADS1292R
+   1316                TADS1292::StartConversation();
+   1317          #endif // USE_ADS1292R
+   1318                TADS1298::StartConversation();
+   1319          */
+   1320              }
+   1321          
+   1322              /* Инициализация записи во флэш */
+   1323              TFlash::SF_Init();
+   1324          //  TScreen::TimerTrigger = TFlash::SF_GetData16( LCDOFF_TIMER );    /* загрузка из флеш значения */
+   1325              
+   1326              TNandWrite::NW_Init();
+   1327              TLcdTrace::AddLine("NW_Init.");
+   1328              
+   1329              TPoolingNand::PO_Init();
+   1330              TLcdTrace::AddLine("PO_Init.");
+   1331                  
+   1332              TAudio::AUDIO_PHYInit();
+   1333              
+   1334              TLcdTrace::AddLine("Loading SN.");
+   1335              stufSerialNumber *kr02_serialname = 
+   1336                (stufSerialNumber*)TFlash::SF_GetDataPtr(SERIAL_NUM);
+   1337              const uint8_t *sSn = (uint8_t*)kr02_serialname;
+   1338              uint8_t *dSn = (uint8_t*)&ufSerialNumber;
+   1339          
+   1340              for(int s = 0;s < sizeof(stufSerialNumber);s++) dSn[s] = sSn[s]; 
+   1341                    
+   1342              TGuiObjects::GUIDesktopShowTime();
+   1343              
+   1344              while(1)
+   1345              {  
+   1346                
+   1347          //      vTaskDelay(20000/portTICK_RATE_MS); 
+   1348          //      PWR_EnterSTOPMode(PWR_Regulator_LowPower, PWR_STOPEntry_WFI);
+   1349          //      RCC_Configuration_Main();
+   1350          //      SystemInit();
+   1351          //      TFrame::TurnOnBluetooth();
+   1352            
+   1353                
+   1354                if( disk_initialize(0) == RES_OK )
+   1355                {
+   1356                  TLcdTrace::AddLine("CARD INIT OK.");
+   1357                  TLcdTrace::AddLineX("CARD Type ",CardType);
+   1358                    
+   1359                  TGuiObjects::ToolbarSet(TBFM_MEMCARD,1);
+   1360                  
+   1361          //      TGuiObjects::ToolbarSet(TBFM_STORED,1);
+   1362                    
+   1363                  while(StartRecording != true) 
+   1364                  {
+   1365                    static bool check_trv = true;
+   1366                    
+   1367                    if( disk_initialize(0) != RES_OK )
+   1368                    {
+   1369                      TGuiObjects::ToolbarSet(TBFM_MEMCARD,0);
+   1370                      
+   1371                      if (SD_Off_Sound)
+   1372                      {
+   1373                         TSound::PlaySound(_modiShortBeep);
+   1374                  
+   1375                         SD_Off_Sound = false;
+   1376                         
+   1377                         SD_On_Sound = true;
+   1378                      }
+   1379                                  
+   1380                      TGuiObjects::ToolbarSet(TBFM_STORED,0);
+   1381                      TSDProcessor::SDPresent = false;
+   1382                      check_trv = true;
+   1383                    }
+   1384                    else
+   1385                    {
+   1386                      TGuiObjects::ToolbarSet(TBFM_MEMCARD,1);
+   1387                      
+   1388                      if (SD_On_Sound)
+   1389                      {
+   1390                         TSound::PlaySound(_modiShortBeep);
+   1391                  
+   1392                         SD_On_Sound = false;
+   1393                         
+   1394                         SD_Off_Sound = true;
+   1395                      }            
+   1396                      
+   1397                      TSDProcessor::SDPresent = true;
+   1398                      if(check_trv)
+   1399                      {
+   1400                        TLcdTrace::AddLine("Check Trv File");
+   1401                        if( f_mount( 0, &FATFS_Obj ) == FR_OK )
+   1402                        {
+   1403                          if(f_open( &TrvFile,"KR01.TRE",FA_OPEN_EXISTING|FA_READ) == FR_OK )    /* File NOT exists */
+   1404                          {
+   1405                            unsigned int BwW;
+   1406                            f_read( &TrvFile, TSDProcessor::EcgBuffer_1, 5, &BwW );
+   1407                            if( TSDProcessor::EcgBuffer_1[0] == 1 )    
+   1408                            {
+   1409                              TSDProcessor::TrMode = trverrNotRead;
+   1410                              TGuiObjects::ToolbarSet(TBFM_STORED,1);
+   1411                            }
+   1412                            else
+   1413                            {
+   1414                              TSDProcessor::TrMode = trverrGood;
+   1415                              TGuiObjects::ToolbarSet(TBFM_STORED,0);
+   1416                            }
+   1417                            f_close( &TrvFile );
+   1418                          }
+   1419          //                else TGuiObjects::ToolbarSet(TBFM_ERROR,1);
+   1420                        }
+   1421                      }
+   1422                      check_trv = false;
+   1423                    }
+   1424                    
+   1425                    cable_state = CableCheck();
+   1426                    
+   1427                    if(cable_state != prevCableCheck) 
+   1428                    {
+   1429                      ChangeCableIcon(cable_state);
+   1430                      prevCableCheck = cable_state; 
+   1431                    }
+   1432                    vTaskDelay(1500/portTICK_RATE_MS);
+   1433                  }
+   1434          
+   1435                  RTC_WriteBackupRegister(RTC_BKP_DR3,0xAAAA);
+   1436                  
+   1437                  TNandWrite::FlashCardRemoved = false;
+   1438                  
+   1439          //        if( f_mount( 0, &FATFS_Obj ) == FR_OK )
+   1440                  {
+   1441                    unsigned int BwW;
+   1442                    TLcdTrace::AddLine("Drive mounted");       
+   1443                    
+   1444                    TLcdTrace::AddLine("Creating File");
+   1445                    FIL CodedFile;
+   1446          //          f_rename( "KR01.RAW", "KR01.BAK" );
+   1447          
+   1448          //          static portTickType LastTick = xTaskGetTickCount();
+   1449          //          f_unlink( "KR01.RAW" );
+   1450                    f_open( &CodedFile, "KR01.RAW", FA_CREATE_ALWAYS | FA_WRITE );
+   1451                    f_close( &CodedFile );
+   1452          //          uint32_t time = xTaskGetTickCount() - LastTick;
+   1453          //          float fadxc = (float)time / 1000.;
+   1454          //          char *ss = ftoa(fadxc,3);
+   1455          //          TFont::DrawText(12, 205-SysFont[0].biHeight/2, ss, 80, algLeft);  
+   1456          
+   1457                    
+   1458                    TLcdTrace::AddLine("Create Trv File");
+   1459                    f_open( &TrvFile, "KR01.TRE", FA_CREATE_ALWAYS | FA_WRITE );    /* Create file */           
+   1460                    memset( TSDProcessor::EcgBuffer_1, 0x00, 5 );
+   1461                    TSDProcessor::EcgBuffer_1[0] = 1;
+   1462                    f_write( &TrvFile, TSDProcessor::EcgBuffer_1, 5, &BwW );    /* Write 1 in first byte, mean ECG file was read */
+   1463                    TSDProcessor::TrMode = trverrGood;
+   1464                    TGuiObjects::ToolbarSet(TBFM_STORED,0);
+   1465                    f_close( &TrvFile );
+   1466                    
+   1467                    TLcdTrace::AddLine("PCard load.");
+   1468                    int i = 0;
+   1469                    for(i=0;i<1024;i++) karta[i]=0;
+   1470                    
+   1471                    for(i=0;i<16;i++)  karta[i] = inst1[i];
+   1472                    for(i=17;i<25;i++) karta[i] = inst2_3[i-17]; //3отв
+   1473                    for(i=32;i<55;i++) karta[i] = inst3_3[i-32]; //3отв
+   1474                    for(i=56;i<76;i++) karta[i] = PatientCard.Name[i-56];//Fio[i-56];
+   1475                    karta[116] = PatientCard.Sex;//'М';
+   1476                    for(i=117;i<127;i++) karta[i] = PatientCard.DateOfBirth[i-117];//Year[i-117];
+   1477                    for(i=136;i<140;i++) karta[i] = vozr[i-136];
+   1478                    for(i=140;i<150;i++) karta[i] = exDate[i-140];
+   1479                    for(i=150;i<158;i++) karta[i] = exTime[i-150];
+   1480                    for(i=166;i<171;i++) karta[i] = inst4[i-166]; 
+   1481                    for(i=174;i<182;i++) karta[i] = dlit_v[i-174];           
+   1482                    for(i=182;i<202;i++) karta[i] = inst5_3[i-182]; //3отв -8
+   1483                    karta[239]=0x17; karta[240] = 0;  //Время начала сна
+   1484                    karta[259]=0x7; karta[260] = 0;   //Время окончания сна
+   1485                    
+   1486                    PatientCard.DateTimeOfStart.Date = DeviceDateTime.Date;
+   1487                    PatientCard.DateTimeOfStart.Time = DeviceDateTime.Time;
+   1488          
+   1489                    switch(cable_state)
+   1490                    {
+   1491          #ifdef USE_ADS1292R
+   1492                      case ct5Leads:
+   1493                        ecg_format = 1;
+   1494                        break;
+   1495                      case ct7Leads:
+   1496                        ecg_format = 1;
+   1497                        break;
+   1498          #else //USE_ADS1292R
+   1499                      case ct5Leads:
+   1500                        ecg_format = 0;
+   1501                        break;
+   1502                      case ct7Leads:
+   1503                        ecg_format = 0;
+   1504                        break;
+   1505          #endif // USE_ADS1292R
+   1506                      case ct10Leads:
+   1507                        ecg_format = 2;
+   1508                        break;
+   1509                      default:
+   1510                        ecg_format = 7;
+   1511                        break;
+   1512                    }
+   1513                    PatientCard.ECGAdvancedOption = cable_state | (ecg_format << 3);
+   1514          
+   1515          
+   1516          //          if (cable_state == ct10Leads) PatientCard.ECGAdvancedOption |= 0x10;
+   1517          //          else PatientCard.ECGAdvancedOption |= 0x08;
+   1518          
+   1519                    TLcdTrace::AddLine("Save PCard to SD.");
+   1520                    f_open( &PatCardFile, "KR01.PAT", FA_CREATE_ALWAYS | FA_WRITE );    /* Create file */           
+   1521                    f_write( &PatCardFile, (BYTE*)&PatientCard, 245, &BwW );    /* Write 1 in first byte, mean ECG file was read */
+   1522                    f_close( &PatCardFile );
+   1523                  
+   1524                    TLcdTrace::AddLine("Write patient card.");
+   1525                    wfType pc_recType;
+   1526                    *((uint32_t *)&pc_recType) = 0;
+   1527                    pc_recType.IsDummy = 1;
+   1528                    pc_recType.Take = 0;
+   1529                    TPoolingNand::SetupPool(1,pc_recType);    
+   1530                    
+   1531                    for(int j = 0;j < 32;j++) //place racord
+   1532                    {  
+   1533                      TPoolingNand::AddDataToPool(1,(uint8_t*)&_ff_array[0],64,0);
+   1534                      vTaskDelay(5/portTICK_RATE_MS);
+   1535                    }
+   1536                    TPoolingNand::FinishPool(1);
+   1537          
+   1538                    vTaskDelay(200/portTICK_RATE_MS);
+   1539                    
+   1540                    *((uint32_t *)&pc_recType) = 0;
+   1541                    pc_recType.IsPatientCard = 1;
+   1542                    pc_recType.Take = 0;
+   1543                    TPoolingNand::SetupPool(1,pc_recType);    
+   1544          
+   1545                    TPoolingNand::AddDataToPool(1,(uint8_t*)&PatientCard,sizeof(stPatientCardV1),0);
+   1546                    TPoolingNand::AddDataToPool(1,(uint8_t*)&karta[0],1024,0);
+   1547                    TPoolingNand::FinishPool(1);
+   1548                    
+   1549                    vTaskDelay(200/portTICK_RATE_MS);
+   1550                              
+   1551                    wfType recTypeEcg;
+   1552                    *((uint32_t *)&recTypeEcg) = 0;
+   1553                    recTypeEcg.IsECG = 1;
+   1554                    recTypeEcg.Take = 0;
+   1555                    TPoolingNand::SetupPool(1,recTypeEcg);  
+   1556                    TLcdTrace::AddLine("EcgPool Setup.");
+   1557                    
+   1558                    TSDProcessor::SDStartWrPool = true;
+   1559                    
+   1560                    // Send "CMD_SET_LEDMODE", LedMode = 2 - HR Indication  
+   1561                    BYTE EnMode[1];
+   1562                    
+   1563                    EnMode[0] = 2;          
+   1564                    
+   1565                    TInterpreter::SendFrameToHost(CMD_SET_LEDMODE,1,EnMode);
+   1566                    vTaskDelay(1/portTICK_RATE_MS);
+   1567                    TInterpreter::SendFrameToHost(CMD_SET_LEDMODE,1,EnMode);
+   1568                    vTaskDelay(1/portTICK_RATE_MS);
+   1569                    TInterpreter::SendFrameToHost(CMD_SET_LEDMODE,1,EnMode);
+   1570                    
+   1571          //        if (TFrame::StartMonitioring /*|| TSDProcessor::SDStartWrPool*/ || TGuiObjects::EcgOnScreen) TInterpreter::SetStartUSARTMonitioring(true);
+   1572          //          else TInterpreter::SetStartUSARTMonitioring(false);
+   1573                    
+   1574                    TInterpreter::SetStartECGWrite(true);
+   1575                    vTaskDelay(1/portTICK_RATE_MS);
+   1576                    TInterpreter::SetStartECGWrite(true);
+   1577                    vTaskDelay(1/portTICK_RATE_MS);
+   1578                    TInterpreter::SetStartECGWrite(true);
+   1579                    
+   1580                    TPoolingNand::Pool1WRConfirm = false;
+   1581                    vTaskDelay(100/portTICK_RATE_MS);
+   1582                    int start_timer = 0;
+   1583                    while(!TPoolingNand::Pool1WRConfirm)
+   1584                    {
+   1585                      start_timer++;
+   1586                      if(start_timer == 200)
+   1587                      {
+   1588                        TSound::PlaySound(_modiStopMeasureError);
+   1589                        vTaskDelay(2000/portTICK_RATE_MS);
+   1590                        TDevice::SystemReset();
+   1591                      }
+   1592                      vTaskDelay(200/portTICK_RATE_MS);
+   1593                    }
+   1594          
+   1595                    TSound::PlaySound(_modiSetUp);
+   1596                    ECGRecordingStarted = true;
+   1597                   
+   1598                    if(TGuiObjects::ButtonModeStart) 
+   1599                      TLMX9838::TurnOffBluetooth();
+   1600                    TGuiObjects::ButtonModeStart = false;
+   1601          
+   1602          //        TAudio::AUDIO_PHYInit();
+   1603          //
+   1604                    TGuiObjects::StandbyLedEnable = false;
+   1605                    
+   1606                    RecordInProgress = true;
+   1607                    
+   1608                    RTC_WriteBackupRegister(RTC_BKP_DR3,0x5555);
+   1609                    
+   1610                    while(TSDProcessor::SDPresent)
+   1611                    {  
+   1612                      if(AudioRec)
+   1613                      {
+   1614                        TLcdTrace::AddLine("Au Rec Start.");
+   1615                        wfType recType;
+   1616                        *((uint32_t *)&recType) = 0;
+   1617                        recType.IsSND = 1;
+   1618                        recType.Take = sndTakeN++;
+   1619                        TPoolingNand::SetupPool(2,recType);    
+   1620                        
+   1621                        audio_rec_start = true;
+   1622          
+   1623                        while(AudioRec)
+   1624                        {
+   1625                          vTaskDelay(100/portTICK_RATE_MS);
+   1626                        }
+   1627                        TPoolingNand::FinishPool(2);  
+   1628                        TLcdTrace::AddLine("Rec Stop.");
+   1629          
+   1630                        audio_rec_start = false;
+   1631          
+   1632                      }
+   1633                      vTaskDelay(50/portTICK_RATE_MS);
+   1634                    }
+   1635                    TPoolingNand::FinishPool(1);  
+   1636                    TLMX9838::TurnOnBluetooth();
+   1637                  }
+   1638                }
+   1639                else
+   1640                {
+   1641          //#ifdef LCD_TRACE
+   1642          //        TLcdTrace::AddLine("CARD Not Present.");
+   1643          //#endif
+   1644                }
+   1645                
+   1646                cable_state = CableCheck();
+   1647                
+   1648                if(cable_state != prevCableCheck) 
+   1649                {
+   1650                  ChangeCableIcon(cable_state);
+   1651                  prevCableCheck = cable_state; 
+   1652                }
+   1653                    
+   1654                vTaskDelay(1000/portTICK_RATE_MS);
+   1655              }    
+   1656              
+   1657          //    vTaskDelete( NULL );
+   1658            }
+   1659          }
+   1660          
+   1661          
+   1662          
+   1663          
+   1664          /*----------------------------------------------------------------------------------*/
+   1665          /* @brief  Задача мигания светодиодом                      */
+   1666          /* @param  None                                  */
+   1667          /* @return  None                                  */
+   1668          /*----------------------------------------------------------------------------------*/
+   1669          void TAppProcessor::TASK_LEDblink( void *pvParameters )
+   1670          {
+   1671            static uint8_t blink_cnt = 2;
+   1672            
+   1673            while( 1 )
+   1674            {
+   1675              if(TEcgProcessor::HR_Led_Enable) vTaskSuspend( NULL );
+   1676              vTaskDelay( 3000 / portTICK_RATE_MS );
+   1677              if(TSDProcessor::SDPresent) blink_cnt = 4;
+   1678              else blink_cnt = 2;
+   1679              for(int i = 0; i < blink_cnt; i++)
+   1680              {  
+   1681                if(!TEcgProcessor::HR_Led_Enable) TDevice::LedOn();
+   1682                vTaskDelay( 20 / portTICK_RATE_MS );
+   1683                TDevice::LedOff();
+   1684                vTaskDelay( 230 / portTICK_RATE_MS );
+   1685              }
+   1686            }
+   1687          }
+   1688          
+   1689          
+   1690          
+   1691          /*----------------------------------------------------------------------------------*/
+   1692          
+   1693          int TAppProcessor::CableCheck()
+   1694          {
+   1695            if (!TInterpreter::StartUSARTMonitioring)
+   1696            {
+   1697              TInterpreter::SetStartUSARTMonitioring(true);
+   1698              vTaskDelay( 100 / portTICK_RATE_MS );
+   1699              if (TFrame::StartMonitioring /*|| TSDProcessor::SDStartWrPool*/ || TGuiObjects::EcgOnScreen) TInterpreter::SetStartUSARTMonitioring(true);
+   1700              else TInterpreter::SetStartUSARTMonitioring(false);
+   1701            }
+   1702            switch(TEcgProcessor::EcgData.Status.ChannelBytes[0] & 0x03)
+   1703            {
+   1704              case 0:
+   1705                return ct10Leads;
+   1706              case 1:
+   1707                return ct7Leads;
+   1708              case 2:
+   1709                return ct5Leads;
+   1710              default:
+   1711              case 3:
+   1712                return ctNoCable;
+   1713            }
+   1714          }
+   1715          /*----------------------------------------------------------------------------------*/
+   1716          
+   1717          void TAppProcessor::ChangeCableIcon(int NewState)
+   1718          {
+   1719          
+   1720            TGuiObjects::ToolbarSet(TBFM_NOLEAD,0);
+   1721            TGuiObjects::ToolbarSet(TBFM_LEAD5,0);
+   1722            TGuiObjects::ToolbarSet(TBFM_LEAD7,0);
+   1723            TGuiObjects::ToolbarSet(TBFM_LEAD10,0);
+   1724            switch(NewState)
+   1725            {
+   1726              case ct5Leads:
+   1727                TGuiObjects::ToolbarSet(TBFM_LEAD5,1);
+   1728                break;
+   1729              case ct7Leads:
+   1730                TGuiObjects::ToolbarSet(TBFM_LEAD7,1);
+   1731                break;
+   1732              case ct10Leads:
+   1733                TGuiObjects::ToolbarSet(TBFM_LEAD10,1);
+   1734                break;
+   1735              default:
+   1736                TGuiObjects::ToolbarSet(TBFM_NOLEAD,1);
+   1737                break;
+   1738            }
+   1739            TGuiObjects::ShowToolbar();
+   1740          }
+
+Errors: 1
+Warnings: none

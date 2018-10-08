@@ -1,0 +1,1108 @@
+###############################################################################
+#
+# IAR ANSI C/C++ Compiler V7.40.2.8542/W32 for ARM        08/Oct/2018  09:57:56
+# Copyright 1999-2015 IAR Systems AB.
+#
+#    Cpu mode     =  thumb
+#    Endian       =  little
+#    Source file  =  D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\stm32_it.c
+#    Command line =  
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\stm32_it.c -D IAR_ARM_CM4
+#        -D USE_STDPERIPH_DRIVER -D STM32F40_41xxx -D HAVE_CONFIG_H -D
+#        SD_SPI_MODE -D USE_FULL_ASSERT -D DEVICE_2 -D TFT -D STENDBUY_NOT_USE
+#        -D SCREEN_NOT_ROTATE -D USE_ADS1292R -D DISPLAY_GPIO -D
+#        BUFFERED_TRANSFER -D LCD_TRACE -lCN
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\KP02_DEVICE_2\List\ -o
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\KP02_DEVICE_2\Obj\
+#        --no_unroll --no_inline --no_tbaa --no_scheduling --debug
+#        --endian=little --cpu=Cortex-M4F -e --fpu=VFPv4_sp --dlib_config
+#        "D:\Program Files (x86)\IAR Systems\Embedded Workbench
+#        7.2\arm\INC\c\DLib_Config_Normal.h" -I
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\ -I
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\FatFs\ -I
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\FreeRTOS\Source\include\
+#        -I
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\FreeRTOS\Source\portable\IAR\ARM_CM3\
+#        -I
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\Libraries\CMSIS\CM4\CoreSupport\
+#        -I
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\Libraries\CMSIS\CM4\DeviceSupport\STM32F4xx\
+#        -I
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\Libraries\STM32F4xx_StdPeriph_Driver\inc\
+#        -I
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\Libraries\STM32F10x_Speex_Lib\include\speex\
+#        -I
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\Libraries\STM32F10x_Speex_Lib\include\
+#        -I
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\Libraries\STM32F10x_Speex_Lib\libspeex\
+#        -I
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\Libraries\STM32F10x_Speex_Lib\STM32\include\speex\
+#        -I
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\Libraries\STM32F10x_Speex_Lib\STM32\include\
+#        -I
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\Libraries\STM32F10x_Speex_Lib\STM32\
+#        -I
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\Libraries\STM32F10x_Speex_Lib\STM32\libspeex\
+#        -I
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\Libraries\STM32F10x_Speex_Lib\STM32\libspeex\iar\
+#        -I D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\Fonts\ -Om --ec++
+#    List file    =  
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\KP02_DEVICE_2\List\stm32_it.lst
+#    Object file  =  
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\KP02_DEVICE_2\Obj\stm32_it.o
+#
+###############################################################################
+
+D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\stm32_it.c
+      1          /************************************************************************************/
+      2          /* @title		Interrupt functions													*/
+      3          /* @author		Cyber Genius														*/
+      4          /* @version		0.1																	*/
+      5          /* @date		13.07.2012															*/
+      6          /************************************************************************************/
+      7          /* @brief																			*/
+      8          /************************************************************************************/
+      9          #include "main.h"
+
+   \                                 In section .text, align 2, keep-with-next
+   \   static __interwork __softfp void NVIC_SystemReset()
+   \                     _Z16NVIC_SystemResetv: (+1)
+   \   00000000   0xF3BF 0x8F4F      DSB      
+   \   00000004   0x....             LDR.N    R0,??DataTable10  ;; 0xe000ed0c
+   \   00000006   0x6801             LDR      R1,[R0, #+0]
+   \   00000008   0xF401 0x61E0      AND      R1,R1,#0x700
+   \   0000000C   0x....             LDR.N    R2,??DataTable10_1  ;; 0x5fa0004
+   \   0000000E   0x4311             ORRS     R1,R2,R1
+   \   00000010   0x6001             STR      R1,[R0, #+0]
+   \   00000012   0xF3BF 0x8F4F      DSB      
+   \                     ??NVIC_SystemReset_0: (+1)
+   \   00000016   0xE7FE             B.N      ??NVIC_SystemReset_0
+
+   \                                 In section .text, align 2
+   \   __interwork __softfp void __delay_cycles(int)
+   \                     _Z14__delay_cyclesi: (+1)
+   \   00000000   0xB401             PUSH     {R0}
+   \   00000002   0x2000             MOVS     R0,#+0
+   \   00000004   0xE001             B.N      ??__delay_cycles_0
+   \                     ??__delay_cycles_1: (+1)
+   \   00000006   0xBF00             Nop      
+   \   00000008   0x1C40             ADDS     R0,R0,#+1
+   \                     ??__delay_cycles_0: (+1)
+   \   0000000A   0x9900             LDR      R1,[SP, #+0]
+   \   0000000C   0x4288             CMP      R0,R1
+   \   0000000E   0xDBFA             BLT.N    ??__delay_cycles_1
+   \   00000010   0xB001             ADD      SP,SP,#+4
+   \   00000012   0x4770             BX       LR               ;; return
+     10          //#include "clocks.h"
+     11          
+     12          #include "stm32_it.h"
+     13          
+     14          #include "FreeRTOS.h"
+     15          #include "task.h"
+     16          #include "queue.h"
+     17          
+     18          #include "THardware.h"
+     19          #include "TADS1298.h"
+     20          #include "TADS1292.h"
+     21          #include "TFrame.h"
+     22          #include "TSDProcessor.h"
+     23          #include "TAudio.h"
+     24          #include "IAP.h"
+     25          #include "TAppProcessor.h"
+     26          #include "TRespProcessor.h"
+     27          #include "TDevice.h"
+     28          #include "TPoolingNand.h"
+     29          #include "TGuiObjectsV2.h"
+     30          #include "TInterpreter.h"
+     31          
+     32          extern volatile WORD Timer;
+     33          
+
+   \                                 In section .data, align 2
+     34          uint16_t TIM4_AutoreloadVal = 2999;
+   \                     TIM4_AutoreloadVal:
+   \   00000000   0x0BB7             DC16 2999
+     35          
+     36          extern bool StopMode;
+     37          extern bool EnterStopMode;
+     38          extern bool StopModePeriod;
+     39          
+     40          
+     41          //#define LED_IN_IRQ
+     42          //#define LED_PACE
+     43          
+     44          
+     45          /*----------------------------------------------------------------------------------*/
+
+   \                                 In section .text, align 2, keep-with-next
+     46          void SetClockTo40MHz(void)
+     47          {
+   \                     _Z15SetClockTo40MHzv: (+1)
+   \   00000000   0xB081             SUB      SP,SP,#+4
+     48          //******************************************************************************
+     49          //            PLL (clocked by HSE) used as System clock source                **
+     50          //******************************************************************************
+     51            __IO uint32_t StartUpCounter = 0, HSEStatus = 0;
+   \   00000002   0x2000             MOVS     R0,#+0
+   \   00000004   0x9000             STR      R0,[SP, #+0]
+   \   00000006   0x9000             STR      R0,[SP, #+0]
+     52            
+     53            {
+     54              // Select regulator voltage output Scale 1 mode 
+     55              RCC->APB1ENR |= RCC_APB1ENR_PWREN;
+   \   00000008   0x....             LDR.N    R0,??DataTable10_2  ;; 0x40023800
+   \   0000000A   0x6C01             LDR      R1,[R0, #+64]
+   \   0000000C   0xF041 0x5180      ORR      R1,R1,#0x10000000
+   \   00000010   0x6401             STR      R1,[R0, #+64]
+     56              __DSB();
+   \   00000012   0xF3BF 0x8F4F      DSB      
+     57          //    PWR->CR |= PWR_CR_VOS;
+     58              PWR->CR &= ~PWR_CR_VOS;
+   \   00000016   0x....             LDR.N    R1,??DataTable10_3  ;; 0x40007000
+   \   00000018   0x680A             LDR      R2,[R1, #+0]
+   \   0000001A   0xF422 0x4240      BIC      R2,R2,#0xC000
+   \   0000001E   0x600A             STR      R2,[R1, #+0]
+     59          
+     60              // HCLK = SYSCLK / 1
+     61              RCC->CFGR |= RCC_CFGR_HPRE_DIV1;
+   \   00000020   0x6881             LDR      R1,[R0, #+8]
+   \   00000022   0x6081             STR      R1,[R0, #+8]
+     62          
+     63              // PCLK2 = HCLK / 1
+     64              RCC->CFGR |= RCC_CFGR_PPRE2_DIV1;
+   \   00000024   0x6881             LDR      R1,[R0, #+8]
+   \   00000026   0x6081             STR      R1,[R0, #+8]
+     65              
+     66              // PCLK1 = HCLK / 1
+     67              RCC->CFGR |= RCC_CFGR_PPRE1_DIV1;
+   \   00000028   0x6881             LDR      R1,[R0, #+8]
+   \   0000002A   0x6081             STR      R1,[R0, #+8]
+     68          
+     69             
+     70              // Configure the main PLL 
+     71              RCC->PLLCFGR = 16 | (154 << 6) | (((4 >> 1) -1) << 16) |
+     72                             (RCC_PLLCFGR_PLLSRC_HSI) | (4 << 24);
+   \   0000002C   0x....             LDR.N    R1,??DataTable10_4  ;; 0x4012690
+   \   0000002E   0x6041             STR      R1,[R0, #+4]
+     73          
+     74              // Enable the main PLL 
+     75              RCC->CR |= RCC_CR_PLLON;
+   \   00000030   0x6801             LDR      R1,[R0, #+0]
+   \   00000032   0xF041 0x7180      ORR      R1,R1,#0x1000000
+   \   00000036   0x6001             STR      R1,[R0, #+0]
+     76          
+     77              // Wait till the main PLL is ready 
+     78              while((RCC->CR & RCC_CR_PLLRDY) == 0)
+   \                     ??SetClockTo40MHz_0: (+1)
+   \   00000038   0x6801             LDR      R1,[R0, #+0]
+   \   0000003A   0x0189             LSLS     R1,R1,#+6
+   \   0000003C   0xD5FC             BPL.N    ??SetClockTo40MHz_0
+     79              {
+     80              }
+     81             
+     82          
+     83              // Configure Flash prefetch, Instruction cache, Data cache and wait state 
+     84          //    FLASH->ACR = FLASH_ACR_PRFTEN | FLASH_ACR_ICEN |FLASH_ACR_DCEN |FLASH_ACR_LATENCY_0WS;
+     85              FLASH->ACR = FLASH_ACR_PRFTEN | FLASH_ACR_ICEN |FLASH_ACR_DCEN |FLASH_ACR_LATENCY_1WS;
+   \   0000003E   0xF240 0x7101      MOVW     R1,#+1793
+   \   00000042   0x....             LDR.N    R2,??DataTable10_5  ;; 0x40023c00
+   \   00000044   0x6011             STR      R1,[R2, #+0]
+     86          
+     87          
+     88              // Select the main PLL as system clock source 
+     89              RCC->CFGR &= (uint32_t)((uint32_t)~(RCC_CFGR_SW));
+   \   00000046   0x6881             LDR      R1,[R0, #+8]
+   \   00000048   0x0889             LSRS     R1,R1,#+2
+   \   0000004A   0x0089             LSLS     R1,R1,#+2
+   \   0000004C   0x6081             STR      R1,[R0, #+8]
+     90              RCC->CFGR |= RCC_CFGR_SW_PLL;
+   \   0000004E   0x6881             LDR      R1,[R0, #+8]
+   \   00000050   0xF041 0x0102      ORR      R1,R1,#0x2
+   \   00000054   0x6081             STR      R1,[R0, #+8]
+     91          
+     92              // Wait till the main PLL is used as system clock source 
+     93              while ((RCC->CFGR & (uint32_t)RCC_CFGR_SWS ) != RCC_CFGR_SWS_PLL);
+   \                     ??SetClockTo40MHz_1: (+1)
+   \   00000056   0x6881             LDR      R1,[R0, #+8]
+   \   00000058   0xF001 0x010C      AND      R1,R1,#0xC
+   \   0000005C   0x2908             CMP      R1,#+8
+   \   0000005E   0xD1FA             BNE.N    ??SetClockTo40MHz_1
+     94              {
+     95              }
+     96            }
+     97          
+     98          }
+   \   00000060   0xB001             ADD      SP,SP,#+4
+   \   00000062   0x4770             BX       LR               ;; return
+     99          
+    100          /*----------------------------------------------------------------------------------*/
+
+   \                                 In section .text, align 2, keep-with-next
+    101          void SysReset()
+    102          {
+   \                     _Z8SysResetv: (+1)
+   \   00000000   0xB510             PUSH     {R4,LR}
+    103          
+    104            __delay_cycles(600000);
+   \   00000002   0x....             LDR.N    R4,??DataTable10_6  ;; 0x927c0
+   \   00000004   0x4620             MOV      R0,R4
+   \   00000006   0x.... 0x....      BL       _Z14__delay_cyclesi
+    105          #ifndef BOOTLOADER
+    106            TInterpreter::SendFrameToHost(CMD_RST);
+   \   0000000A   0x200D             MOVS     R0,#+13
+   \   0000000C   0x.... 0x....      BL       _ZN12TInterpreter15SendFrameToHostEh
+    107            __delay_cycles(600000);
+   \   00000010   0x4620             MOV      R0,R4
+   \   00000012   0x.... 0x....      BL       _Z14__delay_cyclesi
+    108          #endif
+    109            NVIC_SystemReset();
+   \   00000016   0x.... 0x....      BL       _Z16NVIC_SystemResetv
+    110          
+    111          	while(1) 
+   \                     ??SysReset_0: (+1)
+   \   0000001A   0xE7FE             B.N      ??SysReset_0
+    112          	{}	
+    113          }
+    114          /*----------------------------------------------------------------------------------*/
+    115          
+    116          
+    117          
+    118          /*----------------------------------------------------------------------------------*/
+    119          /* @brief  This function handles NMI exception.										*/
+    120          /* @param  None																		*/
+    121          /* @retval None																		*/
+    122          /*----------------------------------------------------------------------------------*/
+
+   \                                 In section .text, align 2, keep-with-next
+    123          void NMI_Handler(void)
+    124          {
+    125          //  GPIO_ResetBits( GPIOA, GPIO_Pin_8 );
+    126            SysReset();
+   \                     NMI_Handler: (+1)
+   \   00000000   0x....             B.N      _Z8SysResetv
+    127          }
+    128          
+    129          
+    130          
+    131          /*----------------------------------------------------------------------------------*/
+    132          /* @brief  This function handles Hard Fault exception								*/
+    133          /* @param  None																		*/
+    134          /* @retval None																		*/
+    135          /*----------------------------------------------------------------------------------*/
+
+   \                                 In section .text, align 2, keep-with-next
+    136          void HardFault_Handler(void)
+    137          {
+   \                     HardFault_Handler: (+1)
+   \   00000000   0xB580             PUSH     {R7,LR}
+    138          //	uint32_t link = __get_LR();
+    139          //	uint32_t sp   = __get_SP();
+    140          //
+    141          // 	SCB_Type scb;
+    142          //	uint32_t nv = scb.BFAR;
+    143          //
+    144          //	BKP_WriteBackupRegister(BKP_DR15,(uint16_t)(link & 0x0000FFFF));
+    145          //	BKP_WriteBackupRegister(BKP_DR16,(uint16_t)((link & 0xFFFF0000)>>16));
+    146          //
+    147          //	BKP_WriteBackupRegister(BKP_DR17,(uint16_t)(sp & 0x0000FFFF));
+    148          //	BKP_WriteBackupRegister(BKP_DR18,(uint16_t)((sp & 0xFFFF0000)>>16));
+    149          //
+    150          //	BKP_WriteBackupRegister(BKP_DR19,(uint16_t)(nv & 0x0000FFFF));
+    151          //	BKP_WriteBackupRegister(BKP_DR20,(uint16_t)((nv & 0xFFFF0000)>>16));
+    152          //
+    153          //	BKP_WriteBackupRegister(BKP_DR21,0x0004);
+    154          
+    155          	/* Go to infinite loop when Hard Fault exception occurs */
+    156          
+    157          //  GPIO_ResetBits( GPIOA, GPIO_Pin_8 );
+    158            SysReset();
+   \   00000002   0x.... 0x....      BL       _Z8SysResetv
+    159          //  NVIC_SystemReset();
+    160          
+    161          	while (1)
+    162          	{
+    163          		//TDevice::LedOn();
+    164              
+    165              __no_operation();		/* trollface =) */
+   \                     ??HardFault_Handler_0: (+1)
+   \   00000006   0xBF00             Nop      
+   \   00000008   0xE7FD             B.N      ??HardFault_Handler_0
+    166          	}
+    167          }
+    168          
+    169          
+    170          
+    171          /*----------------------------------------------------------------------------------*/
+    172          /* @brief  This function handles Memory Manage exception.							*/
+    173          /* @param  None																		*/
+    174          /* @retval None																		*/
+    175          /*----------------------------------------------------------------------------------*/
+
+   \                                 In section .text, align 2, keep-with-next
+    176          void MemManage_Handler(void)
+    177          {
+   \                     MemManage_Handler: (+1)
+   \   00000000   0xB580             PUSH     {R7,LR}
+    178          //  GPIO_ResetBits( GPIOA, GPIO_Pin_8 );
+    179            SysReset();
+   \   00000002   0x.... 0x....      BL       _Z8SysResetv
+    180          	/* Go to infinite loop when Memory Manage exception occurs */
+    181          	while (1)
+   \                     ??MemManage_Handler_0: (+1)
+   \   00000006   0xE7FE             B.N      ??MemManage_Handler_0
+    182          	{
+    183          	}
+    184          }
+    185          
+    186          
+    187          
+    188          /*----------------------------------------------------------------------------------*/
+    189          /* @brief  This function handles Bus Fault exception.								*/
+    190          /* @param  None																		*/
+    191          /* @retval None																		*/
+    192          /*----------------------------------------------------------------------------------*/
+
+   \                                 In section .text, align 2, keep-with-next
+    193          void BusFault_Handler(void)
+    194          {
+   \                     BusFault_Handler: (+1)
+   \   00000000   0xB580             PUSH     {R7,LR}
+    195          //  GPIO_ResetBits( GPIOA, GPIO_Pin_8 );
+    196            SysReset();
+   \   00000002   0x.... 0x....      BL       _Z8SysResetv
+    197          	/* Go to infinite loop when Bus Fault exception occurs */
+    198          	while (1)
+   \                     ??BusFault_Handler_0: (+1)
+   \   00000006   0xE7FE             B.N      ??BusFault_Handler_0
+    199          	{
+    200          	}
+    201          }
+    202          
+    203          
+    204          
+    205          /*----------------------------------------------------------------------------------*/
+    206          /* @brief  This function handles Usage Fault exception.								*/
+    207          /* @param  None																		*/
+    208          /* @retval None																		*/
+    209          /*----------------------------------------------------------------------------------*/
+
+   \                                 In section .text, align 2, keep-with-next
+    210          void UsageFault_Handler(void)
+    211          {
+   \                     UsageFault_Handler: (+1)
+   \   00000000   0xB580             PUSH     {R7,LR}
+    212          //  GPIO_ResetBits( GPIOA, GPIO_Pin_8 );
+    213            SysReset();
+   \   00000002   0x.... 0x....      BL       _Z8SysResetv
+    214          	/* Go to infinite loop when Usage Fault exception occurs */
+    215          	while (1)
+   \                     ??UsageFault_Handler_0: (+1)
+   \   00000006   0xE7FE             B.N      ??UsageFault_Handler_0
+    216          	{
+    217          	}
+    218          }
+    219          
+    220          
+    221          /*----------------------------------------------------------------------------------*/
+    222          /* @brief  This function handles SVCall exception.									*/
+    223          /* @param  None																		*/
+    224          /* @retval used in FreeRTOS!														*/
+    225          /*----------------------------------------------------------------------------------*/
+
+   \                                 In section .text, align 2, keep-with-next
+    226          void SVC_Handler(void)
+    227          {
+    228          #ifndef BOOTLOADER
+    229          //  GPIO_ResetBits( GPIOA, GPIO_Pin_8 );
+    230          	vPortSVCHandler();
+   \                     SVC_Handler: (+1)
+   \   00000000   0x.... 0x....      B.W      vPortSVCHandler
+    231          #endif // BOOTLOADER
+    232          }
+    233          
+    234          
+    235          /*----------------------------------------------------------------------------------*/
+    236          /* @brief  This function handles Debug Monitor exception.							*/
+    237          /* @param  None																		*/
+    238          /* @retval None																		*/
+    239          /*----------------------------------------------------------------------------------*/
+
+   \                                 In section .text, align 2, keep-with-next
+    240          void DebugMon_Handler(void)
+    241          {
+    242          //  GPIO_ResetBits( GPIOA, GPIO_Pin_8 );
+    243          }
+   \                     DebugMon_Handler: (+1)
+   \   00000000   0x4770             BX       LR               ;; return
+    244          
+    245          
+    246          
+    247          /*----------------------------------------------------------------------------------*/
+    248          /* @brief  This function handles PendSVC exception.									*/
+    249          /* @param  None																		*/
+    250          /* @retval used in FreeRTOS!														*/
+    251          /*----------------------------------------------------------------------------------*/
+
+   \                                 In section .text, align 2, keep-with-next
+    252          void PendSV_Handler(void)
+    253          {
+    254            #ifndef BOOTLOADER
+    255          //    GPIO_ResetBits( GPIOA, GPIO_Pin_8 );
+    256          	  xPortPendSVHandler();
+   \                     PendSV_Handler: (+1)
+   \   00000000   0x.... 0x....      B.W      xPortPendSVHandler
+    257            #endif // BOOTLOADER
+    258          }
+    259          
+    260          
+    261          
+    262          /*----------------------------------------------------------------------------------*/
+    263          /* @brief  This function handles SysTick Handler.									*/
+    264          /* @param  None																		*/
+    265          /* @retval used in FreeRTOS!														*/
+    266          /*----------------------------------------------------------------------------------*/
+
+   \                                 In section .text, align 2, keep-with-next
+    267          void SysTick_Handler(void)
+    268          {
+    269            #ifndef BOOTLOADER
+    270          //    GPIO_ResetBits( GPIOA, GPIO_Pin_8 );
+    271          	  xPortSysTickHandler();
+   \                     SysTick_Handler: (+1)
+   \   00000000   0x.... 0x....      B.W      xPortSysTickHandler
+    272            #endif // BOOTLOADER
+    273          }
+    274          
+    275          
+    276          
+    277          /*----------------------------------------------------------------------------------*/
+    278          /* @brief	Обработка внешнего прерывания по спаду импульса с DRDY					*/
+    279          /* @param	None																	*/
+    280          /* @return	None																	*/
+    281          /*----------------------------------------------------------------------------------*/
+    282          
+    283          
+    284          
+    285          /*----------------------------------------------------------------------------------*/
+    286          /* @brief	Bluetooth USART transmition												*/
+    287          /* @param	None																	*/
+    288          /* @return	None																	*/
+    289          /*----------------------------------------------------------------------------------*/
+
+   \                                 In section .text, align 2, keep-with-next
+    290          void USART1_IRQHandler( void )
+    291          {
+   \                     USART1_IRQHandler: (+1)
+   \   00000000   0xB580             PUSH     {R7,LR}
+    292          //  GPIO_ResetBits( GPIOA, GPIO_Pin_8 );
+    293            #ifndef BOOTLOADER
+    294          	  
+    295          //    if (USART_GetFlagStatus(LMX_USART, USART_FLAG_ORE) != RESET)               //USART_FLAG_ORE
+    296          //	  {	
+    297          //      //USART_ClearITPendingBit (LMX_USART, USART_IT_ORE_RX);                    //USART_IT_ORE = USART_IT_ORE_ER 
+    298          //      
+    299          //      //USART_ClearITPendingBit (LMX_USART, USART_IT_ORE_ER);
+    300          //      
+    301          //      USART_ClearFlag(LMX_USART, USART_FLAG_ORE);
+    302          //      
+    303          //      (void)USART_ReceiveData(LMX_USART);
+    304          //		  //TFrame::ISR_USART_Rcv();
+    305          //	  }
+    306                 
+    307          	  if( USART_GetITStatus( LMX_USART, USART_IT_RXNE) != RESET )
+   \   00000002   0xF240 0x5125      MOVW     R1,#+1317
+   \   00000006   0x....             LDR.N    R0,??DataTable10_7  ;; 0x40011000
+   \   00000008   0x.... 0x....      BL       USART_GetITStatus
+   \   0000000C   0x2800             CMP      R0,#+0
+   \   0000000E   0xD003             BEQ.N    ??USART1_IRQHandler_0
+    308          	  {
+    309          		  TFrame::ISR_USART_Rcv();
+   \   00000010   0xE8BD 0x4001      POP      {R0,LR}
+   \   00000014   0x.... 0x....      B.W      _ZN6TFrame13ISR_USART_RcvEv
+    310          	  }
+    311              
+    312            #else
+    313          	  
+    314              if(USART_GetITStatus( LMX_USART, USART_IT_RXNE ) != RESET)
+    315          	  {
+    316          		  UsartRcv = (int)( (BYTE)USART_ReceiveData(LMX_USART) );
+    317          		  UsartRcv |= 0xFF00;
+    318          	  }
+    319              
+    320            #endif // BOOTLOADER
+    321          }
+   \                     ??USART1_IRQHandler_0: (+1)
+   \   00000018   0xBD01             POP      {R0,PC}          ;; return
+    322          
+    323          
+    324          
+    325          /*----------------------------------------------------------------------------------*/
+    326          /* @brief	Обработка внешнего прерывания по линии LSTAT							*/
+    327          /* @param	None																	*/
+    328          /* @return	None																	*/
+    329          /*----------------------------------------------------------------------------------*/
+
+   \                                 In section .text, align 2, keep-with-next
+    330          void EXTI9_5_IRQHandler( void )
+    331          {
+   \                     EXTI9_5_IRQHandler: (+1)
+   \   00000000   0xB580             PUSH     {R7,LR}
+    332          //  GPIO_ResetBits( GPIOA, GPIO_Pin_8 );
+    333            #ifndef BOOTLOADER
+    334          	  if( EXTI_GetITStatus( EXTI_Line9 ) != RESET ){
+   \   00000002   0xF44F 0x7000      MOV      R0,#+512
+   \   00000006   0x.... 0x....      BL       EXTI_GetITStatus
+   \   0000000A   0x2800             CMP      R0,#+0
+   \   0000000C   0xD006             BEQ.N    ??EXTI9_5_IRQHandler_0
+    335          		  EXTI_ClearITPendingBit( EXTI_Line9 ); 			/* Clear the Key Button EXTI line pending bit */
+   \   0000000E   0xF44F 0x7000      MOV      R0,#+512
+   \   00000012   0x.... 0x....      BL       EXTI_ClearITPendingBit
+    336          		  //xTaskResumeFromISR( TFrame::xhCmdProcessor );
+    337                TFrame::ResumeFromISR = true;
+   \   00000016   0x2001             MOVS     R0,#+1
+   \   00000018   0x....             LDR.N    R1,??DataTable10_8
+   \   0000001A   0x7008             STRB     R0,[R1, #+0]
+    338              }
+    339            #endif // BOOTLOADER
+    340          }
+   \                     ??EXTI9_5_IRQHandler_0: (+1)
+   \   0000001C   0xBD01             POP      {R0,PC}          ;; return
+    341          
+    342          
+    343          /*----------------------------------------------------------------------------------*/
+    344          /* @brief	Обработка ICI_IRQ					*/
+    345          /* @param	None								*/
+    346          /* @return	None								*/
+    347          /*----------------------------------------------------------------------------------*/
+
+   \                                 In section .text, align 2, keep-with-next
+    348          void EXTI2_IRQHandler( void )
+    349          {
+   \                     EXTI2_IRQHandler: (+1)
+   \   00000000   0xB580             PUSH     {R7,LR}
+    350          #ifndef BOOTLOADER
+    351          //  GPIO_ResetBits( GPIOA, GPIO_Pin_8 );
+    352          
+    353          	if( EXTI_GetITStatus( EXTI_Line2 ) != RESET )								/* DRDY line trigger */
+   \   00000002   0x2004             MOVS     R0,#+4
+   \   00000004   0x.... 0x....      BL       EXTI_GetITStatus
+   \   00000008   0x2800             CMP      R0,#+0
+   \   0000000A   0xD018             BEQ.N    ??EXTI2_IRQHandler_0
+    354          	{	
+    355          //    GPIO_SetBits( GPIOA, GPIO_Pin_8 );
+    356              StopModePeriod = true;
+   \   0000000C   0x2001             MOVS     R0,#+1
+   \   0000000E   0x....             LDR.N    R1,??DataTable10_9
+   \   00000010   0x7008             STRB     R0,[R1, #+0]
+    357              if (StopMode) SetClockTo40MHz();
+   \   00000012   0x....             LDR.N    R0,??DataTable10_10
+   \   00000014   0x7800             LDRB     R0,[R0, #+0]
+   \   00000016   0x2800             CMP      R0,#+0
+   \   00000018   0xD001             BEQ.N    ??EXTI2_IRQHandler_1
+   \   0000001A   0x.... 0x....      BL       _Z15SetClockTo40MHzv
+    358              
+    359          		xTaskResumeFromISR( TEcgProcessor::xhECGWrProcessing );
+   \                     ??EXTI2_IRQHandler_1: (+1)
+   \   0000001E   0x....             LDR.N    R0,??DataTable10_11
+   \   00000020   0x6800             LDR      R0,[R0, #+0]
+   \   00000022   0x.... 0x....      BL       xTaskResumeFromISR
+    360          
+    361          		EXTI_ClearITPendingBit( EXTI_Line2 );
+   \   00000026   0x2004             MOVS     R0,#+4
+   \   00000028   0x.... 0x....      BL       EXTI_ClearITPendingBit
+    362              
+    363              //увелич. счетчик ICI_IRQ_Cnt
+    364              TNandWrite::ICI_IRQ_Cnt ++;
+   \   0000002C   0x....             LDR.N    R0,??DataTable10_12
+   \   0000002E   0x6801             LDR      R1,[R0, #+0]
+   \   00000030   0x1C49             ADDS     R1,R1,#+1
+   \   00000032   0x6001             STR      R1,[R0, #+0]
+    365              
+    366              //проверка счетчика ICI_IRQ_Cnt
+    367              if (TNandWrite::ICI_IRQ_Cnt > 50)
+   \   00000034   0x2933             CMP      R1,#+51
+   \   00000036   0xDB02             BLT.N    ??EXTI2_IRQHandler_0
+    368                SysReset();
+   \   00000038   0xE8BD 0x4001      POP      {R0,LR}
+   \   0000003C   0x....             B.N      _Z8SysResetv
+    369              
+    370          	}
+    371          #endif /* BOOTLOADER */
+    372          }
+   \                     ??EXTI2_IRQHandler_0: (+1)
+   \   0000003E   0xBD01             POP      {R0,PC}          ;; return
+    373          
+    374          #ifndef BOOTLOADER
+    375          /*----------------------------------------------------------------------------------*/
+    376          /* @brief	SDIO interrupt															*/
+    377          /* @param	None																	*/
+    378          /* @return	None																	*/
+    379          /*----------------------------------------------------------------------------------*/
+    380          #ifdef SD_SDIO_MODE
+    381          //  GPIO_ResetBits( GPIOA, GPIO_Pin_8 );
+    382          void SDIO_IRQHandler( void )
+    383          {
+    384          	SD_ProcessIRQSrc();	  /* Process All SDIO Interrupt Sources */
+    385          }
+    386          #endif /* SD_SDIO_MODE */
+    387          
+    388          
+    389          /*----------------------------------------------------------------------------------*/
+    390          /* @brief	DMA1 Channel1 Interrupt	Handler	func										*/
+    391          /* @param	None																	*/
+    392          /* @return	None																	*/
+    393          /*----------------------------------------------------------------------------------*/
+
+   \                                 In section .text, align 2, keep-with-next
+    394          void AU_PMD_IRQHandler( int strtIndx )
+    395          {
+    396            int j = strtIndx;
+    397            for(int i = 0;i < 512;i++)
+   \                     _Z17AU_PMD_IRQHandleri: (+1)
+   \   00000000   0x2100             MOVS     R1,#+0
+   \   00000002   0x....             LDR.N    R3,??DataTable10_13
+   \   00000004   0xE006             B.N      ??AU_PMD_IRQHandler_0
+    398            {
+    399               TAudio::Audio_raw_data[i] = TAudio::ADC1_raw_data[j++];
+   \                     ??AU_PMD_IRQHandler_1: (+1)
+   \   00000006   0x....             LDR.N    R2,??DataTable10_14
+   \   00000008   0xF832 0x2010      LDRH     R2,[R2, R0, LSL #+1]
+   \   0000000C   0xF823 0x2011      STRH     R2,[R3, R1, LSL #+1]
+   \   00000010   0x1C40             ADDS     R0,R0,#+1
+    400            }
+   \   00000012   0x1C49             ADDS     R1,R1,#+1
+   \                     ??AU_PMD_IRQHandler_0: (+1)
+   \   00000014   0xF5B1 0x7F00      CMP      R1,#+512
+   \   00000018   0xDBF5             BLT.N    ??AU_PMD_IRQHandler_1
+    401            if(TAppProcessor::audio_rec_start) TPoolingNand::AddDataToPool(2,(uint8_t*)&TAudio::Audio_raw_data[0],1024,1);
+   \   0000001A   0x....             LDR.N    R0,??DataTable10_15
+   \   0000001C   0x7800             LDRB     R0,[R0, #+0]
+   \   0000001E   0x2800             CMP      R0,#+0
+   \   00000020   0xD006             BEQ.N    ??AU_PMD_IRQHandler_2
+   \   00000022   0x2301             MOVS     R3,#+1
+   \   00000024   0xF44F 0x6280      MOV      R2,#+1024
+   \   00000028   0x....             LDR.N    R1,??DataTable10_13
+   \   0000002A   0x2002             MOVS     R0,#+2
+   \   0000002C   0x.... 0x....      B.W      _ZN12TPoolingNand13AddDataToPoolEiPhib
+    402          }
+   \                     ??AU_PMD_IRQHandler_2: (+1)
+   \   00000030   0x4770             BX       LR               ;; return
+    403          
+    404          /*----------------------------------------------------------------------------------*/
+    405          /* @brief	DMA1 Channel1 Interrupt	Handler											*/
+    406          /* @param	None																	*/
+    407          /* @return	None																	*/
+    408          /*----------------------------------------------------------------------------------*/
+
+   \                                 In section .text, align 2, keep-with-next
+    409          void DMA2_Stream0_IRQHandler( void )
+    410          {
+   \                     DMA2_Stream0_IRQHandler: (+1)
+   \   00000000   0xB538             PUSH     {R3-R5,LR}
+    411          //  GPIO_ResetBits( GPIOA, GPIO_Pin_8 );
+    412          	if( DMA_GetITStatus( DMA2_Stream0, DMA_IT_HTIF0 ))
+   \   00000002   0x....             LDR.N    R4,??DataTable10_16  ;; 0x40026410
+   \   00000004   0x....             LDR.N    R5,??DataTable10_17  ;; 0x10004010
+   \   00000006   0x4629             MOV      R1,R5
+   \   00000008   0x4620             MOV      R0,R4
+   \   0000000A   0x.... 0x....      BL       DMA_GetITStatus
+   \   0000000E   0x2800             CMP      R0,#+0
+   \   00000010   0xD006             BEQ.N    ??DMA2_Stream0_IRQHandler_0
+    413          	{
+    414          		AU_PMD_IRQHandler(0);
+   \   00000012   0x2000             MOVS     R0,#+0
+   \   00000014   0x.... 0x....      BL       _Z17AU_PMD_IRQHandleri
+    415          		DMA_ClearITPendingBit( DMA2_Stream0, DMA_IT_HTIF0 );
+   \   00000018   0x4629             MOV      R1,R5
+   \   0000001A   0x4620             MOV      R0,R4
+   \   0000001C   0x.... 0x....      BL       DMA_ClearITPendingBit
+    416          	}
+    417          	if( DMA_GetITStatus( DMA2_Stream0, DMA_IT_TCIF0 ))
+   \                     ??DMA2_Stream0_IRQHandler_0: (+1)
+   \   00000020   0x....             LDR.N    R5,??DataTable10_18  ;; 0x10008020
+   \   00000022   0x4629             MOV      R1,R5
+   \   00000024   0x4620             MOV      R0,R4
+   \   00000026   0x.... 0x....      BL       DMA_GetITStatus
+   \   0000002A   0x2800             CMP      R0,#+0
+   \   0000002C   0xD009             BEQ.N    ??DMA2_Stream0_IRQHandler_1
+    418          	{
+    419          		AU_PMD_IRQHandler(512);
+   \   0000002E   0xF44F 0x7000      MOV      R0,#+512
+   \   00000032   0x.... 0x....      BL       _Z17AU_PMD_IRQHandleri
+    420          		DMA_ClearITPendingBit( DMA2_Stream0, DMA_IT_TCIF0 );
+   \   00000036   0x4629             MOV      R1,R5
+   \   00000038   0x4620             MOV      R0,R4
+   \   0000003A   0xE8BD 0x4034      POP      {R2,R4,R5,LR}
+   \   0000003E   0x.... 0x....      B.W      DMA_ClearITPendingBit
+    421          	}
+    422          }
+   \                     ??DMA2_Stream0_IRQHandler_1: (+1)
+   \   00000042   0xBD31             POP      {R0,R4,R5,PC}    ;; return
+    423          
+    424          
+    425          
+    426          /*----------------------------------------------------------------------------------*/
+    427          /* @brief	ADC 1 & 2 Interrupt	Handler												*/
+    428          /* @param	None																	*/
+    429          /* @return	None																	*/
+    430          /*----------------------------------------------------------------------------------*/
+
+   \                                 In section .text, align 2, keep-with-next
+    431          void ADC1_2_IRQHandler( void )
+    432          {
+    433          //	if( ADC_GetITStatus( ADC1, DMA_IT_TCIF0 ))
+    434          //	{
+    435          ////    GPIO_ResetBits( GPIOA, GPIO_Pin_8 );
+    436          //  	ADC_ClearITPendingBit( ADC1, ADC_IT_EOC );
+    437          //  }
+    438          //	if( ADC_GetITStatus( ADC2, DMA_IT_TCIF0 ))
+    439          //	{
+    440          ////    GPIO_ResetBits( GPIOA, GPIO_Pin_8 );
+    441          //  	ADC_ClearITPendingBit( ADC2, ADC_IT_EOC );
+    442          //  }
+    443          }
+   \                     ADC1_2_IRQHandler: (+1)
+   \   00000000   0x4770             BX       LR               ;; return
+    444          
+    445          
+    446          
+    447          /*----------------------------------------------------------------------------------*/
+    448          /* @brief	ADC3 Interrupt Handler													*/
+    449          /* @param	None																	*/
+    450          /* @return	None																	*/
+    451          /*----------------------------------------------------------------------------------*/
+
+   \                                 In section .text, align 2, keep-with-next
+    452          void ADC3_IRQHandler( void )
+    453          {
+    454          //  GPIO_ResetBits( GPIOA, GPIO_Pin_8 );
+    455          	ADC_ClearITPendingBit( ADC3, ADC_IT_EOC );
+   \                     ADC3_IRQHandler: (+1)
+   \   00000000   0xF240 0x2105      MOVW     R1,#+517
+   \   00000004   0x....             LDR.N    R0,??DataTable10_19  ;; 0x40012200
+   \   00000006   0x.... 0x....      B.W      ADC_ClearITPendingBit
+    456          }
+    457          
+    458          /*----------------------------------------------------------------------------------*/
+    459          /* @brief	Прерывание для SD карты													*/
+    460          /* @param	None																	*/
+    461          /* @return	None																	*/
+    462          /*----------------------------------------------------------------------------------*/
+    463          #ifdef SD_SPI_MODE
+
+   \                                 In section .text, align 2, keep-with-next
+    464          void TIM3_IRQHandler( void )
+    465          {
+   \                     TIM3_IRQHandler: (+1)
+   \   00000000   0xB510             PUSH     {R4,LR}
+    466          //  GPIO_ResetBits( GPIOA, GPIO_Pin_8 );
+    467          //	static bool _So;
+    468          
+    469          	if( TIM_GetITStatus( TIM3, TIM_IT_Update ) != RESET )
+   \   00000002   0x....             LDR.N    R4,??DataTable10_20  ;; 0x40000400
+   \   00000004   0x2101             MOVS     R1,#+1
+   \   00000006   0x4620             MOV      R0,R4
+   \   00000008   0x.... 0x....      BL       TIM_GetITStatus
+   \   0000000C   0x2800             CMP      R0,#+0
+   \   0000000E   0xD00B             BEQ.N    ??TIM3_IRQHandler_0
+    470          	{
+    471          		TIM_ClearITPendingBit( TIM3, TIM_IT_Update );
+   \   00000010   0x2101             MOVS     R1,#+1
+   \   00000012   0x4620             MOV      R0,R4
+   \   00000014   0x.... 0x....      BL       TIM_ClearITPendingBit
+    472          				
+    473          		Timer++;			/* Performance counter for this module */
+   \   00000018   0x....             LDR.N    R0,??DataTable10_21
+   \   0000001A   0x8801             LDRH     R1,[R0, #+0]
+   \   0000001C   0x1C49             ADDS     R1,R1,#+1
+   \   0000001E   0x8001             STRH     R1,[R0, #+0]
+    474          		disk_timerproc();	/* Drive timer procedure of low level disk I/O module */
+   \   00000020   0xE8BD 0x4010      POP      {R4,LR}
+   \   00000024   0x.... 0x....      B.W      disk_timerproc
+    475          //    THardware::LedInvert();
+    476          	}
+    477          }
+   \                     ??TIM3_IRQHandler_0: (+1)
+   \   00000028   0xBD10             POP      {R4,PC}          ;; return
+    478          #endif /* SD_SPI_MODE */
+    479          
+    480          /*----------------------------------------------------------------------------------*/
+
+   \                                 In section .text, align 2, keep-with-next
+    481          void EXTI0_IRQHandler( void )
+    482          {
+   \                     EXTI0_IRQHandler: (+1)
+   \   00000000   0xB580             PUSH     {R7,LR}
+    483          //  GPIO_ResetBits( GPIOA, GPIO_Pin_8 );
+    484          	if( EXTI_GetITStatus( EXTI_Line0 ) != RESET ){
+   \   00000002   0x2001             MOVS     R0,#+1
+   \   00000004   0x.... 0x....      BL       EXTI_GetITStatus
+   \   00000008   0x2800             CMP      R0,#+0
+   \   0000000A   0xD004             BEQ.N    ??EXTI0_IRQHandler_0
+    485          		EXTI_ClearITPendingBit( EXTI_Line0 );
+   \   0000000C   0x2001             MOVS     R0,#+1
+   \   0000000E   0xE8BD 0x4002      POP      {R1,LR}
+   \   00000012   0x.... 0x....      B.W      EXTI_ClearITPendingBit
+    486          	}
+    487          }
+   \                     ??EXTI0_IRQHandler_0: (+1)
+   \   00000016   0xBD01             POP      {R0,PC}          ;; return
+    488          
+    489          /*----------------------------------------------------------------------------------*/
+
+   \                                 In section .text, align 2, keep-with-next
+    490          void EXTI1_IRQHandler( void )
+    491          {
+   \                     EXTI1_IRQHandler: (+1)
+   \   00000000   0xB580             PUSH     {R7,LR}
+    492          //  GPIO_ResetBits( GPIOA, GPIO_Pin_8 );
+    493          	if( EXTI_GetITStatus( EXTI_Line1 ) != RESET ){
+   \   00000002   0x2002             MOVS     R0,#+2
+   \   00000004   0x.... 0x....      BL       EXTI_GetITStatus
+   \   00000008   0x2800             CMP      R0,#+0
+   \   0000000A   0xD004             BEQ.N    ??EXTI1_IRQHandler_0
+    494          		EXTI_ClearITPendingBit( EXTI_Line1 );
+   \   0000000C   0x2002             MOVS     R0,#+2
+   \   0000000E   0xE8BD 0x4002      POP      {R1,LR}
+   \   00000012   0x.... 0x....      B.W      EXTI_ClearITPendingBit
+    495          	}
+    496          }
+   \                     ??EXTI1_IRQHandler_0: (+1)
+   \   00000016   0xBD01             POP      {R0,PC}          ;; return
+    497          
+    498          
+
+   \                                 In section .text, align 2, keep-with-next
+    499          void USART3_IRQHandler( void )
+    500          {
+    501            uint16_t status = INTER_PORT->SR;
+   \                     USART3_IRQHandler: (+1)
+   \   00000000   0x....             LDR.N    R0,??DataTable10_22  ;; 0x40004800
+   \   00000002   0x8801             LDRH     R1,[R0, #+0]
+    502            uint16_t data = INTER_PORT->DR;
+   \   00000004   0x8880             LDRH     R0,[R0, #+4]
+    503            if(status & USART_IT_RXNE)
+   \   00000006   0xF240 0x5225      MOVW     R2,#+1317
+   \   0000000A   0x4211             TST      R1,R2
+   \   0000000C   0xD001             BEQ.N    ??USART3_IRQHandler_0
+    504            {
+    505          //    USART_ClearITPendingBit(INTER_PORT, USART_IT_RXNE);
+    506              TInterpreter::ISR_USART_Rcv(data);
+   \   0000000E   0x.... 0x....      B.W      _ZN12TInterpreter13ISR_USART_RcvEt
+    507            }
+    508          }
+   \                     ??USART3_IRQHandler_0: (+1)
+   \   00000012   0x4770             BX       LR               ;; return
+
+   \                                 In section .text, align 4, keep-with-next
+   \                     ??DataTable10:
+   \   00000000   0xE000ED0C         DC32     0xe000ed0c
+
+   \                                 In section .text, align 4, keep-with-next
+   \                     ??DataTable10_1:
+   \   00000000   0x05FA0004         DC32     0x5fa0004
+
+   \                                 In section .text, align 4, keep-with-next
+   \                     ??DataTable10_2:
+   \   00000000   0x40023800         DC32     0x40023800
+
+   \                                 In section .text, align 4, keep-with-next
+   \                     ??DataTable10_3:
+   \   00000000   0x40007000         DC32     0x40007000
+
+   \                                 In section .text, align 4, keep-with-next
+   \                     ??DataTable10_4:
+   \   00000000   0x04012690         DC32     0x4012690
+
+   \                                 In section .text, align 4, keep-with-next
+   \                     ??DataTable10_5:
+   \   00000000   0x40023C00         DC32     0x40023c00
+
+   \                                 In section .text, align 4, keep-with-next
+   \                     ??DataTable10_6:
+   \   00000000   0x000927C0         DC32     0x927c0
+
+   \                                 In section .text, align 4, keep-with-next
+   \                     ??DataTable10_7:
+   \   00000000   0x40011000         DC32     0x40011000
+
+   \                                 In section .text, align 4, keep-with-next
+   \                     ??DataTable10_8:
+   \   00000000   0x........         DC32     _ZN6TFrame13ResumeFromISRE
+
+   \                                 In section .text, align 4, keep-with-next
+   \                     ??DataTable10_9:
+   \   00000000   0x........         DC32     StopModePeriod
+
+   \                                 In section .text, align 4, keep-with-next
+   \                     ??DataTable10_10:
+   \   00000000   0x........         DC32     StopMode
+
+   \                                 In section .text, align 4, keep-with-next
+   \                     ??DataTable10_11:
+   \   00000000   0x........         DC32     _ZN13TEcgProcessor17xhECGWrProcessingE
+
+   \                                 In section .text, align 4, keep-with-next
+   \                     ??DataTable10_12:
+   \   00000000   0x........         DC32     _ZN10TNandWrite11ICI_IRQ_CntE
+
+   \                                 In section .text, align 4, keep-with-next
+   \                     ??DataTable10_13:
+   \   00000000   0x........         DC32     _ZN6TAudio14Audio_raw_dataE
+
+   \                                 In section .text, align 4, keep-with-next
+   \                     ??DataTable10_14:
+   \   00000000   0x........         DC32     _ZN6TAudio13ADC1_raw_dataE
+
+   \                                 In section .text, align 4, keep-with-next
+   \                     ??DataTable10_15:
+   \   00000000   0x........         DC32     _ZN13TAppProcessor15audio_rec_startE
+
+   \                                 In section .text, align 4, keep-with-next
+   \                     ??DataTable10_16:
+   \   00000000   0x40026410         DC32     0x40026410
+
+   \                                 In section .text, align 4, keep-with-next
+   \                     ??DataTable10_17:
+   \   00000000   0x10004010         DC32     0x10004010
+
+   \                                 In section .text, align 4, keep-with-next
+   \                     ??DataTable10_18:
+   \   00000000   0x10008020         DC32     0x10008020
+
+   \                                 In section .text, align 4, keep-with-next
+   \                     ??DataTable10_19:
+   \   00000000   0x40012200         DC32     0x40012200
+
+   \                                 In section .text, align 4, keep-with-next
+   \                     ??DataTable10_20:
+   \   00000000   0x40000400         DC32     0x40000400
+
+   \                                 In section .text, align 4, keep-with-next
+   \                     ??DataTable10_21:
+   \   00000000   0x........         DC32     Timer
+
+   \                                 In section .text, align 4, keep-with-next
+   \                     ??DataTable10_22:
+   \   00000000   0x40004800         DC32     0x40004800
+    509          
+    510          #endif /* BOOTLOADER */
+
+   Maximum stack usage in bytes:
+
+   .cstack Function
+   ------- --------
+       0   ADC1_2_IRQHandler
+       0   ADC3_IRQHandler
+         0   -> ADC_ClearITPendingBit
+       0   AU_PMD_IRQHandler(int)
+       8   BusFault_Handler
+         8   -> SysReset()
+      16   DMA2_Stream0_IRQHandler
+        16   -> AU_PMD_IRQHandler(int)
+        16   -> DMA_ClearITPendingBit
+        16   -> DMA_GetITStatus
+       0   DebugMon_Handler
+       8   EXTI0_IRQHandler
+         8   -> EXTI_GetITStatus
+       8   EXTI1_IRQHandler
+         8   -> EXTI_GetITStatus
+       8   EXTI2_IRQHandler
+         8   -> EXTI_ClearITPendingBit
+         8   -> EXTI_GetITStatus
+         8   -> SetClockTo40MHz()
+         8   -> xTaskResumeFromISR
+       8   EXTI9_5_IRQHandler
+         8   -> EXTI_ClearITPendingBit
+         8   -> EXTI_GetITStatus
+       8   HardFault_Handler
+         8   -> SysReset()
+       8   MemManage_Handler
+         8   -> SysReset()
+       0   NMI_Handler
+         0   -> SysReset()
+       0   NVIC_SystemReset()
+       0   PendSV_Handler
+         0   -> xPortPendSVHandler
+       0   SVC_Handler
+         0   -> vPortSVCHandler
+       4   SetClockTo40MHz()
+       8   SysReset()
+         8   -> NVIC_SystemReset()
+         8   -> TInterpreter::SendFrameToHost(BYTE)
+         8   -> __delay_cycles(int)
+       0   SysTick_Handler
+         0   -> xPortSysTickHandler
+       8   TIM3_IRQHandler
+         8   -> TIM_ClearITPendingBit
+         8   -> TIM_GetITStatus
+       8   USART1_IRQHandler
+         8   -> USART_GetITStatus
+       0   USART3_IRQHandler
+       8   UsageFault_Handler
+         8   -> SysReset()
+       4   __delay_cycles(int)
+
+
+   Section sizes:
+
+   Bytes  Function/Label
+   -----  --------------
+       4  ??DataTable10
+       4  ??DataTable10_1
+       4  ??DataTable10_10
+       4  ??DataTable10_11
+       4  ??DataTable10_12
+       4  ??DataTable10_13
+       4  ??DataTable10_14
+       4  ??DataTable10_15
+       4  ??DataTable10_16
+       4  ??DataTable10_17
+       4  ??DataTable10_18
+       4  ??DataTable10_19
+       4  ??DataTable10_2
+       4  ??DataTable10_20
+       4  ??DataTable10_21
+       4  ??DataTable10_22
+       4  ??DataTable10_3
+       4  ??DataTable10_4
+       4  ??DataTable10_5
+       4  ??DataTable10_6
+       4  ??DataTable10_7
+       4  ??DataTable10_8
+       4  ??DataTable10_9
+       2  ADC1_2_IRQHandler
+      10  ADC3_IRQHandler
+      50  AU_PMD_IRQHandler(int)
+       8  BusFault_Handler
+      68  DMA2_Stream0_IRQHandler
+       2  DebugMon_Handler
+      24  EXTI0_IRQHandler
+      24  EXTI1_IRQHandler
+      64  EXTI2_IRQHandler
+      30  EXTI9_5_IRQHandler
+      10  HardFault_Handler
+       8  MemManage_Handler
+       2  NMI_Handler
+      24  NVIC_SystemReset()
+       4  PendSV_Handler
+       4  SVC_Handler
+     100  SetClockTo40MHz()
+      28  SysReset()
+       4  SysTick_Handler
+      42  TIM3_IRQHandler
+       2  TIM4_AutoreloadVal
+      26  USART1_IRQHandler
+      20  USART3_IRQHandler
+       8  UsageFault_Handler
+      20  __delay_cycles(int)
+
+ 
+   2 bytes in section .data
+ 674 bytes in section .text
+ 
+ 654 bytes of CODE memory (+ 20 bytes shared)
+   2 bytes of DATA memory
+
+Errors: none
+Warnings: none

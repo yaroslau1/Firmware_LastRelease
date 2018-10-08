@@ -1,0 +1,2155 @@
+###############################################################################
+#
+# IAR ANSI C/C++ Compiler V7.40.2.8542/W32 for ARM        08/Oct/2018  09:57:56
+# Copyright 1999-2015 IAR Systems AB.
+#
+#    Cpu mode     =  thumb
+#    Endian       =  little
+#    Source file  =  
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\FatFs\sd_spi.c
+#    Command line =  
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\FatFs\sd_spi.c -D
+#        IAR_ARM_CM4 -D USE_STDPERIPH_DRIVER -D STM32F40_41xxx -D HAVE_CONFIG_H
+#        -D SD_SPI_MODE -D USE_FULL_ASSERT -D DEVICE_2 -D TFT -D
+#        STENDBUY_NOT_USE -D SCREEN_NOT_ROTATE -D USE_ADS1292R -D DISPLAY_GPIO
+#        -D BUFFERED_TRANSFER -D LCD_TRACE -lCN
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\KP02_DEVICE_2\List\ -o
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\KP02_DEVICE_2\Obj\
+#        --no_unroll --no_inline --no_tbaa --no_scheduling --debug
+#        --endian=little --cpu=Cortex-M4F -e --fpu=VFPv4_sp --dlib_config
+#        "D:\Program Files (x86)\IAR Systems\Embedded Workbench
+#        7.2\arm\INC\c\DLib_Config_Normal.h" -I
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\ -I
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\FatFs\ -I
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\FreeRTOS\Source\include\
+#        -I
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\FreeRTOS\Source\portable\IAR\ARM_CM3\
+#        -I
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\Libraries\CMSIS\CM4\CoreSupport\
+#        -I
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\Libraries\CMSIS\CM4\DeviceSupport\STM32F4xx\
+#        -I
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\Libraries\STM32F4xx_StdPeriph_Driver\inc\
+#        -I
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\Libraries\STM32F10x_Speex_Lib\include\speex\
+#        -I
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\Libraries\STM32F10x_Speex_Lib\include\
+#        -I
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\Libraries\STM32F10x_Speex_Lib\libspeex\
+#        -I
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\Libraries\STM32F10x_Speex_Lib\STM32\include\speex\
+#        -I
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\Libraries\STM32F10x_Speex_Lib\STM32\include\
+#        -I
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\Libraries\STM32F10x_Speex_Lib\STM32\
+#        -I
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\Libraries\STM32F10x_Speex_Lib\STM32\libspeex\
+#        -I
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\Libraries\STM32F10x_Speex_Lib\STM32\libspeex\iar\
+#        -I D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\Fonts\ -Om --ec++
+#    List file    =  
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\KP02_DEVICE_2\List\sd_spi.lst
+#    Object file  =  
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\KP02_DEVICE_2\Obj\sd_spi.o
+#
+###############################################################################
+
+D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\FatFs\sd_spi.c
+      1          /*-----------------------------------------------------------------------*/
+      2          /* MMCv3/SDv1/SDv2 (in SPI mode) control module  (C)ChaN, 2010           */
+      3          /*-----------------------------------------------------------------------*/
+      4          /* Only rcvr_spi(), xmit_spi(), disk_timerproc() and some macros         */
+      5          /* are platform dependent.                                               */
+      6          /*-----------------------------------------------------------------------*/
+      7          #include "sd_spi.h"
+      8          #include "ff.h"
+      9          
+     10          #include "THardware.h"
+     11          #include "TLcdTrace.h"
+     12          
+     13          /*--------------------------------------------------------------------------
+     14          
+     15             Module Private Functions
+     16          
+     17          ---------------------------------------------------------------------------*/
+     18          #define SOCKWP		(false)
+     19          #define SOCKINS		(true)
+     20          
+     21          /* Definitions for MMC/SDC command */
+     22          #define CMD0	(0)			/* GO_IDLE_STATE */
+     23          #define CMD1	(1)			/* SEND_OP_COND (MMC) */
+     24          #define	ACMD41	(0x80+41)	/* SEND_OP_COND (SDC) */
+     25          #define CMD8	(8)			/* SEND_IF_COND */
+     26          #define CMD9	(9)			/* SEND_CSD */
+     27          #define CMD10	(10)		/* SEND_CID */
+     28          #define CMD12	(12)		/* STOP_TRANSMISSION */
+     29          #define ACMD13	(0x80+13)	/* SD_STATUS (SDC) */
+     30          #define CMD16	(16)		/* SET_BLOCKLEN */
+     31          #define CMD17	(17)		/* READ_SINGLE_BLOCK */
+     32          #define CMD18	(18)		/* READ_MULTIPLE_BLOCK */
+     33          #define CMD23	(23)		/* SET_BLOCK_COUNT (MMC) */
+     34          #define	ACMD23	(0x80+23)	/* SET_WR_BLK_ERASE_COUNT (SDC) */
+     35          #define CMD24	(24)		/* WRITE_BLOCK */
+     36          #define CMD25	(25)		/* WRITE_MULTIPLE_BLOCK */
+     37          #define CMD55	(55)		/* APP_CMD */
+     38          #define CMD58	(58)		/* READ_OCR */
+     39          
+     40          
+
+   \                                 In section .bss, align 2
+     41          volatile WORD Timer;
+   \                     Timer:
+   \   00000000                      DS8 2
+
+   \                                 In section .data, align 1
+     42          volatile DSTATUS Stat = STA_NOINIT;	/* Disk status */
+   \                     Stat:
+   \   00000000   0x01               DC8 1
+     43          volatile BYTE Timer1, Timer2;	/* 100Hz decrement timer */
+   \                     Timer1:
+   \   00000001   0x00               DC8 0
+   \                     Timer2:
+   \   00000002   0x00               DC8 0
+     44          BYTE CardType;			/* Card type flags */
+   \                     CardType:
+   \   00000003   0x00               DC8 0
+     45          
+     46          
+     47          /*----------------------------------------------------------------------------------*/
+     48          /* @brief	Инициализация SD карты													*/
+     49          /* @param	Номер диска																*/
+     50          /* @return	Статус																	*/
+     51          /*----------------------------------------------------------------------------------*/
+
+   \                                 In section .text, align 2, keep-with-next
+     52          DSTATUS SD_Init( BYTE drv )
+     53          {
+   \                     SD_Init: (+1)
+   \   00000000   0xE92D 0x41F0      PUSH     {R4-R8,LR}
+   \   00000004   0xB082             SUB      SP,SP,#+8
+     54          	BYTE n, cmd, ty, ocr[4];
+     55          
+     56          	if (drv) return STA_NOINIT;			/* Supports only single drive */
+   \   00000006   0x2800             CMP      R0,#+0
+   \   00000008   0xD001             BEQ.N    ??SD_Init_0
+   \   0000000A   0x2001             MOVS     R0,#+1
+   \   0000000C   0xE089             B.N      ??SD_Init_1
+     57          	if (Stat & STA_NODISK) return Stat;	/* No card in the socket */
+   \                     ??SD_Init_0: (+1)
+   \   0000000E   0x.... 0x....      LDR.W    R4,??DataTable18
+   \   00000012   0x7820             LDRB     R0,[R4, #+0]
+   \   00000014   0x0780             LSLS     R0,R0,#+30
+   \   00000016   0xD501             BPL.N    ??SD_Init_2
+   \   00000018   0x7820             LDRB     R0,[R4, #+0]
+   \   0000001A   0xE082             B.N      ??SD_Init_1
+     58          
+     59          	power_on();							/* Force socket power on */
+   \                     ??SD_Init_2: (+1)
+   \   0000001C   0x.... 0x....      BL       power_on
+     60          	FCLK_FAST();
+   \   00000020   0x.... 0x....      BL       FCLK_FAST
+     61          //  FCLK_SLOW();
+     62            
+     63          //  int rr = xmit_spi(213);
+     64          //  #ifdef LCD_TRACE
+     65          //    TLcdTrace::AddLineX("SPI ",rr);
+     66          //  #endif
+     67            
+     68            
+     69          	for (n = 10; n; n--) rcvr_spi();	/* 80 dummy clocks */
+   \   00000024   0x270A             MOVS     R7,#+10
+   \   00000026   0xE002             B.N      ??SD_Init_3
+   \                     ??SD_Init_4: (+1)
+   \   00000028   0x.... 0x....      BL       rcvr_spi
+   \   0000002C   0x1E7F             SUBS     R7,R7,#+1
+   \                     ??SD_Init_3: (+1)
+   \   0000002E   0xB2FF             UXTB     R7,R7
+   \   00000030   0x2F00             CMP      R7,#+0
+   \   00000032   0xD1F9             BNE.N    ??SD_Init_4
+     70          
+     71          	ty = 0;
+   \   00000034   0x2500             MOVS     R5,#+0
+     72          	if (send_cmd(CMD0, 0) == 1) {			/* Enter Idle state */
+   \   00000036   0x4629             MOV      R1,R5
+   \   00000038   0x4608             MOV      R0,R1
+   \   0000003A   0x.... 0x....      BL       send_cmd
+   \   0000003E   0x2801             CMP      R0,#+1
+   \   00000040   0xD15D             BNE.N    ??SD_Init_5
+     73          		Timer1 = 100;						/* Initialization timeout of 1000 msec */
+   \   00000042   0x2064             MOVS     R0,#+100
+   \   00000044   0x7060             STRB     R0,[R4, #+1]
+     74          		if (send_cmd(CMD8, 0x1AA) == 1) {	/* SDv2? */
+   \   00000046   0xF44F 0x71D5      MOV      R1,#+426
+   \   0000004A   0x2008             MOVS     R0,#+8
+   \   0000004C   0x.... 0x....      BL       send_cmd
+   \   00000050   0x2801             CMP      R0,#+1
+   \   00000052   0xAE00             ADD      R6,SP,#+0
+   \   00000054   0xD00D             BEQ.N    ??SD_Init_6
+     75          //      THardware::LedOn();
+     76          			for (n = 0; n < 4; n++) ocr[n] = rcvr_spi();		/* Get trailing return value of R7 resp */
+     77          			if (ocr[2] == 0x01 && ocr[3] == 0xAA) {				/* The card can work at vdd range of 2.7-3.6V */
+     78          				while (Timer1 && send_cmd(ACMD41, 1UL << 30));	/* Wait for leaving idle state (ACMD41 with HCS bit) */
+     79          				if (Timer1 && send_cmd(CMD58, 0) == 0) {		/* Check CCS bit in the OCR */
+     80          					for (n = 0; n < 4; n++) ocr[n] = rcvr_spi();
+     81          					ty = (ocr[0] & 0x40) ? CT_SD2 | CT_BLOCK : CT_SD2;	/* SDv2 */
+     82          				}
+     83          			}
+     84          		} else {							/* SDv1 or MMCv3 */
+     85          			if (send_cmd(ACMD41, 0) <= 1) 	{
+   \   00000056   0x4629             MOV      R1,R5
+   \   00000058   0x20A9             MOVS     R0,#+169
+   \   0000005A   0x.... 0x....      BL       send_cmd
+   \   0000005E   0x2802             CMP      R0,#+2
+   \   00000060   0xDA37             BGE.N    ??SD_Init_7
+     86          				ty = CT_SD1; cmd = ACMD41;	/* SDv1 */
+   \   00000062   0x2502             MOVS     R5,#+2
+   \   00000064   0x26A9             MOVS     R6,#+169
+   \   00000066   0xE036             B.N      ??SD_Init_8
+     87          			} else {
+   \                     ??SD_Init_9: (+1)
+   \   00000068   0x.... 0x....      BL       rcvr_spi
+   \   0000006C   0xF808 0x0006      STRB     R0,[R8, R6]
+   \   00000070   0x1C7F             ADDS     R7,R7,#+1
+   \                     ??SD_Init_6: (+1)
+   \   00000072   0xB2FF             UXTB     R7,R7
+   \   00000074   0x46B8             MOV      R8,R7
+   \   00000076   0xF1B8 0x0F04      CMP      R8,#+4
+   \   0000007A   0xDBF5             BLT.N    ??SD_Init_9
+   \   0000007C   0x78B0             LDRB     R0,[R6, #+2]
+   \   0000007E   0x2801             CMP      R0,#+1
+   \   00000080   0xD13D             BNE.N    ??SD_Init_5
+   \   00000082   0x78F0             LDRB     R0,[R6, #+3]
+   \   00000084   0x28AA             CMP      R0,#+170
+   \   00000086   0xD13A             BNE.N    ??SD_Init_5
+   \                     ??SD_Init_10: (+1)
+   \   00000088   0x7860             LDRB     R0,[R4, #+1]
+   \   0000008A   0x2800             CMP      R0,#+0
+   \   0000008C   0xD006             BEQ.N    ??SD_Init_11
+   \   0000008E   0xF04F 0x4180      MOV      R1,#+1073741824
+   \   00000092   0x20A9             MOVS     R0,#+169
+   \   00000094   0x.... 0x....      BL       send_cmd
+   \   00000098   0x2800             CMP      R0,#+0
+   \   0000009A   0xD1F5             BNE.N    ??SD_Init_10
+   \                     ??SD_Init_11: (+1)
+   \   0000009C   0x7860             LDRB     R0,[R4, #+1]
+   \   0000009E   0x2800             CMP      R0,#+0
+   \   000000A0   0xD02D             BEQ.N    ??SD_Init_5
+   \   000000A2   0x4629             MOV      R1,R5
+   \   000000A4   0x203A             MOVS     R0,#+58
+   \   000000A6   0x.... 0x....      BL       send_cmd
+   \   000000AA   0x2800             CMP      R0,#+0
+   \   000000AC   0xD127             BNE.N    ??SD_Init_5
+   \   000000AE   0x462F             MOV      R7,R5
+   \   000000B0   0xE003             B.N      ??SD_Init_12
+   \                     ??SD_Init_13: (+1)
+   \   000000B2   0x.... 0x....      BL       rcvr_spi
+   \   000000B6   0x55A8             STRB     R0,[R5, R6]
+   \   000000B8   0x1C7F             ADDS     R7,R7,#+1
+   \                     ??SD_Init_12: (+1)
+   \   000000BA   0xB2FF             UXTB     R7,R7
+   \   000000BC   0x463D             MOV      R5,R7
+   \   000000BE   0x2D04             CMP      R5,#+4
+   \   000000C0   0xDBF7             BLT.N    ??SD_Init_13
+   \   000000C2   0xF89D 0x0000      LDRB     R0,[SP, #+0]
+   \   000000C6   0x0640             LSLS     R0,R0,#+25
+   \   000000C8   0xD501             BPL.N    ??SD_Init_14
+   \   000000CA   0x250C             MOVS     R5,#+12
+   \   000000CC   0xE017             B.N      ??SD_Init_5
+   \                     ??SD_Init_14: (+1)
+   \   000000CE   0x2504             MOVS     R5,#+4
+   \   000000D0   0xE015             B.N      ??SD_Init_5
+     88          				ty = CT_MMC; cmd = CMD1;	/* MMCv3 */
+   \                     ??SD_Init_7: (+1)
+   \   000000D2   0x2501             MOVS     R5,#+1
+   \   000000D4   0x462E             MOV      R6,R5
+     89          			}
+     90          			while (Timer1 && send_cmd(cmd, 0));			/* Wait for leaving idle state */
+   \                     ??SD_Init_8: (+1)
+   \   000000D6   0x7860             LDRB     R0,[R4, #+1]
+   \   000000D8   0x2800             CMP      R0,#+0
+   \   000000DA   0xD005             BEQ.N    ??SD_Init_15
+   \   000000DC   0x2100             MOVS     R1,#+0
+   \   000000DE   0x4630             MOV      R0,R6
+   \   000000E0   0x.... 0x....      BL       send_cmd
+   \   000000E4   0x2800             CMP      R0,#+0
+   \   000000E6   0xD1F6             BNE.N    ??SD_Init_8
+     91          			if (!Timer1 || send_cmd(CMD16, 512) != 0)	/* Set R/W block length to 512 */
+   \                     ??SD_Init_15: (+1)
+   \   000000E8   0x7860             LDRB     R0,[R4, #+1]
+   \   000000EA   0x2800             CMP      R0,#+0
+   \   000000EC   0xD006             BEQ.N    ??SD_Init_16
+   \   000000EE   0xF44F 0x7100      MOV      R1,#+512
+   \   000000F2   0x2010             MOVS     R0,#+16
+   \   000000F4   0x.... 0x....      BL       send_cmd
+   \   000000F8   0x2800             CMP      R0,#+0
+   \   000000FA   0xD000             BEQ.N    ??SD_Init_5
+     92          				ty = 0;
+   \                     ??SD_Init_16: (+1)
+   \   000000FC   0x2500             MOVS     R5,#+0
+     93          		}
+     94          	}
+     95          	CardType = ty;
+   \                     ??SD_Init_5: (+1)
+   \   000000FE   0x70E5             STRB     R5,[R4, #+3]
+     96          	deselect();
+   \   00000100   0x.... 0x....      BL       deselect
+     97          
+     98          	if (ty) {			/* Initialization succeded */
+   \   00000104   0x2D00             CMP      R5,#+0
+   \   00000106   0xD009             BEQ.N    ??SD_Init_17
+     99          		Stat &= ~STA_NOINIT;		/* Clear STA_NOINIT */
+   \   00000108   0x7820             LDRB     R0,[R4, #+0]
+   \   0000010A   0xF000 0x00FE      AND      R0,R0,#0xFE
+   \   0000010E   0x7020             STRB     R0,[R4, #+0]
+    100          //		FCLK_FAST();
+    101              #ifdef LCD_TRACE
+    102                TLcdTrace::AddLine("SD Type",ty);
+   \   00000110   0x4629             MOV      R1,R5
+   \   00000112   0x.... 0x....      ADR.W    R0,?_0
+   \   00000116   0x.... 0x....      BL       _ZN9TLcdTrace7AddLineEPKci
+   \   0000011A   0xE001             B.N      ??SD_Init_18
+    103              #endif
+    104          	} else {			/* Initialization failed */
+    105              #ifdef LCD_TRACE
+    106          //      TLcdTrace::AddLine("SD Failed");
+    107              #endif
+    108          		power_off();
+   \                     ??SD_Init_17: (+1)
+   \   0000011C   0x.... 0x....      BL       power_off
+    109          	}
+    110          
+    111          	return Stat;
+   \                     ??SD_Init_18: (+1)
+   \   00000120   0x7820             LDRB     R0,[R4, #+0]
+   \                     ??SD_Init_1: (+1)
+   \   00000122   0xE8BD 0x81F6      POP      {R1,R2,R4-R8,PC}  ;; return
+    112          }
+    113          
+    114          
+    115          
+    116          /*----------------------------------------------------------------------------------*/
+    117          /* @brief	Функции изменяют скорость SPI											*/
+    118          /* @param	None																	*/
+    119          /* @return	None																	*/
+    120          /*----------------------------------------------------------------------------------*/
+
+   \                                 In section .text, align 2, keep-with-next
+    121          void FCLK_SLOW( void )
+    122          {
+   \                     FCLK_SLOW: (+1)
+   \   00000000   0xB510             PUSH     {R4,LR}
+   \   00000002   0xB086             SUB      SP,SP,#+24
+    123          	SPI_InitTypeDef SPI_InitStructure;
+    124          
+    125          	/*!< SD_SPI Config */
+    126          	SPI_InitStructure.SPI_Direction = SPI_Direction_2Lines_FullDuplex;
+   \   00000004   0x2000             MOVS     R0,#+0
+   \   00000006   0xF8AD 0x0000      STRH     R0,[SP, #+0]
+    127          	SPI_InitStructure.SPI_Mode = SPI_Mode_Master;
+   \   0000000A   0xF44F 0x7082      MOV      R0,#+260
+   \   0000000E   0xF8AD 0x0002      STRH     R0,[SP, #+2]
+    128          	SPI_InitStructure.SPI_DataSize = SPI_DataSize_8b;
+   \   00000012   0x2000             MOVS     R0,#+0
+   \   00000014   0x9001             STR      R0,[SP, #+4]
+    129          	SPI_InitStructure.SPI_CPOL = SPI_CPOL_Low;
+    130          	SPI_InitStructure.SPI_CPHA = SPI_CPHA_1Edge;
+   \   00000016   0xF8AD 0x0008      STRH     R0,[SP, #+8]
+    131          	SPI_InitStructure.SPI_NSS = SPI_NSS_Soft;
+   \   0000001A   0xF44F 0x7000      MOV      R0,#+512
+   \   0000001E   0xF8AD 0x000A      STRH     R0,[SP, #+10]
+    132          	SPI_InitStructure.SPI_BaudRatePrescaler = SPI_BaudRatePrescaler_64;
+   \   00000022   0x2028             MOVS     R0,#+40
+   \   00000024   0xF8AD 0x000C      STRH     R0,[SP, #+12]
+    133          	SPI_InitStructure.SPI_FirstBit = SPI_FirstBit_MSB;
+   \   00000028   0x2000             MOVS     R0,#+0
+   \   0000002A   0xF8AD 0x000E      STRH     R0,[SP, #+14]
+    134          	SPI_InitStructure.SPI_CRCPolynomial = 7;
+   \   0000002E   0x2007             MOVS     R0,#+7
+   \   00000030   0xF8AD 0x0010      STRH     R0,[SP, #+16]
+    135          	SPI_Init( SD_SPI, &SPI_InitStructure );
+   \   00000034   0x.... 0x....      LDR.W    R4,??DataTable18_1  ;; 0x40013000
+   \   00000038   0xA900             ADD      R1,SP,#+0
+   \   0000003A   0x4620             MOV      R0,R4
+   \   0000003C   0x.... 0x....      BL       SPI_Init
+    136          	
+    137          	SPI_Cmd( SD_SPI, ENABLE );
+   \   00000040   0x2101             MOVS     R1,#+1
+   \   00000042   0x4620             MOV      R0,R4
+   \   00000044   0x.... 0x....      BL       SPI_Cmd
+    138          }
+   \   00000048   0xB006             ADD      SP,SP,#+24
+   \   0000004A   0xBD10             POP      {R4,PC}          ;; return
+    139          
+    140          /*----------------------------------------------------------------------------------*/
+
+   \                                 In section .text, align 2, keep-with-next
+    141          void FCLK_FAST( void )
+    142          {
+   \                     FCLK_FAST: (+1)
+   \   00000000   0xB510             PUSH     {R4,LR}
+   \   00000002   0xB086             SUB      SP,SP,#+24
+    143          	SPI_InitTypeDef   SPI_InitStructure;
+    144          
+    145          	/*!< SD_SPI Config */
+    146          	SPI_InitStructure.SPI_Direction = SPI_Direction_2Lines_FullDuplex;
+   \   00000004   0x2000             MOVS     R0,#+0
+   \   00000006   0xF8AD 0x0000      STRH     R0,[SP, #+0]
+    147          	SPI_InitStructure.SPI_Mode = SPI_Mode_Master;
+   \   0000000A   0xF44F 0x7082      MOV      R0,#+260
+   \   0000000E   0xF8AD 0x0002      STRH     R0,[SP, #+2]
+    148          	SPI_InitStructure.SPI_DataSize = SPI_DataSize_8b;
+   \   00000012   0x2000             MOVS     R0,#+0
+   \   00000014   0x9001             STR      R0,[SP, #+4]
+    149          	SPI_InitStructure.SPI_CPOL = SPI_CPOL_Low;
+    150          	SPI_InitStructure.SPI_CPHA = SPI_CPHA_1Edge;
+   \   00000016   0xF8AD 0x0008      STRH     R0,[SP, #+8]
+    151          	SPI_InitStructure.SPI_NSS = SPI_NSS_Soft;
+   \   0000001A   0xF44F 0x7000      MOV      R0,#+512
+   \   0000001E   0xF8AD 0x000A      STRH     R0,[SP, #+10]
+    152          	SPI_InitStructure.SPI_BaudRatePrescaler = SPI_BaudRatePrescaler_2;
+   \   00000022   0x2000             MOVS     R0,#+0
+   \   00000024   0x9003             STR      R0,[SP, #+12]
+    153          	SPI_InitStructure.SPI_FirstBit = SPI_FirstBit_MSB;
+    154          	SPI_InitStructure.SPI_CRCPolynomial = 7;
+   \   00000026   0x2007             MOVS     R0,#+7
+   \   00000028   0xF8AD 0x0010      STRH     R0,[SP, #+16]
+    155          	SPI_Init( SD_SPI, &SPI_InitStructure );
+   \   0000002C   0x.... 0x....      LDR.W    R4,??DataTable18_1  ;; 0x40013000
+   \   00000030   0xA900             ADD      R1,SP,#+0
+   \   00000032   0x4620             MOV      R0,R4
+   \   00000034   0x.... 0x....      BL       SPI_Init
+    156          	
+    157          	SPI_Cmd( SD_SPI, ENABLE );
+   \   00000038   0x2101             MOVS     R1,#+1
+   \   0000003A   0x4620             MOV      R0,R4
+   \   0000003C   0x.... 0x....      BL       SPI_Cmd
+    158          }
+   \   00000040   0xB006             ADD      SP,SP,#+24
+   \   00000042   0xBD10             POP      {R4,PC}          ;; return
+    159          
+    160          
+    161          
+    162          /*-----------------------------------------------------------------------*/
+    163          /* Transmit a byte to MMC via SPI  (Platform dependent)                  */
+    164          /* Приём и передача должны делаться в одно время 						 */
+    165          /*-----------------------------------------------------------------------*/
+
+   \                                 In section .text, align 2, keep-with-next
+    166          uint8_t xmit_spi( uint8_t dat )
+    167          {
+   \                     xmit_spi: (+1)
+   \   00000000   0xB538             PUSH     {R3-R5,LR}
+   \   00000002   0x4604             MOV      R4,R0
+   \   00000004   0x.... 0x....      LDR.W    R5,??DataTable18_1  ;; 0x40013000
+    168          	while( SPI_I2S_GetFlagStatus( SD_SPI, SPI_I2S_FLAG_TXE ) == RESET );		/*!< Wait until the transmit buffer is empty */
+   \                     ??xmit_spi_0: (+1)
+   \   00000008   0x2102             MOVS     R1,#+2
+   \   0000000A   0x4628             MOV      R0,R5
+   \   0000000C   0x.... 0x....      BL       SPI_I2S_GetFlagStatus
+   \   00000010   0x2800             CMP      R0,#+0
+   \   00000012   0xD0F9             BEQ.N    ??xmit_spi_0
+    169          	SPI_I2S_SendData( SD_SPI, dat );											/*!< Send the byte */
+   \   00000014   0x4621             MOV      R1,R4
+   \   00000016   0x4628             MOV      R0,R5
+   \   00000018   0x.... 0x....      BL       SPI_I2S_SendData
+    170          	
+    171          	while( SPI_I2S_GetFlagStatus( SD_SPI, SPI_I2S_FLAG_RXNE ) == RESET );		/*!< Wait until a data is received */
+   \                     ??xmit_spi_1: (+1)
+   \   0000001C   0x2101             MOVS     R1,#+1
+   \   0000001E   0x4628             MOV      R0,R5
+   \   00000020   0x.... 0x....      BL       SPI_I2S_GetFlagStatus
+   \   00000024   0x2800             CMP      R0,#+0
+   \   00000026   0xD0F9             BEQ.N    ??xmit_spi_1
+    172          	return SPI_I2S_ReceiveData( SD_SPI );										/*!< Get the received data */
+   \   00000028   0x4628             MOV      R0,R5
+   \   0000002A   0x.... 0x....      BL       SPI_I2S_ReceiveData
+   \   0000002E   0xB2C0             UXTB     R0,R0
+   \   00000030   0xBD32             POP      {R1,R4,R5,PC}    ;; return
+    173          }
+    174          
+    175          /*----------------------------------------------------------------------------------*/
+
+   \                                 In section .text, align 2, keep-with-next
+    176          void rcvr_spi_m( uint8_t *dst )
+    177          {
+   \                     rcvr_spi_m: (+1)
+   \   00000000   0xB510             PUSH     {R4,LR}
+   \   00000002   0x4604             MOV      R4,R0
+    178          	*dst = xmit_spi(SD_DUMMY_BYTE);
+   \   00000004   0x20FF             MOVS     R0,#+255
+   \   00000006   0x.... 0x....      BL       xmit_spi
+   \   0000000A   0x7020             STRB     R0,[R4, #+0]
+    179          }
+   \   0000000C   0xBD10             POP      {R4,PC}          ;; return
+    180          
+    181          
+    182          
+    183          /*-----------------------------------------------------------------------*/
+    184          /* Receive a byte from MMC via SPI  (Platform dependent)                 */
+    185          /*-----------------------------------------------------------------------*/
+
+   \                                 In section .text, align 2, keep-with-next
+    186          uint8_t rcvr_spi( void )
+    187          {
+    188          	return xmit_spi( SD_DUMMY_BYTE  );	
+   \                     rcvr_spi: (+1)
+   \   00000000   0x20FF             MOVS     R0,#+255
+   \   00000002   0x....             B.N      xmit_spi
+    189          }
+    190          
+    191          
+    192          
+    193          /*-----------------------------------------------------------------------*/
+    194          /* Wait for card ready                                                   */
+    195          /*-----------------------------------------------------------------------*/
+
+   \                                 In section .text, align 2, keep-with-next
+    196          int wait_ready (void)	/* 1:OK, 0:Timeout */
+    197          {
+   \                     wait_ready: (+1)
+   \   00000000   0xB510             PUSH     {R4,LR}
+    198          	BYTE d;
+    199          
+    200          	Timer2 = 50;	/* Wait for ready in timeout of 500ms */
+   \   00000002   0x.... 0x....      LDR.W    R4,??DataTable18
+   \   00000006   0x2032             MOVS     R0,#+50
+   \   00000008   0x70A0             STRB     R0,[R4, #+2]
+    201          	do
+    202          		d = rcvr_spi();
+   \                     ??wait_ready_0: (+1)
+   \   0000000A   0x.... 0x....      BL       rcvr_spi
+    203          	while (d != 0xFF && Timer2);
+   \   0000000E   0x28FF             CMP      R0,#+255
+   \   00000010   0xD002             BEQ.N    ??wait_ready_1
+   \   00000012   0x78A1             LDRB     R1,[R4, #+2]
+   \   00000014   0x2900             CMP      R1,#+0
+   \   00000016   0xD1F8             BNE.N    ??wait_ready_0
+    204          
+    205          	return (d == 0xFF) ? 1 : 0;
+   \                     ??wait_ready_1: (+1)
+   \   00000018   0x28FF             CMP      R0,#+255
+   \   0000001A   0xD101             BNE.N    ??wait_ready_2
+   \   0000001C   0x2001             MOVS     R0,#+1
+   \   0000001E   0xBD10             POP      {R4,PC}
+   \                     ??wait_ready_2: (+1)
+   \   00000020   0x2000             MOVS     R0,#+0
+   \   00000022   0xBD10             POP      {R4,PC}          ;; return
+    206          }
+    207          
+    208          
+    209          
+    210          /*-----------------------------------------------------------------------*/
+    211          /* Deselect the card and release SPI bus                                 */
+    212          /*-----------------------------------------------------------------------*/
+
+   \                                 In section .text, align 2, keep-with-next
+    213          void deselect (void)
+    214          {
+   \                     deselect: (+1)
+   \   00000000   0xB580             PUSH     {R7,LR}
+    215          	CS_HIGH();
+   \   00000002   0x.... 0x....      BL       CS_HIGH
+    216          	rcvr_spi();	// Dummy clock (force DO hi-z for multiple slave SPI)
+   \   00000006   0xE8BD 0x4001      POP      {R0,LR}
+   \   0000000A   0x....             B.N      rcvr_spi
+    217          }
+    218          
+    219          
+    220          
+    221          /*-----------------------------------------------------------------------*/
+    222          /* Select the card and wait for ready                                    */
+    223          /*-----------------------------------------------------------------------*/
+
+   \                                 In section .text, align 2, keep-with-next
+    224          int select( void )	/* 1:Successful, 0:Timeout */
+    225          {
+   \                     select: (+1)
+   \   00000000   0xB580             PUSH     {R7,LR}
+    226          	CS_LOW();
+   \   00000002   0x.... 0x....      BL       CS_LOW
+    227          	
+    228          	rcvr_spi();	/* Dummy clock (force DO enabled) */
+   \   00000006   0x.... 0x....      BL       rcvr_spi
+    229          
+    230          	if (wait_ready()) return 1;	/* OK */
+   \   0000000A   0x.... 0x....      BL       wait_ready
+   \   0000000E   0x2800             CMP      R0,#+0
+   \   00000010   0xD001             BEQ.N    ??select_0
+   \   00000012   0x2001             MOVS     R0,#+1
+   \   00000014   0xBD02             POP      {R1,PC}
+    231          	deselect();
+   \                     ??select_0: (+1)
+   \   00000016   0x.... 0x....      BL       deselect
+    232          	return 0;	/* Timeout */
+   \   0000001A   0x2000             MOVS     R0,#+0
+   \   0000001C   0xBD02             POP      {R1,PC}          ;; return
+    233          }
+    234          
+    235          /*----------------------------------------------------------------------------------*/
+
+   \                                 In section .text, align 2, keep-with-next
+    236          void CS_LOW( void )
+    237          {
+   \                     CS_LOW: (+1)
+   \   00000000   0xB580             PUSH     {R7,LR}
+    238          	while( SPI_I2S_GetFlagStatus( SD_SPI, SPI_I2S_FLAG_TXE ) == RESET );
+   \                     ??CS_LOW_0: (+1)
+   \   00000002   0x2102             MOVS     R1,#+2
+   \   00000004   0x.... 0x....      LDR.W    R0,??DataTable18_1  ;; 0x40013000
+   \   00000008   0x.... 0x....      BL       SPI_I2S_GetFlagStatus
+   \   0000000C   0x2800             CMP      R0,#+0
+   \   0000000E   0xD0F8             BEQ.N    ??CS_LOW_0
+    239          	GPIO_ResetBits( SD_CS_PORT, SD_CS_PIN );
+   \   00000010   0xF44F 0x6100      MOV      R1,#+2048
+   \   00000014   0x.... 0x....      LDR.W    R0,??DataTable18_2  ;; 0x40020800
+   \   00000018   0xE8BD 0x4004      POP      {R2,LR}
+   \   0000001C   0x.... 0x....      B.W      GPIO_ResetBits
+    240          }
+    241          
+    242          /*----------------------------------------------------------------------------------*/
+
+   \                                 In section .text, align 2, keep-with-next
+    243          void CS_HIGH( void )
+    244          {
+   \                     CS_HIGH: (+1)
+   \   00000000   0xB580             PUSH     {R7,LR}
+    245          	while( SPI_I2S_GetFlagStatus( SD_SPI, SPI_I2S_FLAG_BSY ) == SET );	/* Проверка отправки всех битов по SPI */
+   \                     ??CS_HIGH_0: (+1)
+   \   00000002   0x2180             MOVS     R1,#+128
+   \   00000004   0x.... 0x....      LDR.W    R0,??DataTable18_1  ;; 0x40013000
+   \   00000008   0x.... 0x....      BL       SPI_I2S_GetFlagStatus
+   \   0000000C   0x2801             CMP      R0,#+1
+   \   0000000E   0xD0F8             BEQ.N    ??CS_HIGH_0
+    246          //	__delay_cycles(1);
+    247          	GPIO_SetBits( SD_CS_PORT, SD_CS_PIN );
+   \   00000010   0xF44F 0x6100      MOV      R1,#+2048
+   \   00000014   0x.... 0x....      LDR.W    R0,??DataTable18_2  ;; 0x40020800
+   \   00000018   0xE8BD 0x4004      POP      {R2,LR}
+   \   0000001C   0x.... 0x....      B.W      GPIO_SetBits
+    248          }
+    249          
+    250          
+    251          
+    252          /*-----------------------------------------------------------------------*/
+    253          /* Power Control  (Platform dependent)                                   */
+    254          /*-----------------------------------------------------------------------*/
+    255          /* When the target system does not support socket power control, there   */
+    256          /* is nothing to do in these functions and chk_power always returns 1.   */
+    257          /*-----------------------------------------------------------------------*/
+
+   \                                 In section .text, align 2, keep-with-next
+    258          int power_status(void)		/* Socket power state: 0=off, 1=on */
+    259          {
+    260          	return true;
+   \                     power_status: (+1)
+   \   00000000   0x2001             MOVS     R0,#+1
+   \   00000002   0x4770             BX       LR               ;; return
+    261          }
+    262          
+    263          /*-----------------------------------------------------------------------*/
+
+   \                                 In section .text, align 2, keep-with-next
+    264          void power_on (void)
+    265          {
+   \                     power_on: (+1)
+   \   00000000   0xB580             PUSH     {R7,LR}
+    266          	SD_Timer_Init();
+   \   00000002   0x.... 0x....      BL       SD_Timer_Init
+    267          	SD_LowLevel_Init();
+   \   00000006   0x.... 0x....      BL       SD_LowLevel_Init
+    268          	CS_HIGH();
+   \   0000000A   0x.... 0x....      BL       CS_HIGH
+    269          	for (Timer1 = 2; Timer1; );	/* Wait for 20ms */
+   \   0000000E   0x.... 0x....      LDR.W    R0,??DataTable18
+   \   00000012   0x2102             MOVS     R1,#+2
+   \   00000014   0x7041             STRB     R1,[R0, #+1]
+   \                     ??power_on_0: (+1)
+   \   00000016   0x7841             LDRB     R1,[R0, #+1]
+   \   00000018   0x2900             CMP      R1,#+0
+   \   0000001A   0xD1FC             BNE.N    ??power_on_0
+    270          }
+   \   0000001C   0xBD01             POP      {R0,PC}          ;; return
+    271          
+    272          /*-----------------------------------------------------------------------*/
+
+   \                                 In section .text, align 2, keep-with-next
+    273          void power_off (void)
+    274          {
+   \                     power_off: (+1)
+   \   00000000   0xB580             PUSH     {R7,LR}
+    275          	SD_LowLevel_Deinit();
+   \   00000002   0x.... 0x....      BL       SD_LowLevel_Deinit
+    276          	SD_Timer_Deinit();
+   \   00000006   0x.... 0x....      BL       SD_Timer_Deinit
+    277          	Stat |= STA_NOINIT;
+   \   0000000A   0x.... 0x....      LDR.W    R0,??DataTable18
+   \   0000000E   0x7801             LDRB     R1,[R0, #+0]
+   \   00000010   0xF041 0x0101      ORR      R1,R1,#0x1
+   \   00000014   0x7001             STRB     R1,[R0, #+0]
+    278          }
+   \   00000016   0xBD01             POP      {R0,PC}          ;; return
+    279          
+    280          
+    281          
+    282          /*-----------------------------------------------------------------------*/
+    283          /* Receive a data packet from MMC                                        */
+    284          /*-----------------------------------------------------------------------*/
+
+   \                                 In section .text, align 2, keep-with-next
+    285          int rcvr_datablock (
+    286          	BYTE *buff,			/* Data buffer to store received data */
+    287          	UINT btr			/* Byte count (must be multiple of 4) */
+    288          )
+    289          {
+   \                     rcvr_datablock: (+1)
+   \   00000000   0xB570             PUSH     {R4-R6,LR}
+   \   00000002   0x4604             MOV      R4,R0
+   \   00000004   0x460D             MOV      R5,R1
+    290          	BYTE token;
+    291          
+    292          //  TLcdTrace::AddLine("Read data...");
+    293          
+    294          
+    295          	Timer1 = 20;
+   \   00000006   0x.... 0x....      LDR.W    R6,??DataTable18
+   \   0000000A   0x2014             MOVS     R0,#+20
+   \   0000000C   0x7070             STRB     R0,[R6, #+1]
+    296          	do {							/* Wait for data packet in timeout of 200ms */
+    297          		token = rcvr_spi();
+   \                     ??rcvr_datablock_0: (+1)
+   \   0000000E   0x.... 0x....      BL       rcvr_spi
+    298          	} while ((token == 0xFF) && Timer1);
+   \   00000012   0x28FF             CMP      R0,#+255
+   \   00000014   0xD102             BNE.N    ??rcvr_datablock_1
+   \   00000016   0x7871             LDRB     R1,[R6, #+1]
+   \   00000018   0x2900             CMP      R1,#+0
+   \   0000001A   0xD1F8             BNE.N    ??rcvr_datablock_0
+    299          	if(token != 0xFE) return 0;		/* If not valid data token, retutn with error */
+   \                     ??rcvr_datablock_1: (+1)
+   \   0000001C   0x28FE             CMP      R0,#+254
+   \   0000001E   0xD001             BEQ.N    ??rcvr_datablock_2
+   \   00000020   0x2000             MOVS     R0,#+0
+   \   00000022   0xBD70             POP      {R4-R6,PC}
+    300          
+    301          //  TLcdTrace::AddLine("Read data...");
+    302          	do {							/* Receive the data block into buffer */
+    303          		rcvr_spi_m(buff++);
+   \                     ??rcvr_datablock_2: (+1)
+   \   00000024   0x4620             MOV      R0,R4
+   \   00000026   0x.... 0x....      BL       rcvr_spi_m
+   \   0000002A   0x1C64             ADDS     R4,R4,#+1
+    304          		rcvr_spi_m(buff++);
+   \   0000002C   0x4620             MOV      R0,R4
+   \   0000002E   0x.... 0x....      BL       rcvr_spi_m
+   \   00000032   0x1C64             ADDS     R4,R4,#+1
+    305          		rcvr_spi_m(buff++);
+   \   00000034   0x4620             MOV      R0,R4
+   \   00000036   0x.... 0x....      BL       rcvr_spi_m
+   \   0000003A   0x1C64             ADDS     R4,R4,#+1
+    306          		rcvr_spi_m(buff++);
+   \   0000003C   0x4620             MOV      R0,R4
+   \   0000003E   0x.... 0x....      BL       rcvr_spi_m
+   \   00000042   0x1C64             ADDS     R4,R4,#+1
+    307          	} while (btr -= 4);
+   \   00000044   0x1F2D             SUBS     R5,R5,#+4
+   \   00000046   0xD1ED             BNE.N    ??rcvr_datablock_2
+    308          	rcvr_spi();						/* Discard CRC */
+   \   00000048   0x.... 0x....      BL       rcvr_spi
+    309          	rcvr_spi();
+   \   0000004C   0x.... 0x....      BL       rcvr_spi
+    310          
+    311          	return 1;						/* Return with success */
+   \   00000050   0x2001             MOVS     R0,#+1
+   \   00000052   0xBD70             POP      {R4-R6,PC}       ;; return
+    312          }
+    313          
+    314          
+    315          
+    316          /*-----------------------------------------------------------------------*/
+    317          /* Send a data packet to MMC                                             */
+    318          /*-----------------------------------------------------------------------*/
+
+   \                                 In section .text, align 2, keep-with-next
+    319          int xmit_datablock (
+    320          	const BYTE *buff,	/* 512 byte data block to be transmitted */
+    321          	BYTE token			/* Data/Stop token */
+    322          )
+    323          {
+   \                     xmit_datablock: (+1)
+   \   00000000   0xB538             PUSH     {R3-R5,LR}
+   \   00000002   0x4604             MOV      R4,R0
+   \   00000004   0x460D             MOV      R5,R1
+    324          	BYTE resp, wc;
+    325          
+    326          
+    327          	if (!wait_ready()) return 0;
+   \   00000006   0x.... 0x....      BL       wait_ready
+   \   0000000A   0x2800             CMP      R0,#+0
+   \   0000000C   0xD01D             BEQ.N    ??xmit_datablock_0
+    328          
+    329          	xmit_spi(token);					/* Xmit data token */
+   \   0000000E   0x4628             MOV      R0,R5
+   \   00000010   0x.... 0x....      BL       xmit_spi
+    330          	if (token != 0xFD) {	/* Is data token */
+   \   00000014   0x2DFD             CMP      R5,#+253
+   \   00000016   0xD01A             BEQ.N    ??xmit_datablock_1
+    331          		wc = 0;
+   \   00000018   0x2500             MOVS     R5,#+0
+    332          		do {							/* Xmit the 512 byte data block to MMC */
+    333          			xmit_spi(*buff++);
+   \                     ??xmit_datablock_2: (+1)
+   \   0000001A   0xF814 0x0B01      LDRB     R0,[R4], #+1
+   \   0000001E   0x.... 0x....      BL       xmit_spi
+    334          			xmit_spi(*buff++);
+   \   00000022   0xF814 0x0B01      LDRB     R0,[R4], #+1
+   \   00000026   0x.... 0x....      BL       xmit_spi
+    335          		} while (--wc);
+   \   0000002A   0x1E6D             SUBS     R5,R5,#+1
+   \   0000002C   0xB2ED             UXTB     R5,R5
+   \   0000002E   0x2D00             CMP      R5,#+0
+   \   00000030   0xD1F3             BNE.N    ??xmit_datablock_2
+    336          		xmit_spi(0xFF);					/* CRC (Dummy) */
+   \   00000032   0x20FF             MOVS     R0,#+255
+   \   00000034   0x.... 0x....      BL       xmit_spi
+    337          		xmit_spi(0xFF);
+   \   00000038   0x20FF             MOVS     R0,#+255
+   \   0000003A   0x.... 0x....      BL       xmit_spi
+    338          		resp = rcvr_spi();				/* Reveive data response */
+    339          		if ((resp & 0x1F) != 0x05)		/* If not accepted, return with error */
+   \   0000003E   0x.... 0x....      BL       rcvr_spi
+   \   00000042   0xF000 0x001F      AND      R0,R0,#0x1F
+   \   00000046   0x2805             CMP      R0,#+5
+   \   00000048   0xD001             BEQ.N    ??xmit_datablock_1
+    340          			return 0;
+   \                     ??xmit_datablock_0: (+1)
+   \   0000004A   0x2000             MOVS     R0,#+0
+   \   0000004C   0xBD32             POP      {R1,R4,R5,PC}
+    341          	}
+    342          
+    343          	return 1;
+   \                     ??xmit_datablock_1: (+1)
+   \   0000004E   0x2001             MOVS     R0,#+1
+   \   00000050   0xBD32             POP      {R1,R4,R5,PC}    ;; return
+    344          }
+    345          
+    346          
+    347          
+    348          /*-----------------------------------------------------------------------*/
+    349          /* Send a command packet to MMC                                          */
+    350          /*-----------------------------------------------------------------------*/
+
+   \                                 In section .text, align 2, keep-with-next
+    351          BYTE send_cmd (		/* Returns R1 resp (bit7==1:Send failed) */
+    352          	BYTE cmd,		/* Command index */
+    353          	DWORD arg		/* Argument */
+    354          )
+    355          {
+   \                     send_cmd: (+1)
+   \   00000000   0xB538             PUSH     {R3-R5,LR}
+   \   00000002   0x4604             MOV      R4,R0
+   \   00000004   0x460D             MOV      R5,R1
+    356          	BYTE n, res;
+    357          
+    358          
+    359          	if (cmd & 0x80) {	/* ACMD<n> is the command sequense of CMD55-CMD<n> */
+   \   00000006   0x0620             LSLS     R0,R4,#+24
+   \   00000008   0xD507             BPL.N    ??send_cmd_0
+    360          		cmd &= 0x7F;
+   \   0000000A   0xF004 0x047F      AND      R4,R4,#0x7F
+    361          		res = send_cmd(CMD55, 0);
+   \   0000000E   0x2100             MOVS     R1,#+0
+   \   00000010   0x2037             MOVS     R0,#+55
+   \   00000012   0xF7FF 0xFFF5      BL       send_cmd
+    362          		if (res > 1) return res;
+   \   00000016   0x2802             CMP      R0,#+2
+   \   00000018   0xDA30             BGE.N    ??send_cmd_1
+    363          	}
+    364          
+    365          	/* Select the card and wait for ready */
+    366          	deselect();
+   \                     ??send_cmd_0: (+1)
+   \   0000001A   0x.... 0x....      BL       deselect
+    367          	if (!select()) return 0xFF;
+   \   0000001E   0x.... 0x....      BL       select
+   \   00000022   0x2800             CMP      R0,#+0
+   \   00000024   0xD101             BNE.N    ??send_cmd_2
+   \   00000026   0x20FF             MOVS     R0,#+255
+   \   00000028   0xBD32             POP      {R1,R4,R5,PC}
+    368            
+    369          	/* Send command packet */
+    370          	xmit_spi(0x40 | cmd);				/* Start + Command index */
+   \                     ??send_cmd_2: (+1)
+   \   0000002A   0xF044 0x0040      ORR      R0,R4,#0x40
+   \   0000002E   0x.... 0x....      BL       xmit_spi
+    371          	xmit_spi((BYTE)(arg >> 24));		/* Argument[31..24] */
+   \   00000032   0x0E28             LSRS     R0,R5,#+24
+   \   00000034   0x.... 0x....      BL       xmit_spi
+    372          	xmit_spi((BYTE)(arg >> 16));		/* Argument[23..16] */
+   \   00000038   0x0C28             LSRS     R0,R5,#+16
+   \   0000003A   0xB2C0             UXTB     R0,R0
+   \   0000003C   0x.... 0x....      BL       xmit_spi
+    373          	xmit_spi((BYTE)(arg >> 8));			/* Argument[15..8] */
+   \   00000040   0x0A28             LSRS     R0,R5,#+8
+   \   00000042   0xB2C0             UXTB     R0,R0
+   \   00000044   0x.... 0x....      BL       xmit_spi
+    374          	xmit_spi((BYTE)arg);				/* Argument[7..0] */
+   \   00000048   0x4628             MOV      R0,R5
+   \   0000004A   0xB2C0             UXTB     R0,R0
+   \   0000004C   0x.... 0x....      BL       xmit_spi
+    375          	n = 0x01;							/* Dummy CRC + Stop */
+   \   00000050   0x2001             MOVS     R0,#+1
+    376          	if (cmd == CMD0) n = 0x95;			/* Valid CRC for CMD0(0) */
+   \   00000052   0x2C00             CMP      R4,#+0
+   \   00000054   0xD100             BNE.N    ??send_cmd_3
+   \   00000056   0x2095             MOVS     R0,#+149
+    377          	if (cmd == CMD8) n = 0x87;			/* Valid CRC for CMD8(0x1AA) */
+   \                     ??send_cmd_3: (+1)
+   \   00000058   0x2C08             CMP      R4,#+8
+   \   0000005A   0xD100             BNE.N    ??send_cmd_4
+   \   0000005C   0x2087             MOVS     R0,#+135
+    378          	xmit_spi(n);
+   \                     ??send_cmd_4: (+1)
+   \   0000005E   0x.... 0x....      BL       xmit_spi
+    379          
+    380          	/* Receive command response */
+    381          	if (cmd == CMD12) rcvr_spi();		/* Skip a stuff byte when stop reading */
+   \   00000062   0x2C0C             CMP      R4,#+12
+   \   00000064   0xD101             BNE.N    ??send_cmd_5
+   \   00000066   0x.... 0x....      BL       rcvr_spi
+    382          	n = 10;								/* Wait for a valid response in timeout of 10 attempts */
+   \                     ??send_cmd_5: (+1)
+   \   0000006A   0x240A             MOVS     R4,#+10
+    383          	do
+    384          		res = rcvr_spi();
+   \                     ??send_cmd_6: (+1)
+   \   0000006C   0x.... 0x....      BL       rcvr_spi
+    385          	while((res & 0x80) && --n);
+   \   00000070   0x0601             LSLS     R1,R0,#+24
+   \   00000072   0xD503             BPL.N    ??send_cmd_1
+   \   00000074   0x1E64             SUBS     R4,R4,#+1
+   \   00000076   0xB2E4             UXTB     R4,R4
+   \   00000078   0x2C00             CMP      R4,#+0
+   \   0000007A   0xD1F7             BNE.N    ??send_cmd_6
+    386          
+    387          	return res;							/* Return with the response value */
+   \                     ??send_cmd_1: (+1)
+   \   0000007C   0xBD32             POP      {R1,R4,R5,PC}    ;; return
+    388          }
+    389          
+    390          
+    391          
+    392          /*-----------------------------------------------------------------------*/
+    393          /* Read Sector(s)                                                        */
+    394          /*-----------------------------------------------------------------------*/
+
+   \                                 In section .text, align 2, keep-with-next
+    395          DRESULT SD_ReadMultiBlocks(
+    396          	BYTE drv,			/* Physical drive nmuber (0) */
+    397          	BYTE *buff,			/* Pointer to the data buffer to store read data */
+    398          	DWORD sector,		/* Start sector number (LBA) */
+    399          	BYTE count			/* Sector count (1..255) */
+    400          )
+    401          {
+   \                     SD_ReadMultiBlocks: (+1)
+   \   00000000   0xB538             PUSH     {R3-R5,LR}
+   \   00000002   0x460C             MOV      R4,R1
+   \   00000004   0x4611             MOV      R1,R2
+   \   00000006   0x461D             MOV      R5,R3
+    402          	if (drv || !count) return RES_PARERR;
+   \   00000008   0x2800             CMP      R0,#+0
+   \   0000000A   0xD101             BNE.N    ??SD_ReadMultiBlocks_0
+   \   0000000C   0x2D00             CMP      R5,#+0
+   \   0000000E   0xD101             BNE.N    ??SD_ReadMultiBlocks_1
+   \                     ??SD_ReadMultiBlocks_0: (+1)
+   \   00000010   0x2004             MOVS     R0,#+4
+   \   00000012   0xBD32             POP      {R1,R4,R5,PC}
+    403          	if (Stat & STA_NOINIT) return RES_NOTRDY;
+   \                     ??SD_ReadMultiBlocks_1: (+1)
+   \   00000014   0x.... 0x....      LDR.W    R0,??DataTable18
+   \   00000018   0x7802             LDRB     R2,[R0, #+0]
+   \   0000001A   0x07D2             LSLS     R2,R2,#+31
+   \   0000001C   0xD501             BPL.N    ??SD_ReadMultiBlocks_2
+   \   0000001E   0x2003             MOVS     R0,#+3
+   \   00000020   0xBD32             POP      {R1,R4,R5,PC}
+    404          
+    405          	if (!(CardType & CT_BLOCK)) sector *= 512;	/* Convert to byte address if needed */
+   \                     ??SD_ReadMultiBlocks_2: (+1)
+   \   00000022   0x78C0             LDRB     R0,[R0, #+3]
+   \   00000024   0x0700             LSLS     R0,R0,#+28
+   \   00000026   0xD400             BMI.N    ??SD_ReadMultiBlocks_3
+   \   00000028   0x0249             LSLS     R1,R1,#+9
+    406            
+    407          
+    408          	if (count == 1) {	/* Single block read */
+   \                     ??SD_ReadMultiBlocks_3: (+1)
+   \   0000002A   0x2D01             CMP      R5,#+1
+   \   0000002C   0xD10D             BNE.N    ??SD_ReadMultiBlocks_4
+    409          		if ((send_cmd(CMD17, sector) == 0)	/* READ_SINGLE_BLOCK */
+    410          			&& rcvr_datablock(buff, 512))
+   \   0000002E   0x2011             MOVS     R0,#+17
+   \   00000030   0x.... 0x....      BL       send_cmd
+   \   00000034   0x2800             CMP      R0,#+0
+   \   00000036   0xD11E             BNE.N    ??SD_ReadMultiBlocks_5
+   \   00000038   0xF44F 0x7100      MOV      R1,#+512
+   \   0000003C   0x4620             MOV      R0,R4
+   \   0000003E   0x.... 0x....      BL       rcvr_datablock
+   \   00000042   0x2800             CMP      R0,#+0
+   \   00000044   0xD017             BEQ.N    ??SD_ReadMultiBlocks_5
+    411              {
+    412          			count = 0;
+   \   00000046   0x2500             MOVS     R5,#+0
+   \   00000048   0xE015             B.N      ??SD_ReadMultiBlocks_5
+    413              }
+    414          	}
+    415          	else {				/* Multiple block read */
+    416          		if (send_cmd(CMD18, sector) == 0) {	/* READ_MULTIPLE_BLOCK */
+   \                     ??SD_ReadMultiBlocks_4: (+1)
+   \   0000004A   0x2012             MOVS     R0,#+18
+   \   0000004C   0x.... 0x....      BL       send_cmd
+   \   00000050   0x2800             CMP      R0,#+0
+   \   00000052   0xD110             BNE.N    ??SD_ReadMultiBlocks_5
+    417          			do {
+    418          				if (!rcvr_datablock(buff, 512)) break;
+   \                     ??SD_ReadMultiBlocks_6: (+1)
+   \   00000054   0xF44F 0x7100      MOV      R1,#+512
+   \   00000058   0x4620             MOV      R0,R4
+   \   0000005A   0x.... 0x....      BL       rcvr_datablock
+   \   0000005E   0x2800             CMP      R0,#+0
+   \   00000060   0xD005             BEQ.N    ??SD_ReadMultiBlocks_7
+    419          				buff += 512;
+   \   00000062   0xF504 0x7400      ADD      R4,R4,#+512
+    420          			} while (--count);
+   \   00000066   0x1E6D             SUBS     R5,R5,#+1
+   \   00000068   0xB2ED             UXTB     R5,R5
+   \   0000006A   0x2D00             CMP      R5,#+0
+   \   0000006C   0xD1F2             BNE.N    ??SD_ReadMultiBlocks_6
+    421          			send_cmd(CMD12, 0);				/* STOP_TRANSMISSION */
+   \                     ??SD_ReadMultiBlocks_7: (+1)
+   \   0000006E   0x2100             MOVS     R1,#+0
+   \   00000070   0x200C             MOVS     R0,#+12
+   \   00000072   0x.... 0x....      BL       send_cmd
+    422          		}
+    423          	}
+    424          	deselect();
+   \                     ??SD_ReadMultiBlocks_5: (+1)
+   \   00000076   0x.... 0x....      BL       deselect
+    425          
+    426          	return count ? RES_ERROR : RES_OK;
+   \   0000007A   0x4628             MOV      R0,R5
+   \   0000007C   0x1E40             SUBS     R0,R0,#+1
+   \   0000007E   0x4180             SBCS     R0,R0,R0
+   \   00000080   0x43C0             MVNS     R0,R0
+   \   00000082   0x0FC0             LSRS     R0,R0,#+31
+   \   00000084   0xBD32             POP      {R1,R4,R5,PC}    ;; return
+    427          }
+    428          
+    429          
+    430          
+    431          /*-----------------------------------------------------------------------*/
+    432          /* Write Sector(s)                                                       */
+    433          /*-----------------------------------------------------------------------*/
+
+   \                                 In section .text, align 2, keep-with-next
+    434          DRESULT SD_WriteMultiBlocks(
+    435          	BYTE drv,			/* Physical drive nmuber (0) */
+    436          	const BYTE *buff,	/* Pointer to the data to be written */
+    437          	DWORD sector,		/* Start sector number (LBA) */
+    438          	BYTE count			/* Sector count (1..255) */
+    439          )
+    440          {
+   \                     SD_WriteMultiBlocks: (+1)
+   \   00000000   0xB570             PUSH     {R4-R6,LR}
+   \   00000002   0x460C             MOV      R4,R1
+   \   00000004   0x4615             MOV      R5,R2
+   \   00000006   0x461E             MOV      R6,R3
+    441          	if (drv || !count) return RES_PARERR;
+   \   00000008   0x2800             CMP      R0,#+0
+   \   0000000A   0xD101             BNE.N    ??SD_WriteMultiBlocks_0
+   \   0000000C   0x2E00             CMP      R6,#+0
+   \   0000000E   0xD101             BNE.N    ??SD_WriteMultiBlocks_1
+   \                     ??SD_WriteMultiBlocks_0: (+1)
+   \   00000010   0x2004             MOVS     R0,#+4
+   \   00000012   0xBD70             POP      {R4-R6,PC}
+    442          	if (Stat & STA_NOINIT) return RES_NOTRDY;
+   \                     ??SD_WriteMultiBlocks_1: (+1)
+   \   00000014   0x.... 0x....      LDR.W    R0,??DataTable18
+   \   00000018   0x7801             LDRB     R1,[R0, #+0]
+   \   0000001A   0x07C9             LSLS     R1,R1,#+31
+   \   0000001C   0xD501             BPL.N    ??SD_WriteMultiBlocks_2
+   \   0000001E   0x2003             MOVS     R0,#+3
+   \   00000020   0xBD70             POP      {R4-R6,PC}
+    443          	if (Stat & STA_PROTECT) return RES_WRPRT;
+   \                     ??SD_WriteMultiBlocks_2: (+1)
+   \   00000022   0x7801             LDRB     R1,[R0, #+0]
+   \   00000024   0x0749             LSLS     R1,R1,#+29
+   \   00000026   0xD501             BPL.N    ??SD_WriteMultiBlocks_3
+   \   00000028   0x2002             MOVS     R0,#+2
+   \   0000002A   0xBD70             POP      {R4-R6,PC}
+    444          
+    445          	if (!(CardType & CT_BLOCK)) sector *= 512;	/* Convert to byte address if needed */
+   \                     ??SD_WriteMultiBlocks_3: (+1)
+   \   0000002C   0x78C0             LDRB     R0,[R0, #+3]
+   \   0000002E   0x0701             LSLS     R1,R0,#+28
+   \   00000030   0xD400             BMI.N    ??SD_WriteMultiBlocks_4
+   \   00000032   0x026D             LSLS     R5,R5,#+9
+    446          
+    447          	if (count == 1) {	/* Single block write */
+   \                     ??SD_WriteMultiBlocks_4: (+1)
+   \   00000034   0x2E01             CMP      R6,#+1
+   \   00000036   0xD10D             BNE.N    ??SD_WriteMultiBlocks_5
+    448          		if ((send_cmd(CMD24, sector) == 0)	/* WRITE_BLOCK */
+    449          			&& xmit_datablock(buff, 0xFE))
+   \   00000038   0x4629             MOV      R1,R5
+   \   0000003A   0x2018             MOVS     R0,#+24
+   \   0000003C   0x.... 0x....      BL       send_cmd
+   \   00000040   0x2800             CMP      R0,#+0
+   \   00000042   0xD127             BNE.N    ??SD_WriteMultiBlocks_6
+   \   00000044   0x21FE             MOVS     R1,#+254
+   \   00000046   0x4620             MOV      R0,R4
+   \   00000048   0x.... 0x....      BL       xmit_datablock
+   \   0000004C   0x2800             CMP      R0,#+0
+   \   0000004E   0xD021             BEQ.N    ??SD_WriteMultiBlocks_6
+    450          			count = 0;
+   \   00000050   0x2600             MOVS     R6,#+0
+   \   00000052   0xE01F             B.N      ??SD_WriteMultiBlocks_6
+    451          	}
+    452          	else {				/* Multiple block write */
+    453          		if (CardType & CT_SDC) send_cmd(ACMD23, count);
+   \                     ??SD_WriteMultiBlocks_5: (+1)
+   \   00000054   0x2106             MOVS     R1,#+6
+   \   00000056   0x4208             TST      R0,R1
+   \   00000058   0xD003             BEQ.N    ??SD_WriteMultiBlocks_7
+   \   0000005A   0x4631             MOV      R1,R6
+   \   0000005C   0x2097             MOVS     R0,#+151
+   \   0000005E   0x.... 0x....      BL       send_cmd
+    454          		if (send_cmd(CMD25, sector) == 0) {	/* WRITE_MULTIPLE_BLOCK */
+   \                     ??SD_WriteMultiBlocks_7: (+1)
+   \   00000062   0x4629             MOV      R1,R5
+   \   00000064   0x2019             MOVS     R0,#+25
+   \   00000066   0x.... 0x....      BL       send_cmd
+   \   0000006A   0x2800             CMP      R0,#+0
+   \   0000006C   0xD112             BNE.N    ??SD_WriteMultiBlocks_6
+    455          			do {
+    456          				if (!xmit_datablock(buff, 0xFC)) break;
+   \                     ??SD_WriteMultiBlocks_8: (+1)
+   \   0000006E   0x21FC             MOVS     R1,#+252
+   \   00000070   0x4620             MOV      R0,R4
+   \   00000072   0x.... 0x....      BL       xmit_datablock
+   \   00000076   0x2800             CMP      R0,#+0
+   \   00000078   0xD005             BEQ.N    ??SD_WriteMultiBlocks_9
+    457          				buff += 512;
+   \   0000007A   0xF504 0x7400      ADD      R4,R4,#+512
+    458          			} while (--count);
+   \   0000007E   0x1E76             SUBS     R6,R6,#+1
+   \   00000080   0xB2F6             UXTB     R6,R6
+   \   00000082   0x2E00             CMP      R6,#+0
+   \   00000084   0xD1F3             BNE.N    ??SD_WriteMultiBlocks_8
+    459          			if (!xmit_datablock(0, 0xFD))	/* STOP_TRAN token */
+   \                     ??SD_WriteMultiBlocks_9: (+1)
+   \   00000086   0x21FD             MOVS     R1,#+253
+   \   00000088   0x2000             MOVS     R0,#+0
+   \   0000008A   0x.... 0x....      BL       xmit_datablock
+   \   0000008E   0x2800             CMP      R0,#+0
+   \   00000090   0xD100             BNE.N    ??SD_WriteMultiBlocks_6
+    460          				count = 1;
+   \   00000092   0x2601             MOVS     R6,#+1
+    461          		}
+    462          	}
+    463          	deselect();
+   \                     ??SD_WriteMultiBlocks_6: (+1)
+   \   00000094   0x.... 0x....      BL       deselect
+    464          
+    465          	return count ? RES_ERROR : RES_OK;
+   \   00000098   0x4630             MOV      R0,R6
+   \   0000009A   0x1E40             SUBS     R0,R0,#+1
+   \   0000009C   0x4180             SBCS     R0,R0,R0
+   \   0000009E   0x43C0             MVNS     R0,R0
+   \   000000A0   0x0FC0             LSRS     R0,R0,#+31
+   \   000000A2   0xBD70             POP      {R4-R6,PC}       ;; return
+    466          }
+    467          
+    468          
+    469          
+    470          /*-----------------------------------------------------------------------*/
+    471          /* Miscellaneous Functions                                               */
+    472          /*-----------------------------------------------------------------------*/
+
+   \                                 In section .text, align 4, keep-with-next
+    473          DRESULT disk_control (
+    474          	BYTE drv,		/* Physical drive nmuber (0) */
+    475          	BYTE ctrl,		/* Control code */
+    476          	void *buff		/* Buffer to send/receive control data */
+    477          )
+    478          {
+   \                     disk_control: (+1)
+   \   00000000   0xB5F0             PUSH     {R4-R7,LR}
+   \   00000002   0xB085             SUB      SP,SP,#+20
+   \   00000004   0x4614             MOV      R4,R2
+    479          	DRESULT res;
+    480          	BYTE n, csd[16], *ptr = (BYTE *)buff;
+   \   00000006   0x4626             MOV      R6,R4
+    481          	WORD csize;
+    482          
+    483          
+    484          	if (drv) return RES_PARERR;
+   \   00000008   0x2800             CMP      R0,#+0
+   \   0000000A   0xD001             BEQ.N    ??disk_control_1
+   \   0000000C   0x2004             MOVS     R0,#+4
+   \   0000000E   0xE106             B.N      ??disk_control_2
+    485          
+    486          	res = RES_ERROR;
+   \                     ??disk_control_1: (+1)
+   \   00000010   0x2701             MOVS     R7,#+1
+    487          
+    488          	if (ctrl == CTRL_POWER) {
+   \   00000012   0x2905             CMP      R1,#+5
+   \   00000014   0xD110             BNE.N    ??disk_control_3
+    489          		switch (ptr[0]) {
+   \   00000016   0x7830             LDRB     R0,[R6, #+0]
+   \   00000018   0x2800             CMP      R0,#+0
+   \   0000001A   0xD002             BEQ.N    ??disk_control_4
+   \   0000001C   0x2801             CMP      R0,#+1
+   \   0000001E   0xD004             BEQ.N    ??disk_control_5
+   \   00000020   0xE008             B.N      ??disk_control_6
+    490          		case 0:		/* Sub control code (POWER_OFF) */
+    491          			power_off();		/* Power off */
+   \                     ??disk_control_4: (+1)
+   \   00000022   0x.... 0x....      BL       power_off
+    492          			res = RES_OK;
+   \   00000026   0x2700             MOVS     R7,#+0
+    493          			break;
+   \   00000028   0xE0F8             B.N      ??disk_control_7
+    494          		case 1:		/* Sub control code (POWER_GET) */
+    495          			ptr[1] = (BYTE)power_status();
+   \                     ??disk_control_5: (+1)
+   \   0000002A   0x.... 0x....      BL       power_status
+   \   0000002E   0x7070             STRB     R0,[R6, #+1]
+    496          			res = RES_OK;
+   \   00000030   0x2700             MOVS     R7,#+0
+    497          			break;
+   \   00000032   0xE0F3             B.N      ??disk_control_7
+    498          		default :
+    499          			res = RES_PARERR;
+   \                     ??disk_control_6: (+1)
+   \   00000034   0x2704             MOVS     R7,#+4
+   \   00000036   0xE0F1             B.N      ??disk_control_7
+    500          		}
+    501          	}
+    502          	else {
+    503          		if (Stat & STA_NOINIT) return RES_NOTRDY;
+   \                     ??disk_control_3: (+1)
+   \   00000038   0x.... 0x....      LDR.W    R5,??DataTable18
+   \   0000003C   0x7828             LDRB     R0,[R5, #+0]
+   \   0000003E   0x07C0             LSLS     R0,R0,#+31
+   \   00000040   0xD501             BPL.N    ??disk_control_8
+   \   00000042   0x2003             MOVS     R0,#+3
+   \   00000044   0xE0EB             B.N      ??disk_control_2
+    504          
+    505          		switch (ctrl) {
+   \                     ??disk_control_8: (+1)
+   \   00000046   0x290E             CMP      R1,#+14
+   \   00000048   0xF200 0x80E5      BHI.W    ??disk_control_9
+   \   0000004C   0xE8DF 0xF001      TBB      [PC, R1]
+   \                     ??disk_control_0:
+   \   00000050   0x08 0x11          DC8      0x8,0x11,0x4B,0x50
+   \              0x4B 0x50    
+   \   00000054   0xE3 0xE3          DC8      0xE3,0xE3,0xE3,0xE3
+   \              0xE3 0xE3    
+   \   00000058   0xE3 0xE3          DC8      0xE3,0xE3,0xA1,0xA5
+   \              0xA1 0xA5    
+   \   0000005C   0xB3 0xC1          DC8      0xB3,0xC1,0xD3,0x0
+   \              0xD3 0x00    
+    506          		case CTRL_SYNC :		/* Make sure that no pending write process. Do not remove this or written sector might not left updated. */
+    507          			if (select()) {
+   \                     ??disk_control_10: (+1)
+   \   00000060   0x.... 0x....      BL       select
+   \   00000064   0x2800             CMP      R0,#+0
+   \   00000066   0xF000 0x80D7      BEQ.W    ??disk_control_11
+    508          				deselect();
+   \   0000006A   0x.... 0x....      BL       deselect
+    509          				res = RES_OK;
+   \   0000006E   0x2700             MOVS     R7,#+0
+   \   00000070   0xE0D2             B.N      ??disk_control_11
+    510          			}
+    511          			break;
+    512          
+    513          		case GET_SECTOR_COUNT :	/* Get number of sectors on the disk (DWORD) */
+    514          			if ((send_cmd(CMD9, 0) == 0) && rcvr_datablock(csd, 16)) {
+   \                     ??disk_control_12: (+1)
+   \   00000072   0x2100             MOVS     R1,#+0
+   \   00000074   0x2009             MOVS     R0,#+9
+   \   00000076   0x.... 0x....      BL       send_cmd
+   \   0000007A   0x2800             CMP      R0,#+0
+   \   0000007C   0xF040 0x80CC      BNE.W    ??disk_control_11
+   \   00000080   0x2110             MOVS     R1,#+16
+   \   00000082   0xA800             ADD      R0,SP,#+0
+   \   00000084   0x.... 0x....      BL       rcvr_datablock
+   \   00000088   0x2800             CMP      R0,#+0
+   \   0000008A   0xF000 0x80C5      BEQ.W    ??disk_control_11
+    515          				if ((csd[0] >> 6) == 1) {	/* SDC ver 2.00 */
+   \   0000008E   0xA800             ADD      R0,SP,#+0
+   \   00000090   0x7A02             LDRB     R2,[R0, #+8]
+   \   00000092   0x7A41             LDRB     R1,[R0, #+9]
+   \   00000094   0xF89D 0x3000      LDRB     R3,[SP, #+0]
+   \   00000098   0x099B             LSRS     R3,R3,#+6
+   \   0000009A   0x2B01             CMP      R3,#+1
+   \   0000009C   0xD107             BNE.N    ??disk_control_13
+    516          					csize = csd[9] + ((WORD)csd[8] << 8) + 1;
+    517          					*(DWORD*)buff = (DWORD)csize << 10;
+   \   0000009E   0x0210             LSLS     R0,R2,#+8
+   \   000000A0   0xFA50 0xF081      UXTAB    R0,R0,R1
+   \   000000A4   0x1C40             ADDS     R0,R0,#+1
+   \   000000A6   0xB280             UXTH     R0,R0
+   \   000000A8   0x0280             LSLS     R0,R0,#+10
+   \   000000AA   0x6020             STR      R0,[R4, #+0]
+   \   000000AC   0xE019             B.N      ??disk_control_14
+    518          				} else {					/* SDC ver 1.XX or MMC*/
+    519          					n = (csd[5] & 15) + ((csd[10] & 128) >> 7) + ((csd[9] & 3) << 1) + 2;
+    520          					csize = (csd[8] >> 6) + ((WORD)csd[7] << 2) + ((WORD)(csd[6] & 3) << 10) + 1;
+    521          					*(DWORD*)buff = (DWORD)csize << (n - 9);
+   \                     ??disk_control_13: (+1)
+   \   000000AE   0x0992             LSRS     R2,R2,#+6
+   \   000000B0   0x79C3             LDRB     R3,[R0, #+7]
+   \   000000B2   0x009B             LSLS     R3,R3,#+2
+   \   000000B4   0xFA53 0xF282      UXTAB    R2,R3,R2
+   \   000000B8   0x7983             LDRB     R3,[R0, #+6]
+   \   000000BA   0xF003 0x0303      AND      R3,R3,#0x3
+   \   000000BE   0xEB02 0x2283      ADD      R2,R2,R3, LSL #+10
+   \   000000C2   0x1C52             ADDS     R2,R2,#+1
+   \   000000C4   0xB292             UXTH     R2,R2
+   \   000000C6   0x7943             LDRB     R3,[R0, #+5]
+   \   000000C8   0xF003 0x030F      AND      R3,R3,#0xF
+   \   000000CC   0x7A80             LDRB     R0,[R0, #+10]
+   \   000000CE   0xEB03 0x10D0      ADD      R0,R3,R0, LSR #+7
+   \   000000D2   0xF001 0x0103      AND      R1,R1,#0x3
+   \   000000D6   0xEB00 0x0041      ADD      R0,R0,R1, LSL #+1
+   \   000000DA   0x1FC0             SUBS     R0,R0,#+7
+   \   000000DC   0xFA02 0xF000      LSL      R0,R2,R0
+   \   000000E0   0x6020             STR      R0,[R4, #+0]
+    522          				}
+    523          				res = RES_OK;
+   \                     ??disk_control_14: (+1)
+   \   000000E2   0x2700             MOVS     R7,#+0
+   \   000000E4   0xE098             B.N      ??disk_control_11
+    524          			}
+    525          			break;
+    526          
+    527          		case GET_SECTOR_SIZE :	/* Get R/W sector size (WORD) */
+    528          			*(WORD*)buff = 512;
+   \                     ??disk_control_15: (+1)
+   \   000000E6   0xF44F 0x7000      MOV      R0,#+512
+   \   000000EA   0x8020             STRH     R0,[R4, #+0]
+    529          			res = RES_OK;
+   \   000000EC   0x2700             MOVS     R7,#+0
+    530          			break;
+   \   000000EE   0xE093             B.N      ??disk_control_11
+    531          
+    532          		case GET_BLOCK_SIZE :	/* Get erase block size in unit of sector (DWORD) */
+    533          			if (CardType & CT_SD2) {	/* SDv2? */
+   \                     ??disk_control_16: (+1)
+   \   000000F0   0x78E8             LDRB     R0,[R5, #+3]
+   \   000000F2   0x0740             LSLS     R0,R0,#+29
+   \   000000F4   0xD51F             BPL.N    ??disk_control_17
+    534          				if (send_cmd(ACMD13, 0) == 0) {	/* Read SD status */
+   \   000000F6   0x2100             MOVS     R1,#+0
+   \   000000F8   0x208D             MOVS     R0,#+141
+   \   000000FA   0x.... 0x....      BL       send_cmd
+   \   000000FE   0x2800             CMP      R0,#+0
+   \   00000100   0xF040 0x808A      BNE.W    ??disk_control_11
+    535          					rcvr_spi();
+   \   00000104   0x.... 0x....      BL       rcvr_spi
+    536          					if (rcvr_datablock(csd, 16)) {				/* Read partial block */
+   \   00000108   0x2110             MOVS     R1,#+16
+   \   0000010A   0xA800             ADD      R0,SP,#+0
+   \   0000010C   0x.... 0x....      BL       rcvr_datablock
+   \   00000110   0x2800             CMP      R0,#+0
+   \   00000112   0xF000 0x8081      BEQ.W    ??disk_control_11
+    537          						for (n = 64 - 16; n; n--) rcvr_spi();	/* Purge trailing data */
+   \   00000116   0x2530             MOVS     R5,#+48
+   \   00000118   0xE002             B.N      ??disk_control_18
+   \                     ??disk_control_19: (+1)
+   \   0000011A   0x.... 0x....      BL       rcvr_spi
+   \   0000011E   0x1E6D             SUBS     R5,R5,#+1
+   \                     ??disk_control_18: (+1)
+   \   00000120   0xB2ED             UXTB     R5,R5
+   \   00000122   0x2D00             CMP      R5,#+0
+   \   00000124   0xD1F9             BNE.N    ??disk_control_19
+    538          						*(DWORD*)buff = 16UL << (csd[10] >> 4);
+   \   00000126   0x2010             MOVS     R0,#+16
+   \   00000128   0xF89D 0x100A      LDRB     R1,[SP, #+10]
+   \   0000012C   0x0909             LSRS     R1,R1,#+4
+   \   0000012E   0x4088             LSLS     R0,R0,R1
+   \   00000130   0x6020             STR      R0,[R4, #+0]
+    539          						res = RES_OK;
+   \   00000132   0x2700             MOVS     R7,#+0
+   \   00000134   0xE070             B.N      ??disk_control_11
+    540          					}
+    541          				}
+    542          			} else {					/* SDv1 or MMCv3 */
+    543          				if ((send_cmd(CMD9, 0) == 0) && rcvr_datablock(csd, 16)) {	/* Read CSD */
+   \                     ??disk_control_17: (+1)
+   \   00000136   0x2100             MOVS     R1,#+0
+   \   00000138   0x2009             MOVS     R0,#+9
+   \   0000013A   0x.... 0x....      BL       send_cmd
+   \   0000013E   0x2800             CMP      R0,#+0
+   \   00000140   0xD16A             BNE.N    ??disk_control_11
+   \   00000142   0x2110             MOVS     R1,#+16
+   \   00000144   0xA800             ADD      R0,SP,#+0
+   \   00000146   0x.... 0x....      BL       rcvr_datablock
+   \   0000014A   0x2800             CMP      R0,#+0
+   \   0000014C   0xD064             BEQ.N    ??disk_control_11
+    544          					if (CardType & CT_SD1) {	/* SDv1 */
+   \   0000014E   0xA800             ADD      R0,SP,#+0
+   \   00000150   0x7AC1             LDRB     R1,[R0, #+11]
+   \   00000152   0x7A80             LDRB     R0,[R0, #+10]
+   \   00000154   0x78EA             LDRB     R2,[R5, #+3]
+   \   00000156   0x0792             LSLS     R2,R2,#+30
+   \   00000158   0xD50D             BPL.N    ??disk_control_20
+    545          						*(DWORD*)buff = (((csd[10] & 63) << 1) + ((WORD)(csd[11] & 128) >> 7) + 1) << ((csd[13] >> 6) - 1);
+   \   0000015A   0xF000 0x003F      AND      R0,R0,#0x3F
+   \   0000015E   0x0040             LSLS     R0,R0,#+1
+   \   00000160   0x09C9             LSRS     R1,R1,#+7
+   \   00000162   0xFA50 0xF081      UXTAB    R0,R0,R1
+   \   00000166   0x1C40             ADDS     R0,R0,#+1
+   \   00000168   0xF89D 0x100D      LDRB     R1,[SP, #+13]
+   \   0000016C   0x0989             LSRS     R1,R1,#+6
+   \   0000016E   0x1E49             SUBS     R1,R1,#+1
+   \   00000170   0x4088             LSLS     R0,R0,R1
+   \   00000172   0x6020             STR      R0,[R4, #+0]
+   \   00000174   0xE00B             B.N      ??disk_control_21
+    546          					} else {					/* MMCv3 */
+    547          						*(DWORD*)buff = ((WORD)((csd[10] & 124) >> 2) + 1) * (((csd[11] & 3) << 3) + ((csd[11] & 224) >> 5) + 1);
+   \                     ??disk_control_20: (+1)
+   \   00000176   0xF3C0 0x0084      UBFX     R0,R0,#+2,#+5
+   \   0000017A   0x1C40             ADDS     R0,R0,#+1
+   \   0000017C   0xF001 0x0203      AND      R2,R1,#0x3
+   \   00000180   0x00D2             LSLS     R2,R2,#+3
+   \   00000182   0x0949             LSRS     R1,R1,#+5
+   \   00000184   0xFA52 0xF181      UXTAB    R1,R2,R1
+   \   00000188   0x1C49             ADDS     R1,R1,#+1
+   \   0000018A   0x4348             MULS     R0,R1,R0
+   \   0000018C   0x6020             STR      R0,[R4, #+0]
+    548          					}
+    549          					res = RES_OK;
+   \                     ??disk_control_21: (+1)
+   \   0000018E   0x2700             MOVS     R7,#+0
+   \   00000190   0xE042             B.N      ??disk_control_11
+    550          				}
+    551          			}
+    552          			break;
+    553          
+    554          		case MMC_GET_TYPE :		/* Get card type flags (1 byte) */
+    555          			*ptr = CardType;
+   \                     ??disk_control_22: (+1)
+   \   00000192   0x78E8             LDRB     R0,[R5, #+3]
+   \   00000194   0x7030             STRB     R0,[R6, #+0]
+    556          			res = RES_OK;
+   \   00000196   0x2700             MOVS     R7,#+0
+    557          			break;
+   \   00000198   0xE03E             B.N      ??disk_control_11
+    558          
+    559          		case MMC_GET_CSD :		/* Receive CSD as a data block (16 bytes) */
+    560          			if (send_cmd(CMD9, 0) == 0		/* READ_CSD */
+    561          				&& rcvr_datablock(ptr, 16))
+   \                     ??disk_control_23: (+1)
+   \   0000019A   0x2100             MOVS     R1,#+0
+   \   0000019C   0x2009             MOVS     R0,#+9
+   \   0000019E   0x.... 0x....      BL       send_cmd
+   \   000001A2   0x2800             CMP      R0,#+0
+   \   000001A4   0xD138             BNE.N    ??disk_control_11
+   \   000001A6   0x2110             MOVS     R1,#+16
+   \   000001A8   0x4630             MOV      R0,R6
+   \   000001AA   0x.... 0x....      BL       rcvr_datablock
+   \   000001AE   0x2800             CMP      R0,#+0
+   \   000001B0   0xD032             BEQ.N    ??disk_control_11
+    562          				res = RES_OK;
+   \   000001B2   0x2700             MOVS     R7,#+0
+   \   000001B4   0xE030             B.N      ??disk_control_11
+    563          			break;
+    564          
+    565          		case MMC_GET_CID :		/* Receive CID as a data block (16 bytes) */
+    566          			if (send_cmd(CMD10, 0) == 0		/* READ_CID */
+    567          				&& rcvr_datablock(ptr, 16))
+   \                     ??disk_control_24: (+1)
+   \   000001B6   0x2100             MOVS     R1,#+0
+   \   000001B8   0x200A             MOVS     R0,#+10
+   \   000001BA   0x.... 0x....      BL       send_cmd
+   \   000001BE   0x2800             CMP      R0,#+0
+   \   000001C0   0xD12A             BNE.N    ??disk_control_11
+   \   000001C2   0x2110             MOVS     R1,#+16
+   \   000001C4   0x4630             MOV      R0,R6
+   \   000001C6   0x.... 0x....      BL       rcvr_datablock
+   \   000001CA   0x2800             CMP      R0,#+0
+   \   000001CC   0xD024             BEQ.N    ??disk_control_11
+    568          				res = RES_OK;
+   \   000001CE   0x2700             MOVS     R7,#+0
+   \   000001D0   0xE022             B.N      ??disk_control_11
+    569          			break;
+    570          
+    571          		case MMC_GET_OCR :		/* Receive OCR as an R3 resp (4 bytes) */
+    572          			if (send_cmd(CMD58, 0) == 0) {	/* READ_OCR */
+   \                     ??disk_control_25: (+1)
+   \   000001D2   0x2100             MOVS     R1,#+0
+   \   000001D4   0x203A             MOVS     R0,#+58
+   \   000001D6   0x.... 0x....      BL       send_cmd
+   \   000001DA   0x2800             CMP      R0,#+0
+   \   000001DC   0xD11C             BNE.N    ??disk_control_11
+    573          				for (n = 4; n; n--) *ptr++ = rcvr_spi();
+   \   000001DE   0x2504             MOVS     R5,#+4
+   \   000001E0   0xE004             B.N      ??disk_control_26
+   \                     ??disk_control_27: (+1)
+   \   000001E2   0x.... 0x....      BL       rcvr_spi
+   \   000001E6   0xF806 0x0B01      STRB     R0,[R6], #+1
+   \   000001EA   0x1E6D             SUBS     R5,R5,#+1
+   \                     ??disk_control_26: (+1)
+   \   000001EC   0xB2ED             UXTB     R5,R5
+   \   000001EE   0x2D00             CMP      R5,#+0
+   \   000001F0   0xD1F7             BNE.N    ??disk_control_27
+    574          				res = RES_OK;
+   \   000001F2   0x2700             MOVS     R7,#+0
+   \   000001F4   0xE010             B.N      ??disk_control_11
+    575          			}
+    576          			break;
+    577          
+    578          		case MMC_GET_SDSTAT :	/* Receive SD status as a data block (64 bytes) */
+    579          			if (send_cmd(ACMD13, 0) == 0) {	/* SD_STATUS */
+   \                     ??disk_control_28: (+1)
+   \   000001F6   0x2100             MOVS     R1,#+0
+   \   000001F8   0x208D             MOVS     R0,#+141
+   \   000001FA   0x.... 0x....      BL       send_cmd
+   \   000001FE   0x2800             CMP      R0,#+0
+   \   00000200   0xD10A             BNE.N    ??disk_control_11
+    580          				rcvr_spi();
+   \   00000202   0x.... 0x....      BL       rcvr_spi
+    581          				if (rcvr_datablock(ptr, 64))
+   \   00000206   0x2140             MOVS     R1,#+64
+   \   00000208   0x4630             MOV      R0,R6
+   \   0000020A   0x.... 0x....      BL       rcvr_datablock
+   \   0000020E   0x2800             CMP      R0,#+0
+   \   00000210   0xD002             BEQ.N    ??disk_control_11
+    582          					res = RES_OK;
+   \   00000212   0x2700             MOVS     R7,#+0
+   \   00000214   0xE000             B.N      ??disk_control_11
+    583          			}
+    584          			break;
+    585          
+    586          		default:
+    587          			res = RES_PARERR;
+   \                     ??disk_control_9: (+1)
+   \   00000216   0x2704             MOVS     R7,#+4
+    588          		}
+    589          
+    590          		deselect();
+   \                     ??disk_control_11: (+1)
+   \   00000218   0x.... 0x....      BL       deselect
+    591          	}
+    592          
+    593          	return res;
+   \                     ??disk_control_7: (+1)
+   \   0000021C   0x4638             MOV      R0,R7
+   \                     ??disk_control_2: (+1)
+   \   0000021E   0xB005             ADD      SP,SP,#+20
+   \   00000220   0xBDF0             POP      {R4-R7,PC}       ;; return
+    594          }
+    595          
+    596          
+    597          
+    598          /*-----------------------------------------------------------------------*/
+    599          /* Device Timer Interrupt Procedure                                      */
+    600          /*-----------------------------------------------------------------------*/
+    601          /* This function must be called in period of 10ms                        */
+
+   \                                 In section .text, align 2, keep-with-next
+    602          void disk_timerproc( void )
+    603          {
+    604          	BYTE n, s;
+    605          
+    606          	n = Timer1;				/* 100Hz decrement timer */
+   \                     disk_timerproc: (+1)
+   \   00000000   0x....             LDR.N    R0,??DataTable18
+   \   00000002   0x7841             LDRB     R1,[R0, #+1]
+    607          	if (n) Timer1 = --n;
+   \   00000004   0x2900             CMP      R1,#+0
+   \   00000006   0xD001             BEQ.N    ??disk_timerproc_0
+   \   00000008   0x1E49             SUBS     R1,R1,#+1
+   \   0000000A   0x7041             STRB     R1,[R0, #+1]
+    608          	n = Timer2;
+   \                     ??disk_timerproc_0: (+1)
+   \   0000000C   0x7881             LDRB     R1,[R0, #+2]
+    609          	if (n) Timer2 = --n;
+   \   0000000E   0x2900             CMP      R1,#+0
+   \   00000010   0xD001             BEQ.N    ??disk_timerproc_1
+   \   00000012   0x1E49             SUBS     R1,R1,#+1
+   \   00000014   0x7081             STRB     R1,[R0, #+2]
+    610          
+    611          	s = Stat;
+   \                     ??disk_timerproc_1: (+1)
+   \   00000016   0x7801             LDRB     R1,[R0, #+0]
+    612          
+    613          	if (SOCKWP)				/* Write protected */
+    614          		s |= STA_PROTECT;
+    615          	else					/* Write enabled */
+    616          		s &= ~STA_PROTECT;
+    617          
+    618          	if (SOCKINS)			/* Card inserted */
+    619          		s &= ~STA_NODISK;
+    620          	else					/* Socket empty */
+    621          		s |= (STA_NODISK | STA_NOINIT);
+    622          
+    623          	Stat = s;				/* Update MMC status */
+   \   00000018   0xF001 0x01F9      AND      R1,R1,#0xF9
+   \   0000001C   0x7001             STRB     R1,[R0, #+0]
+    624          }
+   \   0000001E   0x4770             BX       LR               ;; return
+    625          
+    626          
+    627          
+    628          
+    629          /**************************************************************************************/
+    630          /**************************************************************************************/
+    631          /**************************************************************************************/
+    632          
+    633          /*----------------------------------------------------------------------------------*/
+    634          /* @brief	None																	*/
+    635          /* @param	None																	*/
+    636          /* @return	None																	*/
+    637          /*----------------------------------------------------------------------------------*/
+
+   \                                 In section .text, align 2, keep-with-next
+    638          void SD_Timer_Init( void )
+    639          {
+   \                     SD_Timer_Init: (+1)
+   \   00000000   0xB51F             PUSH     {R0-R4,LR}
+    640          	NVIC_InitTypeDef NVIC_InitStructure;
+    641          	TIM_TimeBaseInitTypeDef TIM_TimeBaseStructure;
+    642          	
+    643          	RCC_APB1PeriphClockCmd( RCC_APB1Periph_TIM3, ENABLE );
+   \   00000002   0x2101             MOVS     R1,#+1
+   \   00000004   0x2002             MOVS     R0,#+2
+   \   00000006   0x.... 0x....      BL       RCC_APB1PeriphClockCmd
+    644          	
+    645          	NVIC_InitStructure.NVIC_IRQChannel = TIM3_IRQn;
+   \   0000000A   0x201D             MOVS     R0,#+29
+   \   0000000C   0xF88D 0x0000      STRB     R0,[SP, #+0]
+    646          	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 12;
+   \   00000010   0x200C             MOVS     R0,#+12
+   \   00000012   0xF88D 0x0001      STRB     R0,[SP, #+1]
+    647          	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
+   \   00000016   0x2000             MOVS     R0,#+0
+   \   00000018   0xF88D 0x0002      STRB     R0,[SP, #+2]
+    648          	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
+   \   0000001C   0x2001             MOVS     R0,#+1
+   \   0000001E   0xF88D 0x0003      STRB     R0,[SP, #+3]
+    649          	NVIC_Init( &NVIC_InitStructure );
+   \   00000022   0xA800             ADD      R0,SP,#+0
+   \   00000024   0x.... 0x....      BL       NVIC_Init
+    650          	
+    651          	/* must be 100 Hz or 10ms */
+    652          	TIM_TimeBaseStructure.TIM_Prescaler = 6; //4;
+   \   00000028   0x2006             MOVS     R0,#+6
+   \   0000002A   0xF8AD 0x0004      STRH     R0,[SP, #+4]
+    653          	TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;
+   \   0000002E   0x2000             MOVS     R0,#+0
+   \   00000030   0xF8AD 0x0006      STRH     R0,[SP, #+6]
+    654          	TIM_TimeBaseStructure.TIM_Period = 57050; //50000;
+   \   00000034   0xF64D 0x60DA      MOVW     R0,#+57050
+   \   00000038   0x9002             STR      R0,[SP, #+8]
+    655          	TIM_TimeBaseStructure.TIM_ClockDivision = 0;
+   \   0000003A   0x2000             MOVS     R0,#+0
+   \   0000003C   0xF8AD 0x000C      STRH     R0,[SP, #+12]
+    656          	TIM_TimeBaseStructure.TIM_RepetitionCounter = 0;
+   \   00000040   0xF88D 0x000E      STRB     R0,[SP, #+14]
+    657          	TIM_TimeBaseInit( TIM3, &TIM_TimeBaseStructure );
+   \   00000044   0x....             LDR.N    R4,??DataTable18_3  ;; 0x40000400
+   \   00000046   0xA901             ADD      R1,SP,#+4
+   \   00000048   0x4620             MOV      R0,R4
+   \   0000004A   0x.... 0x....      BL       TIM_TimeBaseInit
+    658          	
+    659          	TIM_Cmd( TIM3, ENABLE );
+   \   0000004E   0x2101             MOVS     R1,#+1
+   \   00000050   0x4620             MOV      R0,R4
+   \   00000052   0x.... 0x....      BL       TIM_Cmd
+    660          	
+    661          	TIM_ITConfig( TIM3, TIM_IT_Update, ENABLE );
+   \   00000056   0x2201             MOVS     R2,#+1
+   \   00000058   0x4611             MOV      R1,R2
+   \   0000005A   0x4620             MOV      R0,R4
+   \   0000005C   0x.... 0x....      BL       TIM_ITConfig
+    662          }
+   \   00000060   0xBD1F             POP      {R0-R4,PC}       ;; return
+    663          
+    664          /*----------------------------------------------------------------------------------*/
+
+   \                                 In section .text, align 2, keep-with-next
+    665          void SD_Timer_Deinit( void )
+    666          {
+   \                     SD_Timer_Deinit: (+1)
+   \   00000000   0xB510             PUSH     {R4,LR}
+    667          	TIM_Cmd( TIM3, DISABLE );
+   \   00000002   0x....             LDR.N    R4,??DataTable18_3  ;; 0x40000400
+   \   00000004   0x2100             MOVS     R1,#+0
+   \   00000006   0x4620             MOV      R0,R4
+   \   00000008   0x.... 0x....      BL       TIM_Cmd
+    668          	TIM_DeInit( TIM3 );
+   \   0000000C   0x4620             MOV      R0,R4
+   \   0000000E   0x.... 0x....      BL       TIM_DeInit
+    669          	TIM_SetCounter( TIM3, 0 );
+   \   00000012   0x2100             MOVS     R1,#+0
+   \   00000014   0x4620             MOV      R0,R4
+   \   00000016   0xE8BD 0x4010      POP      {R4,LR}
+   \   0000001A   0x.... 0x....      B.W      TIM_SetCounter
+    670          }
+    671          
+    672          
+
+   \                                 In section .text, align 2, keep-with-next
+    673          void SD_LowLevel_Deinit( void )
+    674          {
+   \                     SD_LowLevel_Deinit: (+1)
+   \   00000000   0xB530             PUSH     {R4,R5,LR}
+   \   00000002   0xB083             SUB      SP,SP,#+12
+    675          	GPIO_InitTypeDef  GPIO_InitStructure;
+    676            
+    677          	GPIO_SetBits( SD_EN_PORT, SD_EN_PIN );
+   \   00000004   0x....             LDR.N    R4,??DataTable18_4  ;; 0x40020400
+   \   00000006   0xF44F 0x7180      MOV      R1,#+256
+   \   0000000A   0x4620             MOV      R0,R4
+   \   0000000C   0x.... 0x....      BL       GPIO_SetBits
+    678          
+    679          	
+    680          	SPI_Cmd(SD_SPI, DISABLE); /*!< SD_SPI disable */
+   \   00000010   0x....             LDR.N    R5,??DataTable18_1  ;; 0x40013000
+   \   00000012   0x2100             MOVS     R1,#+0
+   \   00000014   0x4628             MOV      R0,R5
+   \   00000016   0x.... 0x....      BL       SPI_Cmd
+    681          	SPI_I2S_DeInit(SD_SPI);   /*!< DeInitializes the SD_SPI */
+   \   0000001A   0x4628             MOV      R0,R5
+   \   0000001C   0x.... 0x....      BL       SPI_I2S_DeInit
+    682          	
+    683          	/*!< SD_SPI Periph clock disable */
+    684          	SD_SPI_RCC_DISABLE;
+   \   00000020   0x2100             MOVS     R1,#+0
+   \   00000022   0xF44F 0x5080      MOV      R0,#+4096
+   \   00000026   0x.... 0x....      BL       RCC_APB2PeriphClockCmd
+    685          	
+    686          	/*!< Configure SD_SPI pins: SCK */
+    687          	GPIO_InitStructure.GPIO_Pin = SD_SCK_PIN;
+   \   0000002A   0x2008             MOVS     R0,#+8
+   \   0000002C   0x9000             STR      R0,[SP, #+0]
+    688          	GPIO_InitStructure.GPIO_Mode =  GPIO_Mode_IN;
+   \   0000002E   0x2000             MOVS     R0,#+0
+   \   00000030   0x9001             STR      R0,[SP, #+4]
+    689          	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_2MHz;
+    690          	GPIO_InitStructure.GPIO_OType =  GPIO_OType_PP;
+    691            GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_NOPULL;
+    692          	GPIO_Init(SD_SCK_PORT, &GPIO_InitStructure);
+   \   00000032   0xA900             ADD      R1,SP,#+0
+   \   00000034   0x4620             MOV      R0,R4
+   \   00000036   0x.... 0x....      BL       GPIO_Init
+    693          	
+    694          	/*!< Configure SD_SPI pins: MISO */
+    695          	GPIO_InitStructure.GPIO_Pin = SD_MISO_PIN;
+   \   0000003A   0x2010             MOVS     R0,#+16
+   \   0000003C   0x9000             STR      R0,[SP, #+0]
+    696          	GPIO_Init(SD_MISO_PORT, &GPIO_InitStructure);
+   \   0000003E   0xA900             ADD      R1,SP,#+0
+   \   00000040   0x4620             MOV      R0,R4
+   \   00000042   0x.... 0x....      BL       GPIO_Init
+    697          	
+    698          	/*!< Configure SD_SPI pins: MOSI */
+    699          	GPIO_InitStructure.GPIO_Pin = SD_MOSI_PIN;
+   \   00000046   0x2020             MOVS     R0,#+32
+   \   00000048   0x9000             STR      R0,[SP, #+0]
+    700          	GPIO_Init(SD_MISO_PORT, &GPIO_InitStructure);
+   \   0000004A   0xA900             ADD      R1,SP,#+0
+   \   0000004C   0x4620             MOV      R0,R4
+   \   0000004E   0x.... 0x....      BL       GPIO_Init
+    701          	
+    702          	/*!< Configure SD_SPI_CS_PIN pin: SD Card CS pin */
+    703          	GPIO_InitStructure.GPIO_Pin = SD_CS_PIN;
+   \   00000052   0xF44F 0x6000      MOV      R0,#+2048
+   \   00000056   0x9000             STR      R0,[SP, #+0]
+    704          	GPIO_Init(SD_CS_PORT, &GPIO_InitStructure);
+   \   00000058   0xA900             ADD      R1,SP,#+0
+   \   0000005A   0x....             LDR.N    R0,??DataTable18_2  ;; 0x40020800
+   \   0000005C   0x.... 0x....      BL       GPIO_Init
+    705          	
+    706          	//  /*!< Configure SD_SPI_DETECT_PIN pin: SD Card detect pin */
+    707          	//  GPIO_InitStructure.GPIO_Pin = SD_DETECT_PIN;
+    708          	//  GPIO_Init(SD_DETECT_GPIO_PORT, &GPIO_InitStructure);
+    709          }
+   \   00000060   0xBD37             POP      {R0-R2,R4,R5,PC}  ;; return
+    710          
+    711          
+    712          
+    713          /*----------------------------------------------------------------------------------*/
+    714          /* @brief	Initializes the SD_SPI and CS pins										*/
+    715          /* @param	None																	*/
+    716          /* @return	None																	*/
+    717          /*----------------------------------------------------------------------------------*/
+
+   \                                 In section .text, align 2, keep-with-next
+    718          void SD_LowLevel_Init(void)
+    719          {
+   \                     SD_LowLevel_Init: (+1)
+   \   00000000   0xB510             PUSH     {R4,LR}
+   \   00000002   0xB088             SUB      SP,SP,#+32
+    720          	GPIO_InitTypeDef  GPIO_InitStructure;
+    721          	SPI_InitTypeDef   SPI_InitStructure;
+    722          	
+    723          	/*!< SD_SPI_CS_GPIO, SD_SPI_MOSI_GPIO, SD_SPI_MISO_GPIO, SD_SPI_DETECT_GPIO
+    724          	and SD_SPI_SCK_GPIO Periph clock enable */
+    725          	SD_GPIO_RCC_ENABLE;
+   \   00000004   0x2101             MOVS     R1,#+1
+   \   00000006   0x2006             MOVS     R0,#+6
+   \   00000008   0x.... 0x....      BL       RCC_AHB1PeriphClockCmd
+    726          	
+    727          	/*!< SD_SPI Periph clock enable */
+    728          	SD_SPI_RCC_ENABLE;
+   \   0000000C   0x2101             MOVS     R1,#+1
+   \   0000000E   0xF44F 0x5080      MOV      R0,#+4096
+   \   00000012   0x.... 0x....      BL       RCC_APB2PeriphClockCmd
+    729          	
+    730          	/*!< Configure SD_SPI pins: SCK*/
+    731          	GPIO_InitStructure.GPIO_Pin = SD_SCK_PIN;
+   \   00000016   0x2008             MOVS     R0,#+8
+   \   00000018   0x9000             STR      R0,[SP, #+0]
+    732          	GPIO_InitStructure.GPIO_Mode =  GPIO_Mode_AF;
+   \   0000001A   0x2002             MOVS     R0,#+2
+   \   0000001C   0xF88D 0x0004      STRB     R0,[SP, #+4]
+    733          	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_100MHz;
+   \   00000020   0x2003             MOVS     R0,#+3
+   \   00000022   0xF88D 0x0005      STRB     R0,[SP, #+5]
+    734          	GPIO_InitStructure.GPIO_OType =  GPIO_OType_PP;
+   \   00000026   0x2000             MOVS     R0,#+0
+   \   00000028   0xF8AD 0x0006      STRH     R0,[SP, #+6]
+    735            GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_NOPULL;
+    736            GPIO_PinAFConfig(SD_SCK_PORT, SD_SCK_PINSOURCE, SD_SPI_AF);
+   \   0000002C   0x....             LDR.N    R4,??DataTable18_4  ;; 0x40020400
+   \   0000002E   0x2205             MOVS     R2,#+5
+   \   00000030   0x2103             MOVS     R1,#+3
+   \   00000032   0x4620             MOV      R0,R4
+   \   00000034   0x.... 0x....      BL       GPIO_PinAFConfig
+    737          	GPIO_Init(SD_SCK_PORT, &GPIO_InitStructure);
+   \   00000038   0xA900             ADD      R1,SP,#+0
+   \   0000003A   0x4620             MOV      R0,R4
+   \   0000003C   0x.... 0x....      BL       GPIO_Init
+    738          	
+    739          	/*!< Configure SD_SPI pins: MOSI*/
+    740          	GPIO_InitStructure.GPIO_Pin = SD_MOSI_PIN;
+   \   00000040   0x2020             MOVS     R0,#+32
+   \   00000042   0x9000             STR      R0,[SP, #+0]
+    741          	GPIO_InitStructure.GPIO_Mode =  GPIO_Mode_AF;
+   \   00000044   0x2002             MOVS     R0,#+2
+   \   00000046   0xF88D 0x0004      STRB     R0,[SP, #+4]
+    742          	GPIO_InitStructure.GPIO_OType =  GPIO_OType_PP;
+   \   0000004A   0x2000             MOVS     R0,#+0
+   \   0000004C   0xF8AD 0x0006      STRH     R0,[SP, #+6]
+    743            GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_NOPULL;
+    744          	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_100MHz;
+   \   00000050   0x2003             MOVS     R0,#+3
+   \   00000052   0xF88D 0x0005      STRB     R0,[SP, #+5]
+    745            GPIO_PinAFConfig(SD_MOSI_PORT, SD_MOSI_PINSOURCE, SD_SPI_AF);
+   \   00000056   0x2205             MOVS     R2,#+5
+   \   00000058   0x4611             MOV      R1,R2
+   \   0000005A   0x4620             MOV      R0,R4
+   \   0000005C   0x.... 0x....      BL       GPIO_PinAFConfig
+    746          	GPIO_Init(SD_MOSI_PORT, &GPIO_InitStructure);
+   \   00000060   0xA900             ADD      R1,SP,#+0
+   \   00000062   0x4620             MOV      R0,R4
+   \   00000064   0x.... 0x....      BL       GPIO_Init
+    747          	
+    748          	/*!< Configure SD_SPI pins: MISO */
+    749          	GPIO_InitStructure.GPIO_Pin = SD_MISO_PIN;
+   \   00000068   0x2010             MOVS     R0,#+16
+   \   0000006A   0x9000             STR      R0,[SP, #+0]
+    750          	GPIO_InitStructure.GPIO_Mode =  GPIO_Mode_AF;
+   \   0000006C   0x2002             MOVS     R0,#+2
+   \   0000006E   0xF88D 0x0004      STRB     R0,[SP, #+4]
+    751          	GPIO_InitStructure.GPIO_OType =  GPIO_OType_PP;
+   \   00000072   0x2000             MOVS     R0,#+0
+   \   00000074   0xF88D 0x0006      STRB     R0,[SP, #+6]
+    752            GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_UP;
+   \   00000078   0x2001             MOVS     R0,#+1
+   \   0000007A   0xF88D 0x0007      STRB     R0,[SP, #+7]
+    753          	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_100MHz;
+   \   0000007E   0x2003             MOVS     R0,#+3
+   \   00000080   0xF88D 0x0005      STRB     R0,[SP, #+5]
+    754            GPIO_PinAFConfig(SD_MISO_PORT, SD_MISO_PINSOURCE, SD_SPI_AF);
+   \   00000084   0x2205             MOVS     R2,#+5
+   \   00000086   0x2104             MOVS     R1,#+4
+   \   00000088   0x4620             MOV      R0,R4
+   \   0000008A   0x.... 0x....      BL       GPIO_PinAFConfig
+    755          	GPIO_Init(SD_MISO_PORT, &GPIO_InitStructure);
+   \   0000008E   0xA900             ADD      R1,SP,#+0
+   \   00000090   0x4620             MOV      R0,R4
+   \   00000092   0x.... 0x....      BL       GPIO_Init
+    756          	
+    757          	/*!< Configure SD_SPI_CS_PIN pin: SD Card CS pin */
+    758          	GPIO_InitStructure.GPIO_Pin = SD_CS_PIN;
+   \   00000096   0xF44F 0x6000      MOV      R0,#+2048
+   \   0000009A   0x9000             STR      R0,[SP, #+0]
+    759          	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_100MHz;
+   \   0000009C   0x2003             MOVS     R0,#+3
+   \   0000009E   0xF88D 0x0005      STRB     R0,[SP, #+5]
+    760          	GPIO_InitStructure.GPIO_Mode =  GPIO_Mode_OUT;
+   \   000000A2   0x2001             MOVS     R0,#+1
+   \   000000A4   0xF88D 0x0004      STRB     R0,[SP, #+4]
+    761          	GPIO_InitStructure.GPIO_OType =  GPIO_OType_PP;
+   \   000000A8   0x2000             MOVS     R0,#+0
+   \   000000AA   0xF88D 0x0006      STRB     R0,[SP, #+6]
+    762          	GPIO_Init(SD_CS_PORT, &GPIO_InitStructure);
+   \   000000AE   0xA900             ADD      R1,SP,#+0
+   \   000000B0   0x....             LDR.N    R0,??DataTable18_2  ;; 0x40020800
+   \   000000B2   0x.... 0x....      BL       GPIO_Init
+    763          
+    764          	/*!< Configure SD_SPI_EN_PIN pin: SD Card EN pin */
+    765          	GPIO_ResetBits( SD_EN_PORT, SD_EN_PIN );
+   \   000000B6   0xF44F 0x7180      MOV      R1,#+256
+   \   000000BA   0x4620             MOV      R0,R4
+   \   000000BC   0x.... 0x....      BL       GPIO_ResetBits
+    766          	GPIO_InitStructure.GPIO_Pin = SD_EN_PIN;
+   \   000000C0   0xF44F 0x7080      MOV      R0,#+256
+   \   000000C4   0x9000             STR      R0,[SP, #+0]
+    767          	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_100MHz;
+   \   000000C6   0x2003             MOVS     R0,#+3
+   \   000000C8   0xF88D 0x0005      STRB     R0,[SP, #+5]
+    768          	GPIO_InitStructure.GPIO_Mode =  GPIO_Mode_OUT;
+   \   000000CC   0x2001             MOVS     R0,#+1
+   \   000000CE   0xF88D 0x0004      STRB     R0,[SP, #+4]
+    769          	GPIO_InitStructure.GPIO_OType =  GPIO_OType_PP;
+   \   000000D2   0x2000             MOVS     R0,#+0
+   \   000000D4   0xF88D 0x0006      STRB     R0,[SP, #+6]
+    770          	GPIO_Init(SD_EN_PORT, &GPIO_InitStructure);
+   \   000000D8   0xA900             ADD      R1,SP,#+0
+   \   000000DA   0x4620             MOV      R0,R4
+   \   000000DC   0x.... 0x....      BL       GPIO_Init
+    771          	
+    772          	//  /*!< Configure SD_SPI_DETECT_PIN pin: SD Card detect pin */
+    773          	//  GPIO_InitStructure.GPIO_Pin = SD_DETECT_PIN;
+    774          	//  GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPU;
+    775          	//  GPIO_Init(SD_DETECT_GPIO_PORT, &GPIO_InitStructure);
+    776          	
+    777          	/*!< SD_SPI Config */
+    778          	SPI_InitStructure.SPI_Direction = SPI_Direction_2Lines_FullDuplex;
+   \   000000E0   0x2000             MOVS     R0,#+0
+   \   000000E2   0xF8AD 0x0008      STRH     R0,[SP, #+8]
+    779          	SPI_InitStructure.SPI_Mode = SPI_Mode_Master;
+   \   000000E6   0xF44F 0x7082      MOV      R0,#+260
+   \   000000EA   0xF8AD 0x000A      STRH     R0,[SP, #+10]
+    780          	SPI_InitStructure.SPI_DataSize = SPI_DataSize_8b;
+   \   000000EE   0x2000             MOVS     R0,#+0
+   \   000000F0   0x9003             STR      R0,[SP, #+12]
+    781          	SPI_InitStructure.SPI_CPOL = SPI_CPOL_Low;
+    782          	SPI_InitStructure.SPI_CPHA = SPI_CPHA_1Edge;
+   \   000000F2   0xF8AD 0x0010      STRH     R0,[SP, #+16]
+    783          	SPI_InitStructure.SPI_NSS = SPI_NSS_Soft;
+   \   000000F6   0xF44F 0x7000      MOV      R0,#+512
+   \   000000FA   0xF8AD 0x0012      STRH     R0,[SP, #+18]
+    784          	SPI_InitStructure.SPI_BaudRatePrescaler = SPI_BaudRatePrescaler_64;
+   \   000000FE   0x2028             MOVS     R0,#+40
+   \   00000100   0xF8AD 0x0014      STRH     R0,[SP, #+20]
+    785          	SPI_InitStructure.SPI_FirstBit = SPI_FirstBit_MSB;
+   \   00000104   0x2000             MOVS     R0,#+0
+   \   00000106   0xF8AD 0x0016      STRH     R0,[SP, #+22]
+    786          	SPI_InitStructure.SPI_CRCPolynomial = 7;
+   \   0000010A   0x2007             MOVS     R0,#+7
+   \   0000010C   0xF8AD 0x0018      STRH     R0,[SP, #+24]
+    787          	SPI_Init( SD_SPI, &SPI_InitStructure );
+   \   00000110   0x....             LDR.N    R4,??DataTable18_1  ;; 0x40013000
+   \   00000112   0xA902             ADD      R1,SP,#+8
+   \   00000114   0x4620             MOV      R0,R4
+   \   00000116   0x.... 0x....      BL       SPI_Init
+    788          	
+    789          	SPI_Cmd( SD_SPI, ENABLE ); /*!< SD_SPI enable */
+   \   0000011A   0x2101             MOVS     R1,#+1
+   \   0000011C   0x4620             MOV      R0,R4
+   \   0000011E   0x.... 0x....      BL       SPI_Cmd
+    790          }
+   \   00000122   0xB008             ADD      SP,SP,#+32
+   \   00000124   0xBD10             POP      {R4,PC}          ;; return
+
+   \                                 In section .text, align 4, keep-with-next
+   \                     ??DataTable18:
+   \   00000000   0x........         DC32     Stat
+
+   \                                 In section .text, align 4, keep-with-next
+   \                     ??DataTable18_1:
+   \   00000000   0x40013000         DC32     0x40013000
+
+   \                                 In section .text, align 4, keep-with-next
+   \                     ??DataTable18_2:
+   \   00000000   0x40020800         DC32     0x40020800
+
+   \                                 In section .text, align 4, keep-with-next
+   \                     ??DataTable18_3:
+   \   00000000   0x40000400         DC32     0x40000400
+
+   \                                 In section .text, align 4, keep-with-next
+   \                     ??DataTable18_4:
+   \   00000000   0x40020400         DC32     0x40020400
+
+   \                                 In section .text, align 4, keep-with-next
+   \                     ?_0:
+   \   00000000   0x53 0x44          DC8 "SD Type"
+   \              0x20 0x54    
+   \              0x79 0x70    
+   \              0x65 0x00    
+
+   Maximum stack usage in bytes:
+
+   .cstack Function
+   ------- --------
+       8   CS_HIGH
+         0   -> GPIO_SetBits
+         8   -> SPI_I2S_GetFlagStatus
+       8   CS_LOW
+         0   -> GPIO_ResetBits
+         8   -> SPI_I2S_GetFlagStatus
+      32   FCLK_FAST
+        32   -> SPI_Cmd
+        32   -> SPI_Init
+      32   FCLK_SLOW
+        32   -> SPI_Cmd
+        32   -> SPI_Init
+      32   SD_Init
+        32   -> FCLK_FAST
+        32   -> TLcdTrace::AddLine(char const *, int)
+        32   -> deselect
+        32   -> power_off
+        32   -> power_on
+        32   -> rcvr_spi
+        32   -> send_cmd
+      24   SD_LowLevel_Deinit
+        24   -> GPIO_Init
+        24   -> GPIO_SetBits
+        24   -> RCC_APB2PeriphClockCmd
+        24   -> SPI_Cmd
+        24   -> SPI_I2S_DeInit
+      40   SD_LowLevel_Init
+        40   -> GPIO_Init
+        40   -> GPIO_PinAFConfig
+        40   -> GPIO_ResetBits
+        40   -> RCC_AHB1PeriphClockCmd
+        40   -> RCC_APB2PeriphClockCmd
+        40   -> SPI_Cmd
+        40   -> SPI_Init
+      16   SD_ReadMultiBlocks
+        16   -> deselect
+        16   -> rcvr_datablock
+        16   -> send_cmd
+       8   SD_Timer_Deinit
+         8   -> TIM_Cmd
+         8   -> TIM_DeInit
+         0   -> TIM_SetCounter
+      24   SD_Timer_Init
+        24   -> NVIC_Init
+        24   -> RCC_APB1PeriphClockCmd
+        24   -> TIM_Cmd
+        24   -> TIM_ITConfig
+        24   -> TIM_TimeBaseInit
+      16   SD_WriteMultiBlocks
+        16   -> deselect
+        16   -> send_cmd
+        16   -> xmit_datablock
+       8   deselect
+         8   -> CS_HIGH
+         0   -> rcvr_spi
+      40   disk_control
+        40   -> deselect
+        40   -> power_off
+        40   -> power_status
+        40   -> rcvr_datablock
+        40   -> rcvr_spi
+        40   -> select
+        40   -> send_cmd
+       0   disk_timerproc
+       8   power_off
+         8   -> SD_LowLevel_Deinit
+         8   -> SD_Timer_Deinit
+       8   power_on
+         8   -> CS_HIGH
+         8   -> SD_LowLevel_Init
+         8   -> SD_Timer_Init
+       0   power_status
+      16   rcvr_datablock
+        16   -> rcvr_spi
+        16   -> rcvr_spi_m
+       0   rcvr_spi
+         0   -> xmit_spi
+       8   rcvr_spi_m
+         8   -> xmit_spi
+       8   select
+         8   -> CS_LOW
+         8   -> deselect
+         8   -> rcvr_spi
+         8   -> wait_ready
+      16   send_cmd
+        16   -> deselect
+        16   -> rcvr_spi
+        16   -> select
+        16   -> send_cmd
+        16   -> xmit_spi
+       8   wait_ready
+         8   -> rcvr_spi
+      16   xmit_datablock
+        16   -> rcvr_spi
+        16   -> wait_ready
+        16   -> xmit_spi
+      16   xmit_spi
+        16   -> SPI_I2S_GetFlagStatus
+        16   -> SPI_I2S_ReceiveData
+        16   -> SPI_I2S_SendData
+
+
+   Section sizes:
+
+   Bytes  Function/Label
+   -----  --------------
+       4  ??DataTable18
+       4  ??DataTable18_1
+       4  ??DataTable18_2
+       4  ??DataTable18_3
+       4  ??DataTable18_4
+       8  ?_0
+      32  CS_HIGH
+      32  CS_LOW
+      68  FCLK_FAST
+      76  FCLK_SLOW
+     294  SD_Init
+      98  SD_LowLevel_Deinit
+     294  SD_LowLevel_Init
+     134  SD_ReadMultiBlocks
+      30  SD_Timer_Deinit
+      98  SD_Timer_Init
+     164  SD_WriteMultiBlocks
+       4  Stat
+          Timer1
+          Timer2
+          CardType
+       2  Timer
+      12  deselect
+     546  disk_control
+      32  disk_timerproc
+      24  power_off
+      30  power_on
+       4  power_status
+      84  rcvr_datablock
+       4  rcvr_spi
+      14  rcvr_spi_m
+      30  select
+     126  send_cmd
+      36  wait_ready
+      82  xmit_datablock
+      50  xmit_spi
+
+ 
+     2 bytes in section .bss
+     4 bytes in section .data
+ 2 422 bytes in section .text
+ 
+ 2 422 bytes of CODE memory
+     6 bytes of DATA memory
+
+Errors: none
+Warnings: none

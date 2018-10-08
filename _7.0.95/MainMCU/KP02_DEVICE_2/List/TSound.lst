@@ -1,0 +1,571 @@
+###############################################################################
+#
+# IAR ANSI C/C++ Compiler V7.40.2.8542/W32 for ARM        08/Oct/2018  09:58:16
+# Copyright 1999-2015 IAR Systems AB.
+#
+#    Cpu mode     =  thumb
+#    Endian       =  little
+#    Source file  =  D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\TSound.cpp
+#    Command line =  
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\TSound.cpp -D IAR_ARM_CM4
+#        -D USE_STDPERIPH_DRIVER -D STM32F40_41xxx -D HAVE_CONFIG_H -D
+#        SD_SPI_MODE -D USE_FULL_ASSERT -D DEVICE_2 -D TFT -D STENDBUY_NOT_USE
+#        -D SCREEN_NOT_ROTATE -D USE_ADS1292R -D DISPLAY_GPIO -D
+#        BUFFERED_TRANSFER -D LCD_TRACE -lCN
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\KP02_DEVICE_2\List\ -o
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\KP02_DEVICE_2\Obj\
+#        --no_unroll --no_inline --no_tbaa --no_scheduling --debug
+#        --endian=little --cpu=Cortex-M4F -e --fpu=VFPv4_sp --dlib_config
+#        "D:\Program Files (x86)\IAR Systems\Embedded Workbench
+#        7.2\arm\INC\c\DLib_Config_Normal.h" -I
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\ -I
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\FatFs\ -I
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\FreeRTOS\Source\include\
+#        -I
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\FreeRTOS\Source\portable\IAR\ARM_CM3\
+#        -I
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\Libraries\CMSIS\CM4\CoreSupport\
+#        -I
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\Libraries\CMSIS\CM4\DeviceSupport\STM32F4xx\
+#        -I
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\Libraries\STM32F4xx_StdPeriph_Driver\inc\
+#        -I
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\Libraries\STM32F10x_Speex_Lib\include\speex\
+#        -I
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\Libraries\STM32F10x_Speex_Lib\include\
+#        -I
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\Libraries\STM32F10x_Speex_Lib\libspeex\
+#        -I
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\Libraries\STM32F10x_Speex_Lib\STM32\include\speex\
+#        -I
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\Libraries\STM32F10x_Speex_Lib\STM32\include\
+#        -I
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\Libraries\STM32F10x_Speex_Lib\STM32\
+#        -I
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\Libraries\STM32F10x_Speex_Lib\STM32\libspeex\
+#        -I
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\Libraries\STM32F10x_Speex_Lib\STM32\libspeex\iar\
+#        -I D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\Fonts\ -Om --ec++
+#    List file    =  
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\KP02_DEVICE_2\List\TSound.lst
+#    Object file  =  
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\KP02_DEVICE_2\Obj\TSound.o
+#
+###############################################################################
+
+D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\TSound.cpp
+      1          /*
+      2              Title:    
+      3              Author:   VN Asliuk(Cardian)
+      4              Date:     02.09.2010 13:06:23
+      5              Purpose:  
+      6              Software: 
+      7              Hardware: 
+      8              Note:    
+      9          */
+     10          //------------------------------------------------------------------------------------
+     11          #include "TSound.h"
+     12          #include "TGuiObjectsV2.h"
+     13          #include "TAppProcessor.h"
+     14          //------------------------------------------------------------------------------------
+
+   \                                 In section .data, align 4
+     15          uint32_t  TSound::CurrentSound = _modiStartUp;
+     16          xTaskHandle TSound::xhSound;
+     17          bool TSound::Enabled = true;	
+   \                     _ZN6TSound7EnabledE:
+   \   00000000   0x01               DC8 1
+   \   00000001   0x00 0x00          DC8 0, 0, 0
+   \              0x00         
+   \                     _ZN6TSound12CurrentSoundE:
+   \   00000004   0xC6000000         DC32 3321888768
+   \                     _ZN6TSound7xhSoundE:
+   \   00000008   0x00 0x00          DC8 0, 0, 0, 0
+   \              0x00 0x00    
+     18          //------------------------------------------------------------------------------------
+     19          
+
+   \                                 In section .text, align 2, keep-with-next
+     20          void TSound::SoundInit()
+     21          {
+   \                     _ZN6TSound9SoundInitEv: (+1)
+   \   00000000   0xB500             PUSH     {LR}
+   \   00000002   0xB085             SUB      SP,SP,#+20
+     22          	Sound_PHY_Init(); 
+   \   00000004   0x.... 0x....      BL       _ZN6TSound14Sound_PHY_InitEv
+     23          	xTaskCreate(TASK_SoundProcessor, (signed char *) "SND", configMINIMAL_STACK_SIZE, NULL, tskIDLE_PRIORITY, &xhSound);
+   \   00000008   0x2000             MOVS     R0,#+0
+   \   0000000A   0x9003             STR      R0,[SP, #+12]
+   \   0000000C   0x9002             STR      R0,[SP, #+8]
+   \   0000000E   0x....             LDR.N    R0,??DataTable7_1
+   \   00000010   0x9001             STR      R0,[SP, #+4]
+   \   00000012   0x2000             MOVS     R0,#+0
+   \   00000014   0x9000             STR      R0,[SP, #+0]
+   \   00000016   0x4603             MOV      R3,R0
+   \   00000018   0x2280             MOVS     R2,#+128
+   \   0000001A   0x....             ADR.N    R1,??DataTable7  ;; "SND"
+   \   0000001C   0x.... 0x....      ADR.W    R0,_ZN6TSound19TASK_SoundProcessorEPv
+   \   00000020   0x.... 0x....      BL       xTaskGenericCreate
+     24          	vTaskDelay(100/portTICK_RATE_MS);			
+   \   00000024   0x2064             MOVS     R0,#+100
+   \   00000026   0xB005             ADD      SP,SP,#+20
+   \   00000028   0xF85D 0xEB04      POP      {LR}
+   \   0000002C   0x.... 0x....      B.W      vTaskDelay
+     25          }
+     26          //------------------------------------------------------------------------------------
+     27          
+
+   \                                 In section .text, align 2, keep-with-next
+     28          void TSound::Sound_PHY_Init()
+     29          {
+   \                     _ZN6TSound14Sound_PHY_InitEv: (+1)
+   \   00000000   0xB530             PUSH     {R4,R5,LR}
+   \   00000002   0xB08B             SUB      SP,SP,#+44
+     30          	GPIO_InitTypeDef GPIO_InitStructure;
+     31          	
+     32          	//Enable Clocks
+     33          	RCC_AHB1PeriphClockCmd(BUZZER_P_GPIO_CLK | BUZZER_N_GPIO_CLK, ENABLE);
+   \   00000004   0x2101             MOVS     R1,#+1
+   \   00000006   0x2006             MOVS     R0,#+6
+   \   00000008   0x.... 0x....      BL       RCC_AHB1PeriphClockCmd
+     34          	RCC_APB2PeriphClockCmd(BUZZER_TIM_CLK, ENABLE);
+   \   0000000C   0x2101             MOVS     R1,#+1
+   \   0000000E   0x2002             MOVS     R0,#+2
+   \   00000010   0x.... 0x....      BL       RCC_APB2PeriphClockCmd
+     35          
+     36          	//Positive GPIO configuration
+     37          	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF;
+   \   00000014   0x2002             MOVS     R0,#+2
+   \   00000016   0xF88D 0x0004      STRB     R0,[SP, #+4]
+     38          	GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
+   \   0000001A   0x2000             MOVS     R0,#+0
+   \   0000001C   0xF88D 0x0006      STRB     R0,[SP, #+6]
+     39          	GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_UP;
+   \   00000020   0x2001             MOVS     R0,#+1
+   \   00000022   0xF88D 0x0007      STRB     R0,[SP, #+7]
+     40          	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+   \   00000026   0x2002             MOVS     R0,#+2
+   \   00000028   0xF88D 0x0005      STRB     R0,[SP, #+5]
+     41          	GPIO_InitStructure.GPIO_Pin = BUZZER_P_GPIO_PIN;
+   \   0000002C   0x2080             MOVS     R0,#+128
+   \   0000002E   0x9000             STR      R0,[SP, #+0]
+     42          	GPIO_Init( BUZZER_P_GPIO_PORT, &GPIO_InitStructure );
+   \   00000030   0x....             LDR.N    R4,??DataTable7_2  ;; 0x40020800
+   \   00000032   0xA900             ADD      R1,SP,#+0
+   \   00000034   0x4620             MOV      R0,R4
+   \   00000036   0x.... 0x....      BL       GPIO_Init
+     43            
+     44            GPIO_PinAFConfig(BUZZER_P_GPIO_PORT, BUZZER_P_GPIO_PINSOURCE, BUZZER_TIM_AF);
+   \   0000003A   0x2203             MOVS     R2,#+3
+   \   0000003C   0x2107             MOVS     R1,#+7
+   \   0000003E   0x4620             MOV      R0,R4
+   \   00000040   0x.... 0x....      BL       GPIO_PinAFConfig
+     45            
+     46            //Negative GPIO configuration
+     47          	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF;
+   \   00000044   0x2002             MOVS     R0,#+2
+   \   00000046   0xF88D 0x0004      STRB     R0,[SP, #+4]
+     48          	GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
+   \   0000004A   0x2000             MOVS     R0,#+0
+   \   0000004C   0xF88D 0x0006      STRB     R0,[SP, #+6]
+     49          	GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_UP;
+   \   00000050   0x2001             MOVS     R0,#+1
+   \   00000052   0xF88D 0x0007      STRB     R0,[SP, #+7]
+     50          	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+   \   00000056   0x2002             MOVS     R0,#+2
+   \   00000058   0xF88D 0x0005      STRB     R0,[SP, #+5]
+     51          	GPIO_InitStructure.GPIO_Pin = BUZZER_N_GPIO_PIN;
+   \   0000005C   0x2001             MOVS     R0,#+1
+   \   0000005E   0x9000             STR      R0,[SP, #+0]
+     52            GPIO_Init( BUZZER_N_GPIO_PORT, &GPIO_InitStructure );
+   \   00000060   0x....             LDR.N    R4,??DataTable7_3  ;; 0x40020400
+   \   00000062   0xA900             ADD      R1,SP,#+0
+   \   00000064   0x4620             MOV      R0,R4
+   \   00000066   0x.... 0x....      BL       GPIO_Init
+     53          
+     54            GPIO_PinAFConfig(BUZZER_N_GPIO_PORT, BUZZER_N_GPIO_PINSOURCE, BUZZER_TIM_AF);
+   \   0000006A   0x2203             MOVS     R2,#+3
+   \   0000006C   0x2100             MOVS     R1,#+0
+   \   0000006E   0x4620             MOV      R0,R4
+   \   00000070   0x.... 0x....      BL       GPIO_PinAFConfig
+     55            
+     56          	// Time base configuration 
+     57          	TIM_TimeBaseInitTypeDef  TIM_TimeBaseStructure;
+     58          	TIM_TimeBaseStructure.TIM_Period = (SystemCoreClock / SOUND_FREQUENCY) - 1;
+   \   00000074   0x....             LDR.N    R4,??DataTable7_4
+   \   00000076   0x6820             LDR      R0,[R4, #+0]
+   \   00000078   0xF241 0x0104      MOVW     R1,#+4100
+   \   0000007C   0xFBB0 0xF0F1      UDIV     R0,R0,R1
+   \   00000080   0x1E40             SUBS     R0,R0,#+1
+   \   00000082   0x9003             STR      R0,[SP, #+12]
+     59          	TIM_TimeBaseStructure.TIM_Prescaler = 0;
+   \   00000084   0x2000             MOVS     R0,#+0
+   \   00000086   0x9002             STR      R0,[SP, #+8]
+     60          	TIM_TimeBaseStructure.TIM_ClockDivision = 0;
+   \   00000088   0xF8AD 0x0010      STRH     R0,[SP, #+16]
+     61          	TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;
+     62          	TIM_TimeBaseInit(BUZZER_TIM, &TIM_TimeBaseStructure);
+   \   0000008C   0x....             LDR.N    R5,??DataTable7_5  ;; 0x40010400
+   \   0000008E   0xA902             ADD      R1,SP,#+8
+   \   00000090   0x4628             MOV      R0,R5
+   \   00000092   0x.... 0x....      BL       TIM_TimeBaseInit
+     63          	
+     64          	// PWM configuration: Channel2 
+     65          	TIM_OCInitTypeDef  TIM_OCInitStructure;
+     66          	TIM_OCInitStructure.TIM_OCMode = TIM_OCMode_PWM1;
+   \   00000096   0x2060             MOVS     R0,#+96
+   \   00000098   0xF8AD 0x0014      STRH     R0,[SP, #+20]
+     67          	TIM_OCInitStructure.TIM_OutputState = TIM_OutputState_Enable;
+   \   0000009C   0x2001             MOVS     R0,#+1
+   \   0000009E   0xF8AD 0x0016      STRH     R0,[SP, #+22]
+     68          	TIM_OCInitStructure.TIM_Pulse = (SystemCoreClock / SOUND_FREQUENCY) / 2 - 1;
+   \   000000A2   0x6820             LDR      R0,[R4, #+0]
+   \   000000A4   0xF241 0x0104      MOVW     R1,#+4100
+   \   000000A8   0xFBB0 0xF0F1      UDIV     R0,R0,R1
+   \   000000AC   0x0840             LSRS     R0,R0,#+1
+   \   000000AE   0x1E40             SUBS     R0,R0,#+1
+   \   000000B0   0x9007             STR      R0,[SP, #+28]
+     69          	TIM_OCInitStructure.TIM_OCPolarity = TIM_OCPolarity_High;
+   \   000000B2   0x2000             MOVS     R0,#+0
+   \   000000B4   0x9008             STR      R0,[SP, #+32]
+     70          	TIM_OCInitStructure.TIM_OCNPolarity = TIM_OCNPolarity_High;
+     71          	
+     72            TIM_OC2Init(BUZZER_TIM, &TIM_OCInitStructure);
+   \   000000B6   0xA905             ADD      R1,SP,#+20
+   \   000000B8   0x4628             MOV      R0,R5
+   \   000000BA   0x.... 0x....      BL       TIM_OC2Init
+     73          	TIM_OC2PreloadConfig(BUZZER_TIM, TIM_OCPreload_Enable);
+   \   000000BE   0x2108             MOVS     R1,#+8
+   \   000000C0   0x4628             MOV      R0,R5
+   \   000000C2   0x.... 0x....      BL       TIM_OC2PreloadConfig
+     74            
+     75            TIM_ARRPreloadConfig(BUZZER_TIM, ENABLE);
+   \   000000C6   0x2101             MOVS     R1,#+1
+   \   000000C8   0x4628             MOV      R0,R5
+   \   000000CA   0x.... 0x....      BL       TIM_ARRPreloadConfig
+     76           
+     77          	// TIM enable
+     78          	TIM_CtrlPWMOutputs(BUZZER_TIM, ENABLE);	
+   \   000000CE   0x2101             MOVS     R1,#+1
+   \   000000D0   0x4628             MOV      R0,R5
+   \   000000D2   0x.... 0x....      BL       TIM_CtrlPWMOutputs
+     79            //TIM_Cmd(BUZZER_TIM, ENABLE);
+     80          }
+   \   000000D6   0xB00B             ADD      SP,SP,#+44
+   \   000000D8   0xBD30             POP      {R4,R5,PC}       ;; return
+     81          //------------------------------------------------------------------------------------
+     82          
+
+   \                                 In section .text, align 2, keep-with-next
+     83          void TSound::SoundPPEnable()
+     84          {
+     85          	/*
+     86            GPIO_InitTypeDef GPIO_InitStructure;
+     87          
+     88          	//Positive GPIO configuration
+     89          	GPIO_InitStructure.GPIO_Pin = BUZZER_P_GPIO_PIN;
+     90            GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF;
+     91          	GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
+     92          	//GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_UP;
+     93          	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_2MHz;
+     94          	GPIO_Init( BUZZER_P_GPIO_PORT, &GPIO_InitStructure );
+     95          
+     96            //GPIO_PinAFConfig(BUZZER_P_GPIO_PORT, BUZZER_P_GPIO_PINSOURCE, GPIO_AF_TIM4);
+     97            
+     98          	//Negative GPIO configuration
+     99          	GPIO_InitStructure.GPIO_Pin = BUZZER_N_GPIO_PIN;
+    100            GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF;
+    101          	GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
+    102          	//GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_UP;
+    103          	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_2MHz;
+    104          	GPIO_Init( BUZZER_N_GPIO_PORT, &GPIO_InitStructure );
+    105            
+    106            //GPIO_PinAFConfig(BUZZER_N_GPIO_PORT, BUZZER_N_GPIO_PINSOURCE, GPIO_AF_TIM4);
+    107            
+    108            */
+    109              
+    110          	TIM_Cmd(BUZZER_TIM, ENABLE);
+   \                     _ZN6TSound13SoundPPEnableEv: (+1)
+   \   00000000   0x2101             MOVS     R1,#+1
+   \   00000002   0x....             LDR.N    R0,??DataTable7_5  ;; 0x40010400
+   \   00000004   0x.... 0x....      B.W      TIM_Cmd
+    111          }
+    112          //------------------------------------------------------------------------------------
+    113          
+
+   \                                 In section .text, align 2, keep-with-next
+    114          void TSound::SoundPPDisable()
+    115          {
+    116          	TIM_Cmd(BUZZER_TIM, DISABLE);
+   \                     _ZN6TSound14SoundPPDisableEv: (+1)
+   \   00000000   0x2100             MOVS     R1,#+0
+   \   00000002   0x....             LDR.N    R0,??DataTable7_5  ;; 0x40010400
+   \   00000004   0x.... 0x....      B.W      TIM_Cmd
+    117          
+    118            /*
+    119          	GPIO_InitTypeDef GPIO_InitStructure;
+    120            
+    121            //Positive GPIO configuration
+    122          	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN;
+    123          	GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
+    124          	GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_UP;
+    125          	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_2MHz;
+    126          	GPIO_InitStructure.GPIO_Pin = BUZZER_P_GPIO_PIN;
+    127          	GPIO_Init( BUZZER_P_GPIO_PORT, &GPIO_InitStructure );
+    128          
+    129          	//Negative GPIO configuration
+    130          	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN;
+    131          	GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
+    132          	GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_UP;
+    133          	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_2MHz;
+    134          	GPIO_InitStructure.GPIO_Pin = BUZZER_N_GPIO_PIN;
+    135          	GPIO_Init( BUZZER_N_GPIO_PORT, &GPIO_InitStructure );
+    136            */
+    137          }
+    138          //------------------------------------------------------------------------------------
+    139          
+
+   \                                 In section .text, align 4, keep-with-next
+    140          void TSound::TASK_SoundProcessor(void *pvParameters)
+    141          {
+   \                     _ZN6TSound19TASK_SoundProcessorEPv: (+1)
+   \   00000000   0xE92D 0x41F0      PUSH     {R4-R8,LR}
+   \   00000004   0xE001             B.N      ??TASK_SoundProcessor_0
+    142          	while(1)
+    143          	{
+    144          //	TAppProcessor::TaskFlags |= TASKF_SND;
+    145          		vTaskSuspend(NULL);
+    146          //	TAppProcessor::TaskFlags &= ~TASKF_SND;
+    147          		
+    148          		int iend = 4;
+    149          		int shift_sz = 24;
+    150          		int shift_sz_bk = 0;
+    151          		for(int h = 0;h < 4;h++)
+    152          		{
+    153          			BYTE snbyte = CurrentSound >> shift_sz_bk;
+    154          			shift_sz_bk += 8;
+    155          			if(snbyte == 0)
+    156          			{
+    157          				iend--;
+    158          			}
+    159          			else break;	
+    160          		}
+    161          		
+    162          		for(int i = 0;i < iend;i++)
+    163          		{
+    164          			BYTE snbyte = CurrentSound >> shift_sz;
+    165          			shift_sz -= 8;
+    166          			for(int j = 0;j < 8;j++)
+    167          			{
+    168          				BYTE sn_bit = snbyte & 0x80;
+    169          				if(sn_bit == 0x80)
+    170          					SoundPPEnable();
+    171          				else	
+    172          					SoundPPDisable();
+    173          				snbyte <<= 1;	
+    174          				vTaskDelay(SND_TICK_SIZE_MS/portTICK_RATE_MS);			
+    175          				if((i == (iend-1)) && (snbyte == 0)) break;
+    176          			}
+    177          		}
+    178          		SoundPPDisable();
+   \                     ??TASK_SoundProcessor_1: (+1)
+   \   00000006   0x.... 0x....      BL       _ZN6TSound14SoundPPDisableEv
+   \                     ??TASK_SoundProcessor_0: (+1)
+   \   0000000A   0x2000             MOVS     R0,#+0
+   \   0000000C   0x.... 0x....      BL       vTaskSuspend
+   \   00000010   0x2504             MOVS     R5,#+4
+   \   00000012   0x2418             MOVS     R4,#+24
+   \   00000014   0x2000             MOVS     R0,#+0
+   \   00000016   0x4601             MOV      R1,R0
+   \   00000018   0xE001             B.N      ??TASK_SoundProcessor_2
+   \                     ??TASK_SoundProcessor_3: (+1)
+   \   0000001A   0x1E6D             SUBS     R5,R5,#+1
+   \   0000001C   0x1C49             ADDS     R1,R1,#+1
+   \                     ??TASK_SoundProcessor_2: (+1)
+   \   0000001E   0x2904             CMP      R1,#+4
+   \   00000020   0xDA07             BGE.N    ??TASK_SoundProcessor_4
+   \   00000022   0x....             LDR.N    R2,??DataTable7_6
+   \   00000024   0x6853             LDR      R3,[R2, #+4]
+   \   00000026   0x461A             MOV      R2,R3
+   \   00000028   0x40C2             LSRS     R2,R2,R0
+   \   0000002A   0x3008             ADDS     R0,R0,#+8
+   \   0000002C   0xB2D2             UXTB     R2,R2
+   \   0000002E   0x2A00             CMP      R2,#+0
+   \   00000030   0xD0F3             BEQ.N    ??TASK_SoundProcessor_3
+   \                     ??TASK_SoundProcessor_4: (+1)
+   \   00000032   0x2600             MOVS     R6,#+0
+   \   00000034   0xE00C             B.N      ??TASK_SoundProcessor_5
+   \                     ??TASK_SoundProcessor_6: (+1)
+   \   00000036   0x.... 0x....      BL       _ZN6TSound14SoundPPDisableEv
+   \                     ??TASK_SoundProcessor_7: (+1)
+   \   0000003A   0x007F             LSLS     R7,R7,#+1
+   \   0000003C   0x2032             MOVS     R0,#+50
+   \   0000003E   0x.... 0x....      BL       vTaskDelay
+   \   00000042   0x1E68             SUBS     R0,R5,#+1
+   \   00000044   0x4286             CMP      R6,R0
+   \   00000046   0xD10D             BNE.N    ??TASK_SoundProcessor_8
+   \   00000048   0xB2FF             UXTB     R7,R7
+   \   0000004A   0x2F00             CMP      R7,#+0
+   \   0000004C   0xD10A             BNE.N    ??TASK_SoundProcessor_8
+   \                     ??TASK_SoundProcessor_9: (+1)
+   \   0000004E   0x1C76             ADDS     R6,R6,#+1
+   \                     ??TASK_SoundProcessor_5: (+1)
+   \   00000050   0x42AE             CMP      R6,R5
+   \   00000052   0xDAD8             BGE.N    ??TASK_SoundProcessor_1
+   \   00000054   0x....             LDR.N    R0,??DataTable7_6
+   \   00000056   0x6840             LDR      R0,[R0, #+4]
+   \   00000058   0x4607             MOV      R7,R0
+   \   0000005A   0x40E7             LSRS     R7,R7,R4
+   \   0000005C   0x3C08             SUBS     R4,R4,#+8
+   \   0000005E   0xF04F 0x0800      MOV      R8,#+0
+   \   00000062   0xE001             B.N      ??TASK_SoundProcessor_10
+   \                     ??TASK_SoundProcessor_8: (+1)
+   \   00000064   0xF108 0x0801      ADD      R8,R8,#+1
+   \                     ??TASK_SoundProcessor_10: (+1)
+   \   00000068   0xF1B8 0x0F08      CMP      R8,#+8
+   \   0000006C   0xDAEF             BGE.N    ??TASK_SoundProcessor_9
+   \   0000006E   0xF3C7 0x10C0      UBFX     R0,R7,#+7,#+1
+   \   00000072   0x2801             CMP      R0,#+1
+   \   00000074   0xD1DF             BNE.N    ??TASK_SoundProcessor_6
+   \   00000076   0x.... 0x....      BL       _ZN6TSound13SoundPPEnableEv
+   \   0000007A   0xE7DE             B.N      ??TASK_SoundProcessor_7
+    179          	}
+    180          }
+    181          //------------------------------------------------------------------------------------
+    182          
+
+   \                                 In section .text, align 2, keep-with-next
+    183          void TSound::PlaySound(const uint32_t midi)
+    184          {
+    185          	if(!Enabled) return;
+   \                     _ZN6TSound9PlaySoundEj: (+1)
+   \   00000000   0x....             LDR.N    R1,??DataTable7_6
+   \   00000002   0x780A             LDRB     R2,[R1, #+0]
+   \   00000004   0x2A00             CMP      R2,#+0
+   \   00000006   0xD003             BEQ.N    ??PlaySound_0
+    186          	#ifndef SOUND_OFF
+    187          		CurrentSound = midi;
+   \   00000008   0x6048             STR      R0,[R1, #+4]
+    188          		vTaskResume(xhSound);
+   \   0000000A   0x6888             LDR      R0,[R1, #+8]
+   \   0000000C   0x.... 0x....      B.W      vTaskResume
+   \                     ??PlaySound_0: (+1)
+   \   00000010   0x4770             BX       LR               ;; return
+    189          	#endif	
+    190          }
+    191          //------------------------------------------------------------------------------------
+    192          
+
+   \                                 In section .text, align 2, keep-with-next
+    193          void TSound::SoundEnable(bool state)
+    194          {
+    195          	Enabled = state;
+   \                     _ZN6TSound11SoundEnableEb: (+1)
+   \   00000000   0x....             LDR.N    R1,??DataTable7_6
+   \   00000002   0x7008             STRB     R0,[R1, #+0]
+    196          	#ifndef SOUND_OFF
+    197          //		TGuiObjects::ToolbarSet(TBFM_NOSOUND,!state);	
+    198          	#endif		
+    199          }
+   \   00000004   0x4770             BX       LR               ;; return
+
+   \                                 In section .text, align 4, keep-with-next
+   \                     ??DataTable7:
+   \   00000000   0x53 0x4E          DC8      "SND"
+   \              0x44 0x00    
+
+   \                                 In section .text, align 4, keep-with-next
+   \                     ??DataTable7_1:
+   \   00000000   0x........         DC32     _ZN6TSound7EnabledE+0x8
+
+   \                                 In section .text, align 4, keep-with-next
+   \                     ??DataTable7_2:
+   \   00000000   0x40020800         DC32     0x40020800
+
+   \                                 In section .text, align 4, keep-with-next
+   \                     ??DataTable7_3:
+   \   00000000   0x40020400         DC32     0x40020400
+
+   \                                 In section .text, align 4, keep-with-next
+   \                     ??DataTable7_4:
+   \   00000000   0x........         DC32     SystemCoreClock
+
+   \                                 In section .text, align 4, keep-with-next
+   \                     ??DataTable7_5:
+   \   00000000   0x40010400         DC32     0x40010400
+
+   \                                 In section .text, align 4, keep-with-next
+   \                     ??DataTable7_6:
+   \   00000000   0x........         DC32     _ZN6TSound7EnabledE
+
+   \                                 In section .rodata, align 4, keep-with-next
+   \                     ?_0:
+   \   00000000   0x53 0x4E          DC8 "SND"
+   \              0x44 0x00    
+    200          //------------------------------------------------------------------------------------
+
+   Maximum stack usage in bytes:
+
+   .cstack Function
+   ------- --------
+       0   TSound::PlaySound(uint32_t)
+       0   TSound::SoundEnable(bool)
+      24   TSound::SoundInit()
+        24   -> TSound::Sound_PHY_Init()
+         0   -> vTaskDelay
+        24   -> xTaskGenericCreate
+       0   TSound::SoundPPDisable()
+         0   -> TIM_Cmd
+       0   TSound::SoundPPEnable()
+         0   -> TIM_Cmd
+      56   TSound::Sound_PHY_Init()
+        56   -> GPIO_Init
+        56   -> GPIO_PinAFConfig
+        56   -> RCC_AHB1PeriphClockCmd
+        56   -> RCC_APB2PeriphClockCmd
+        56   -> TIM_ARRPreloadConfig
+        56   -> TIM_CtrlPWMOutputs
+        56   -> TIM_OC2Init
+        56   -> TIM_OC2PreloadConfig
+        56   -> TIM_TimeBaseInit
+      24   TSound::TASK_SoundProcessor(void *)
+        24   -> TSound::SoundPPDisable()
+        24   -> TSound::SoundPPEnable()
+        24   -> vTaskDelay
+        24   -> vTaskSuspend
+
+
+   Section sizes:
+
+   Bytes  Function/Label
+   -----  --------------
+       4  ??DataTable7
+       4  ??DataTable7_1
+       4  ??DataTable7_2
+       4  ??DataTable7_3
+       4  ??DataTable7_4
+       4  ??DataTable7_5
+       4  ??DataTable7_6
+       4  ?_0
+      12  TSound::Enabled
+          TSound::CurrentSound
+          TSound::xhSound
+      18  TSound::PlaySound(uint32_t)
+       6  TSound::SoundEnable(bool)
+      48  TSound::SoundInit()
+       8  TSound::SoundPPDisable()
+       8  TSound::SoundPPEnable()
+     218  TSound::Sound_PHY_Init()
+     124  TSound::TASK_SoundProcessor(void *)
+
+ 
+  12 bytes in section .data
+   4 bytes in section .rodata
+ 458 bytes in section .text
+ 
+ 458 bytes of CODE  memory
+   4 bytes of CONST memory
+  12 bytes of DATA  memory
+
+Errors: none
+Warnings: none

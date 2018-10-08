@@ -1,0 +1,552 @@
+###############################################################################
+#
+# IAR ANSI C/C++ Compiler V7.40.2.8542/W32 for ARM        08/Oct/2018  09:58:03
+# Copyright 1999-2015 IAR Systems AB.
+#
+#    Cpu mode     =  thumb
+#    Endian       =  little
+#    Source file  =  D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\TADS1292.cpp
+#    Command line =  
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\TADS1292.cpp -D
+#        IAR_ARM_CM4 -D USE_STDPERIPH_DRIVER -D STM32F40_41xxx -D HAVE_CONFIG_H
+#        -D SD_SPI_MODE -D USE_FULL_ASSERT -D DEVICE_2 -D TFT -D
+#        STENDBUY_NOT_USE -D SCREEN_NOT_ROTATE -D USE_ADS1292R -D DISPLAY_GPIO
+#        -D BUFFERED_TRANSFER -D LCD_TRACE -lCN
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\KP02_DEVICE_2\List\ -o
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\KP02_DEVICE_2\Obj\
+#        --no_unroll --no_inline --no_tbaa --no_scheduling --debug
+#        --endian=little --cpu=Cortex-M4F -e --fpu=VFPv4_sp --dlib_config
+#        "D:\Program Files (x86)\IAR Systems\Embedded Workbench
+#        7.2\arm\INC\c\DLib_Config_Normal.h" -I
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\ -I
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\FatFs\ -I
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\FreeRTOS\Source\include\
+#        -I
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\FreeRTOS\Source\portable\IAR\ARM_CM3\
+#        -I
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\Libraries\CMSIS\CM4\CoreSupport\
+#        -I
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\Libraries\CMSIS\CM4\DeviceSupport\STM32F4xx\
+#        -I
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\Libraries\STM32F4xx_StdPeriph_Driver\inc\
+#        -I
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\Libraries\STM32F10x_Speex_Lib\include\speex\
+#        -I
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\Libraries\STM32F10x_Speex_Lib\include\
+#        -I
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\Libraries\STM32F10x_Speex_Lib\libspeex\
+#        -I
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\Libraries\STM32F10x_Speex_Lib\STM32\include\speex\
+#        -I
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\Libraries\STM32F10x_Speex_Lib\STM32\include\
+#        -I
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\Libraries\STM32F10x_Speex_Lib\STM32\
+#        -I
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\Libraries\STM32F10x_Speex_Lib\STM32\libspeex\
+#        -I
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\Libraries\STM32F10x_Speex_Lib\STM32\libspeex\iar\
+#        -I D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\Fonts\ -Om --ec++
+#    List file    =  
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\KP02_DEVICE_2\List\TADS1292.lst
+#    Object file  =  
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\KP02_DEVICE_2\Obj\TADS1292.o
+#
+###############################################################################
+
+D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\TADS1292.cpp
+      1          /********************************************************************************/
+      2          /* @title		ADS1292 control						*/
+      3          /* @author		Aleksis							*/
+      4          /* @version		0.1							*/
+      5          /* @date		24.04.2014						*/
+      6          /********************************************************************************/
+      7          /* @brief									*/
+      8          /********************************************************************************/
+      9          #include "TADS1292.h"
+
+   \                                 In section .text, align 2
+   \   __interwork __softfp void __delay_cycles(int)
+   \                     _Z14__delay_cyclesi: (+1)
+   \   00000000   0xB401             PUSH     {R0}
+   \   00000002   0x2000             MOVS     R0,#+0
+   \   00000004   0xE001             B.N      ??__delay_cycles_0
+   \                     ??__delay_cycles_1: (+1)
+   \   00000006   0xBF00             Nop      
+   \   00000008   0x1C40             ADDS     R0,R0,#+1
+   \                     ??__delay_cycles_0: (+1)
+   \   0000000A   0x9900             LDR      R1,[SP, #+0]
+   \   0000000C   0x4288             CMP      R0,R1
+   \   0000000E   0xDBFA             BLT.N    ??__delay_cycles_1
+   \   00000010   0xB001             ADD      SP,SP,#+4
+   \   00000012   0x4770             BX       LR               ;; return
+     10          #include "TADS1298.h"
+     11          #include "TSDProcessor.h"
+     12          #include "main.h"
+     13          #include "TRespProcessor.h"
+     14          #include "TAppProcessor.h"
+     15          
+     16          #ifdef USE_ADS1292R
+     17          
+     18          
+     19          /*------------------------------------------------------------------------------*/
+     20          /* @brief	заполняет буффер как результат одного преобразования ADS1292	*/
+     21          /* @param	None								*/
+     22          /* @return	None								*/
+     23          /*------------------------------------------------------------------------------*/
+
+   \                                 In section .text, align 2, keep-with-next
+     24          void TADS1292::GetConvertResult( void )
+     25          {
+     26          /*	TRespProcessor::RespData.Status.ChannelBytes[3] = 0;
+     27          
+     28          	TRespProcessor::RespData.Status.ChannelBytes[2] = DataRead();
+     29          	TRespProcessor::RespData.Status.ChannelBytes[1] = DataRead();
+     30          	TRespProcessor::RespData.Status.ChannelBytes[0] = DataRead();
+     31          
+     32          	TRespProcessor::RespData.Channel_1.ChannelBytes[3] = DataRead();
+     33          	TRespProcessor::RespData.Channel_1.ChannelBytes[2] = DataRead();
+     34          	TRespProcessor::RespData.Channel_1.ChannelBytes[1] = DataRead();
+     35          
+     36          	TRespProcessor::RespData.Channel_2.ChannelBytes[3] = DataRead();
+     37          	TRespProcessor::RespData.Channel_2.ChannelBytes[2] = DataRead();
+     38          	TRespProcessor::RespData.Channel_2.ChannelBytes[1] = DataRead();
+     39          
+     40          	TRespProcessor::RespData.Channel_1.ChannelData = TRespProcessor::RespData.Channel_1.ChannelData >> 8;		// сдвигаем на 8 и делаем 24 битные данные 
+     41          	TRespProcessor::RespData.Channel_2.ChannelData = TRespProcessor::RespData.Channel_2.ChannelData >> 8;
+     42          */}
+   \                     _ZN8TADS129216GetConvertResultEv: (+1)
+   \   00000000   0x4770             BX       LR               ;; return
+     43          
+     44          
+     45          
+     46          /*------------------------------------------------------------------------------*/
+     47          /* @brief	Hастраивает ADS1292 на преобразование				*/
+     48          /* @param	None								*/
+     49          /* @return	None								*/
+     50          /*------------------------------------------------------------------------------*/
+
+   \                                 In section .text, align 2, keep-with-next
+     51          void TADS1292::StartConversation( void )
+     52          {
+     53          }
+   \                     _ZN8TADS129217StartConversationEv: (+1)
+   \   00000000   0x4770             BX       LR               ;; return
+     54          
+     55          
+     56          
+     57          /*------------------------------------------------------------------------------*/
+     58          /* @brief	Включает тестовые сигналы в виде меандра. Необходимо запускать	*/
+     59          /*		перед началом работы, чтобы прошла внутреняя калибровка АЦП	*/
+     60          /* @param	None								*/
+     61          /* @return	None								*/
+     62          /*------------------------------------------------------------------------------*/
+
+   \                                 In section .text, align 2, keep-with-next
+     63          void TADS1292::TestSignals( void )
+     64          {
+     65          }
+   \                     _ZN8TADS129211TestSignalsEv: (+1)
+   \   00000000   0x4770             BX       LR               ;; return
+     66          
+     67          
+     68          
+     69          /*------------------------------------------------------------------------------*/
+     70          /* @brief	Выключает преобразование					*/
+     71          /* @param	None								*/
+     72          /* @return	None								*/
+     73          /*------------------------------------------------------------------------------*/
+
+   \                                 In section .text, align 2, keep-with-next
+     74          void TADS1292::StopConversation( void )
+     75          {
+     76          }
+   \                     _ZN8TADS129216StopConversationEv: (+1)
+   \   00000000   0x4770             BX       LR               ;; return
+     77          
+     78          
+     79          
+     80          /*------------------------------------------------------------------------------*/
+     81          /* @brief	Устанавливает уровень на линии Reset				*/
+     82          /* @param	state - требуемый уровень					*/
+     83          /* @return	None								*/
+     84          /*------------------------------------------------------------------------------*/
+
+   \                                 In section .text, align 2, keep-with-next
+     85          void TADS1292::SPI_Reset( bool state )
+     86          {
+     87          }
+   \                     _ZN8TADS12929SPI_ResetEb: (+1)
+   \   00000000   0x4770             BX       LR               ;; return
+     88          
+     89          
+     90          
+     91          /*------------------------------------------------------------------------------*/
+     92          /* @brief	Устанавливает уровень на линии CS				*/
+     93          /* @param	state - требуемый уровень					*/
+     94          /* @return	None								*/
+     95          /*------------------------------------------------------------------------------*/
+
+   \                                 In section .text, align 2, keep-with-next
+     96          void TADS1292::SPI_SSControl( bool state )
+     97          {
+     98          /*	if( state == true ) GPIO_SetBits( ADS1292_CS_PORT, ADS1292_CS_PIN );
+     99          	else GPIO_ResetBits( ADS1292_CS_PORT, ADS1292_CS_PIN );
+    100          */}
+   \                     _ZN8TADS129213SPI_SSControlEb: (+1)
+   \   00000000   0x4770             BX       LR               ;; return
+    101          
+    102          
+    103          
+    104          /*------------------------------------------------------------------------------*/
+    105          /* @brief	Пересылает по SPI байт						*/
+    106          /* @param	byte - пересылаемый байт					*/
+    107          /* @return	None								*/
+    108          /*------------------------------------------------------------------------------*/
+
+   \                                 In section .text, align 2, keep-with-next
+    109          void TADS1292::SPI_SendByte( uint8_t byte )
+    110          {
+    111          //	SPI_I2S_SendData( ADS1298_SPI, byte );
+    112          //	while( SPI_I2S_GetFlagStatus( ADS1298_SPI, SPI_I2S_FLAG_TXE ) == RESET );
+    113          //	__delay_cycles(	1 );
+    114          TADS1298::SPI_SendByte( byte );
+   \                     _ZN8TADS129212SPI_SendByteEh: (+1)
+   \   00000000   0x.... 0x....      B.W      _ZN8TADS129812SPI_SendByteEh
+    115          }
+    116          
+    117          
+    118          
+    119          /*------------------------------------------------------------------------------*/
+    120          /* @brief	Принимает по SPI байт						*/
+    121          /* @param	data - пересылаемый байт					*/
+    122          /* @return	принятый байт							*/
+    123          /*------------------------------------------------------------------------------*/
+
+   \                                 In section .text, align 2, keep-with-next
+    124          uint8_t TADS1292::SPI_ReceiveByte( uint8_t data )
+    125          {
+    126          //	volatile uint8_t Data;
+    127          //	SPI_I2S_SendData( ADS1298_SPI, data );
+    128          //	while( SPI_I2S_GetFlagStatus( ADS1298_SPI, SPI_I2S_FLAG_RXNE ) == RESET )
+    129          //		;
+    130          //	__delay_cycles(	1 );
+    131          //	Data = SPI_I2S_ReceiveData( ADS1298_SPI );
+    132          //	return Data;
+    133          //	return TADS1298::SPI_ReceiveByte( data );
+    134          	return data;
+   \                     _ZN8TADS129215SPI_ReceiveByteEh: (+1)
+   \   00000000   0x4770             BX       LR               ;; return
+    135          }
+    136          
+    137          
+    138          
+    139          /*------------------------------------------------------------------------------*/
+    140          /* @brief	Инициализация ADS1292						*/
+    141          /* @param	None								*/
+    142          /* @return	None								*/
+    143          /*------------------------------------------------------------------------------*/
+
+   \                                 In section .text, align 2, keep-with-next
+    144          void TADS1292::ADS1292_Init( void )
+    145          {
+   \                     _ZN8TADS129212ADS1292_InitEv: (+1)
+   \   00000000   0xB510             PUSH     {R4,LR}
+    146          	__delay_cycles( 3000 );
+   \   00000002   0xF640 0x34B8      MOVW     R4,#+3000
+   \   00000006   0x4620             MOV      R0,R4
+   \   00000008   0x.... 0x....      BL       _Z14__delay_cyclesi
+    147          	SPI_Reset( 0 );
+   \   0000000C   0x2000             MOVS     R0,#+0
+   \   0000000E   0x.... 0x....      BL       _ZN8TADS12929SPI_ResetEb
+    148          	__delay_cycles( 3000 );
+   \   00000012   0x4620             MOV      R0,R4
+   \   00000014   0x.... 0x....      BL       _Z14__delay_cyclesi
+    149          	SPI_Reset( 1 );
+   \   00000018   0x2001             MOVS     R0,#+1
+   \   0000001A   0x.... 0x....      BL       _ZN8TADS12929SPI_ResetEb
+    150          	__delay_cycles( 3000 );
+   \   0000001E   0x4620             MOV      R0,R4
+   \   00000020   0x.... 0x....      BL       _Z14__delay_cyclesi
+    151          
+    152          //	FFHigh_MA0( 0, NULL, true );		/* filters reset */
+    153          //	FFHigh_MA1( 0, NULL, true );
+    154          //	FFHigh_MA2( 0, NULL, true );
+    155          
+    156          	FHigh_0_32_Fixed( 0, 8, true, false );
+   \   00000024   0x2300             MOVS     R3,#+0
+   \   00000026   0x2201             MOVS     R2,#+1
+   \   00000028   0x2108             MOVS     R1,#+8
+   \   0000002A   0x4618             MOV      R0,R3
+   \   0000002C   0x.... 0x....      BL       _ZN4TDSP16FHigh_0_32_FixedEihbh
+    157          	FHigh_0_32_Fixed( 0, 9, true, false );
+   \   00000030   0x2300             MOVS     R3,#+0
+   \   00000032   0x2201             MOVS     R2,#+1
+   \   00000034   0x2109             MOVS     R1,#+9
+   \   00000036   0x4618             MOV      R0,R3
+   \   00000038   0xE8BD 0x4010      POP      {R4,LR}
+   \   0000003C   0x.... 0x....      B.W      _ZN4TDSP16FHigh_0_32_FixedEihbh
+    158          
+    159          //	for( int i=0; i<512; i++ ){					/* очистка буфферов */
+    160          //		TSDProcessor::EcgBuffer_1[i] = 0;
+    161          //		TSDProcessor::EcgBuffer_2[i] = 0;
+    162          //	}
+    163          }
+    164          
+    165          
+    166          
+    167          /*----------------------------------------------------------------------------------*/
+
+   \                                 In section .text, align 2, keep-with-next
+    168          void TADS1292::SetOpcode( uint8_t opcode )
+    169          {
+   \                     _ZN8TADS12929SetOpcodeEh: (+1)
+   \   00000000   0xB510             PUSH     {R4,LR}
+   \   00000002   0x4604             MOV      R4,R0
+    170          	SPI_SSControl( 0 );
+   \   00000004   0x2000             MOVS     R0,#+0
+   \   00000006   0x.... 0x....      BL       _ZN8TADS129213SPI_SSControlEb
+    171          	SPI_SendByte( opcode );
+   \   0000000A   0x4620             MOV      R0,R4
+   \   0000000C   0x.... 0x....      BL       _ZN8TADS129212SPI_SendByteEh
+    172          	SPI_SSControl( 1 );
+   \   00000010   0x2001             MOVS     R0,#+1
+   \   00000012   0xE8BD 0x4010      POP      {R4,LR}
+   \   00000016   0x....             B.N      _ZN8TADS129213SPI_SSControlEb
+    173          }
+    174          
+    175          
+    176          /*----------------------------------------------------------------------------------*/
+
+   \                                 In section .text, align 2, keep-with-next
+    177          uint8_t TADS1292::RegisterRead( uint8_t Register )
+    178          {
+   \                     _ZN8TADS129212RegisterReadEh: (+1)
+   \   00000000   0xB510             PUSH     {R4,LR}
+   \   00000002   0xB082             SUB      SP,SP,#+8
+   \   00000004   0x4604             MOV      R4,R0
+    179          	volatile uint8_t data;
+    180          	SPI_SSControl( 0 );
+   \   00000006   0x2000             MOVS     R0,#+0
+   \   00000008   0x.... 0x....      BL       _ZN8TADS129213SPI_SSControlEb
+    181          
+    182          	SPI_SendByte( ADS1292_OPCODE_SDATAC );
+   \   0000000C   0x2011             MOVS     R0,#+17
+   \   0000000E   0x.... 0x....      BL       _ZN8TADS129212SPI_SendByteEh
+    183          
+    184          	SPI_SendByte( ADS1292_OPCODE_RREG | Register );
+   \   00000012   0xF044 0x0020      ORR      R0,R4,#0x20
+   \   00000016   0x.... 0x....      BL       _ZN8TADS129212SPI_SendByteEh
+    185          
+    186          	data = SPI_ReceiveByte( 0x00 );
+   \   0000001A   0x2000             MOVS     R0,#+0
+   \   0000001C   0x.... 0x....      BL       _ZN8TADS129215SPI_ReceiveByteEh
+   \   00000020   0xF88D 0x0000      STRB     R0,[SP, #+0]
+    187          	data = SPI_ReceiveByte( 0x00 );
+   \   00000024   0x2000             MOVS     R0,#+0
+   \   00000026   0x.... 0x....      BL       _ZN8TADS129215SPI_ReceiveByteEh
+   \   0000002A   0xF88D 0x0000      STRB     R0,[SP, #+0]
+    188          
+    189          	SPI_SSControl( 1 );
+   \   0000002E   0x2001             MOVS     R0,#+1
+   \   00000030   0x.... 0x....      BL       _ZN8TADS129213SPI_SSControlEb
+    190          	return data;
+   \   00000034   0xF89D 0x0000      LDRB     R0,[SP, #+0]
+   \   00000038   0xBD16             POP      {R1,R2,R4,PC}    ;; return
+    191          }
+    192          
+    193          
+    194          
+    195          /*----------------------------------------------------------------------------------*/
+
+   \                                 In section .text, align 2, keep-with-next
+    196          uint8_t TADS1292::DataRead( void )
+    197          {
+   \                     _ZN8TADS12928DataReadEv: (+1)
+   \   00000000   0xB580             PUSH     {R7,LR}
+    198          	volatile uint8_t data;
+    199          	SPI_SSControl( 0 );
+   \   00000002   0x2000             MOVS     R0,#+0
+   \   00000004   0x.... 0x....      BL       _ZN8TADS129213SPI_SSControlEb
+    200          
+    201          	data = SPI_ReceiveByte( 0x00 );
+   \   00000008   0x2000             MOVS     R0,#+0
+   \   0000000A   0x.... 0x....      BL       _ZN8TADS129215SPI_ReceiveByteEh
+   \   0000000E   0xF88D 0x0000      STRB     R0,[SP, #+0]
+    202          
+    203          	SPI_SSControl( 1 );
+   \   00000012   0x2001             MOVS     R0,#+1
+   \   00000014   0x.... 0x....      BL       _ZN8TADS129213SPI_SSControlEb
+    204          	return data;
+   \   00000018   0xF89D 0x0000      LDRB     R0,[SP, #+0]
+   \   0000001C   0xBD02             POP      {R1,PC}          ;; return
+    205          }
+    206          
+    207          
+    208          
+    209          /*----------------------------------------------------------------------------------*/
+
+   \                                 In section .text, align 2, keep-with-next
+    210          void TADS1292::RegisterWrite( uint8_t Register, uint8_t Data )
+    211          {
+   \                     _ZN8TADS129213RegisterWriteEhh: (+1)
+   \   00000000   0xB538             PUSH     {R3-R5,LR}
+   \   00000002   0x4604             MOV      R4,R0
+   \   00000004   0x460D             MOV      R5,R1
+    212          	SPI_SSControl( 0 );
+   \   00000006   0x2000             MOVS     R0,#+0
+   \   00000008   0x.... 0x....      BL       _ZN8TADS129213SPI_SSControlEb
+    213          
+    214          	SPI_SendByte( ADS1292_OPCODE_WREG | Register );
+   \   0000000C   0xF044 0x0040      ORR      R0,R4,#0x40
+   \   00000010   0x.... 0x....      BL       _ZN8TADS129212SPI_SendByteEh
+    215          	SPI_SendByte( 0x00 );
+   \   00000014   0x2000             MOVS     R0,#+0
+   \   00000016   0x.... 0x....      BL       _ZN8TADS129212SPI_SendByteEh
+    216          	SPI_SendByte( Data );
+   \   0000001A   0x4628             MOV      R0,R5
+   \   0000001C   0x.... 0x....      BL       _ZN8TADS129212SPI_SendByteEh
+    217          
+    218          	SPI_SSControl( 1 );
+   \   00000020   0x2001             MOVS     R0,#+1
+   \   00000022   0xE8BD 0x4032      POP      {R1,R4,R5,LR}
+   \   00000026   0x....             B.N      _ZN8TADS129213SPI_SSControlEb
+    219          }
+    220          
+    221          
+    222          
+    223          /*------------------------------------------------------------------------------*/
+    224          /* @brief	Инициализация GPIO						*/
+    225          /* @param	None								*/
+    226          /* @return	None								*/
+    227          /*------------------------------------------------------------------------------*/
+
+   \                                 In section .text, align 2, keep-with-next
+    228          void TADS1292::ADS1292PHYInit( void )
+    229          {
+    230          /*	GPIO_InitTypeDef GPIO_InitStructure;
+    231          
+    232          	ADS1292_GPIO_RCC_ENABLE;
+    233          
+    234          	// RESET pin
+    235          	GPIO_SetBits( ADS1292_RESET_PORT, ADS1292_RESET_PIN );
+    236          	GPIO_InitStructure.GPIO_Pin = ADS1292_RESET_PIN;
+    237          	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+    238          	GPIO_InitStructure.GPIO_Mode =  GPIO_Mode_Out_PP;
+    239          	GPIO_Init( ADS1292_RESET_PORT, &GPIO_InitStructure );
+    240          
+    241          	// CS 
+    242          	GPIO_SetBits( ADS1292_CS_PORT, ADS1292_CS_PIN );
+    243          	GPIO_InitStructure.GPIO_Pin = ADS1292_CS_PIN;
+    244          	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+    245          	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
+    246          	GPIO_Init( ADS1292_CS_PORT, &GPIO_InitStructure );
+    247          */}
+   \                     _ZN8TADS129214ADS1292PHYInitEv: (+1)
+   \   00000000   0x4770             BX       LR               ;; return
+    248          
+    249          
+    250          
+    251          /*------------------------------------------------------------------------------*/
+    252          /* @brief	Вход в энергосберегающий режим					*/
+    253          /* @param	None								*/
+    254          /* @return	None								*/
+    255          /*------------------------------------------------------------------------------*/
+
+   \                                 In section .text, align 2, keep-with-next
+    256          void TADS1292::StandBy()
+    257          {
+    258          	SetOpcode( ADS1292_OPCODE_STANDBY );
+   \                     _ZN8TADS12927StandByEv: (+1)
+   \   00000000   0x2004             MOVS     R0,#+4
+   \   00000002   0x....             B.N      _ZN8TADS12929SetOpcodeEh
+    259          }
+    260          
+    261          
+    262          
+    263          /*------------------------------------------------------------------------------*/
+    264          /* @brief	Выход из энергосберегающего режима				*/
+    265          /* @param	None								*/
+    266          /* @return	None								*/
+    267          /*------------------------------------------------------------------------------*/
+
+   \                                 In section .text, align 2, keep-with-next
+    268          void TADS1292::WakeUp()
+    269          {
+    270          	SetOpcode( ADS1292_OPCODE_WAKEUP );
+   \                     _ZN8TADS12926WakeUpEv: (+1)
+   \   00000000   0x2002             MOVS     R0,#+2
+   \   00000002   0x....             B.N      _ZN8TADS12929SetOpcodeEh
+    271          }
+    272          
+    273          # endif
+
+   Maximum stack usage in bytes:
+
+   .cstack Function
+   ------- --------
+       0   TADS1292::ADS1292PHYInit()
+       8   TADS1292::ADS1292_Init()
+         8   -> TADS1292::SPI_Reset(bool)
+         0   -> TDSP::FHigh_0_32_Fixed(int32_t, uint8_t, bool, uint8_t)
+         8   -> TDSP::FHigh_0_32_Fixed(int32_t, uint8_t, bool, uint8_t)
+         8   -> __delay_cycles(int)
+       8   TADS1292::DataRead()
+         8   -> TADS1292::SPI_ReceiveByte(uint8_t)
+         8   -> TADS1292::SPI_SSControl(bool)
+       0   TADS1292::GetConvertResult()
+      16   TADS1292::RegisterRead(uint8_t)
+        16   -> TADS1292::SPI_ReceiveByte(uint8_t)
+        16   -> TADS1292::SPI_SSControl(bool)
+        16   -> TADS1292::SPI_SendByte(uint8_t)
+      16   TADS1292::RegisterWrite(uint8_t, uint8_t)
+         0   -> TADS1292::SPI_SSControl(bool)
+        16   -> TADS1292::SPI_SSControl(bool)
+        16   -> TADS1292::SPI_SendByte(uint8_t)
+       0   TADS1292::SPI_ReceiveByte(uint8_t)
+       0   TADS1292::SPI_Reset(bool)
+       0   TADS1292::SPI_SSControl(bool)
+       0   TADS1292::SPI_SendByte(uint8_t)
+         0   -> TADS1298::SPI_SendByte(uint8_t)
+       8   TADS1292::SetOpcode(uint8_t)
+         0   -> TADS1292::SPI_SSControl(bool)
+         8   -> TADS1292::SPI_SSControl(bool)
+         8   -> TADS1292::SPI_SendByte(uint8_t)
+       0   TADS1292::StandBy()
+         0   -> TADS1292::SetOpcode(uint8_t)
+       0   TADS1292::StartConversation()
+       0   TADS1292::StopConversation()
+       0   TADS1292::TestSignals()
+       0   TADS1292::WakeUp()
+         0   -> TADS1292::SetOpcode(uint8_t)
+       4   __delay_cycles(int)
+
+
+   Section sizes:
+
+   Bytes  Function/Label
+   -----  --------------
+       2  TADS1292::ADS1292PHYInit()
+      64  TADS1292::ADS1292_Init()
+      30  TADS1292::DataRead()
+       2  TADS1292::GetConvertResult()
+      58  TADS1292::RegisterRead(uint8_t)
+      40  TADS1292::RegisterWrite(uint8_t, uint8_t)
+       2  TADS1292::SPI_ReceiveByte(uint8_t)
+       2  TADS1292::SPI_Reset(bool)
+       2  TADS1292::SPI_SSControl(bool)
+       4  TADS1292::SPI_SendByte(uint8_t)
+      24  TADS1292::SetOpcode(uint8_t)
+       4  TADS1292::StandBy()
+       2  TADS1292::StartConversation()
+       2  TADS1292::StopConversation()
+       2  TADS1292::TestSignals()
+       4  TADS1292::WakeUp()
+      20  __delay_cycles(int)
+
+ 
+ 264 bytes in section .text
+ 
+ 244 bytes of CODE memory (+ 20 bytes shared)
+
+Errors: none
+Warnings: none

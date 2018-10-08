@@ -1,0 +1,536 @@
+###############################################################################
+#
+# IAR ANSI C/C++ Compiler V7.40.2.8542/W32 for ARM        08/Oct/2018  09:58:06
+# Copyright 1999-2015 IAR Systems AB.
+#
+#    Cpu mode     =  thumb
+#    Endian       =  little
+#    Source file  =  D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\TFlash.cpp
+#    Command line =  
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\TFlash.cpp -D IAR_ARM_CM4
+#        -D USE_STDPERIPH_DRIVER -D STM32F40_41xxx -D HAVE_CONFIG_H -D
+#        SD_SPI_MODE -D USE_FULL_ASSERT -D DEVICE_2 -D TFT -D STENDBUY_NOT_USE
+#        -D SCREEN_NOT_ROTATE -D USE_ADS1292R -D DISPLAY_GPIO -D
+#        BUFFERED_TRANSFER -D LCD_TRACE -lCN
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\KP02_DEVICE_2\List\ -o
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\KP02_DEVICE_2\Obj\
+#        --no_unroll --no_inline --no_tbaa --no_scheduling --debug
+#        --endian=little --cpu=Cortex-M4F -e --fpu=VFPv4_sp --dlib_config
+#        "D:\Program Files (x86)\IAR Systems\Embedded Workbench
+#        7.2\arm\INC\c\DLib_Config_Normal.h" -I
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\ -I
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\FatFs\ -I
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\FreeRTOS\Source\include\
+#        -I
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\FreeRTOS\Source\portable\IAR\ARM_CM3\
+#        -I
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\Libraries\CMSIS\CM4\CoreSupport\
+#        -I
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\Libraries\CMSIS\CM4\DeviceSupport\STM32F4xx\
+#        -I
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\Libraries\STM32F4xx_StdPeriph_Driver\inc\
+#        -I
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\Libraries\STM32F10x_Speex_Lib\include\speex\
+#        -I
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\Libraries\STM32F10x_Speex_Lib\include\
+#        -I
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\Libraries\STM32F10x_Speex_Lib\libspeex\
+#        -I
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\Libraries\STM32F10x_Speex_Lib\STM32\include\speex\
+#        -I
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\Libraries\STM32F10x_Speex_Lib\STM32\include\
+#        -I
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\Libraries\STM32F10x_Speex_Lib\STM32\
+#        -I
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\Libraries\STM32F10x_Speex_Lib\STM32\libspeex\
+#        -I
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\Libraries\STM32F10x_Speex_Lib\STM32\libspeex\iar\
+#        -I D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\Fonts\ -Om --ec++
+#    List file    =  
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\KP02_DEVICE_2\List\TFlash.lst
+#    Object file  =  
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\KP02_DEVICE_2\Obj\TFlash.o
+#
+###############################################################################
+
+D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\TFlash.cpp
+      1          /************************************************************************************/
+      2          /* @title																			*/
+      3          /* @author		Cyber Genius														*/
+      4          /* @version		0.1																	*/
+      5          /* @date		12.10.2012															*/
+      6          /************************************************************************************/
+      7          /* @brief																			*/
+      8          /************************************************************************************/
+      9          #include "TFlash.h"
+
+   \                                 In section .text, align 4, keep-with-next
+   \   static __absolute char const defDeviceName[25]
+   \                     defDeviceName:
+   \   00000000   0x43 0x61          DC8 "Cardian KR01-SNXXXX-XXXX"
+   \              0x72 0x64    
+   \              0x69 0x61    
+   \              0x6E 0x20    
+   \              0x4B 0x52    
+   \              0x30 0x31    
+   \              0x2D 0x53    
+   \              0x4E 0x58    
+   \              0x58 0x58    
+   \              0x58 0x2D    
+   \              0x58 0x58    
+   \              0x58 0x58    
+   \              0x00         
+   \   00000019   0x00 0x00          DC8 0, 0, 0
+   \              0x00         
+     10          #include "TAppProcessor.h"
+     11          
+     12          
+     13          /*----------------------------------------------------------------------------------*/
+
+   \                                 In section .bss, align 4
+     14          uint8_t TFlash::SF_PageCache[STORAGEFLASH_SIZE];
+   \                     _ZN6TFlash12SF_PageCacheE:
+   \   00000000                      DS8 65536
+     15          
+     16          
+     17          
+     18          /*----------------------------------------------------------------------------------*/
+
+   \                                 In section .text, align 2, keep-with-next
+     19          void TFlash::SF_Init()
+     20          {
+   \                     _ZN6TFlash7SF_InitEv: (+1)
+   \   00000000   0xB580             PUSH     {R7,LR}
+     21            /* Unlock the Flash Program Erase controller */
+     22            FLASH_Unlock();
+   \   00000002   0x.... 0x....      BL       FLASH_Unlock
+     23            if( SF_GetData8(FIRST_START) != 0xBA )
+   \   00000006   0x....             LDR.N    R0,??DataTable8  ;; 0x8010000
+   \   00000008   0x.... 0x....      BL       _ZN6TFlash11SF_GetData8Ej
+   \   0000000C   0x28BA             CMP      R0,#+186
+   \   0000000E   0xD002             BEQ.N    ??SF_Init_0
+     24            {
+     25            	/* Init First Start */
+     26            	SF_SetDefaults();
+   \   00000010   0xE8BD 0x4001      POP      {R0,LR}
+   \   00000014   0x....             B.N      _ZN6TFlash14SF_SetDefaultsEv
+     27            }
+     28          }
+   \                     ??SF_Init_0: (+1)
+   \   00000016   0xBD01             POP      {R0,PC}          ;; return
+     29          
+     30          
+     31          
+     32          /*----------------------------------------------------------------------------------*/
+     33          //void TFlash::SF_SetDefaultsAfterReset()
+     34          //{
+     35          //	SF_UpdatePage();
+     36          //
+     37          //	SF_StoreData8(FIRST_START,0xFF);
+     38          //
+     39          //	SF_CommitPage();
+     40          //}
+     41          
+     42          
+     43          
+     44          /*----------------------------------------------------------------------------------*/
+
+   \                                 In section .text, align 2, keep-with-next
+     45          void TFlash::SF_SetDefaults()
+     46          {
+   \                     _ZN6TFlash14SF_SetDefaultsEv: (+1)
+   \   00000000   0xB500             PUSH     {LR}
+   \   00000002   0xB08B             SUB      SP,SP,#+44
+     47          		SF_UpdatePage();
+   \   00000004   0x.... 0x....      BL       _ZN6TFlash13SF_UpdatePageEv
+     48          
+     49          		stufSerialNumber sernum;
+     50          
+     51          		strcpy((char*)sernum.DeviceName,defDeviceName);
+   \   00000008   0x.... 0x....      ADR.W    R1,defDeviceName
+   \   0000000C   0xA800             ADD      R0,SP,#+0
+   \   0000000E   0x.... 0x....      BL       strcpy
+     52          //		strcpy((char*)sernum.PCBID,defPCBID);
+     53          		sernum.Serial = defSerialNumber;
+   \   00000012   0x2000             MOVS     R0,#+0
+   \   00000014   0xF8AD 0x0019      STRH     R0,[SP, #+25]
+     54          		sernum.DateOfProduction = defDataProduction;
+   \   00000018   0x2001             MOVS     R0,#+1
+   \   0000001A   0xF8CD 0x001B      STR      R0,[SP, #+27]
+     55          
+     56          		SF_StoreDataArray(SERIAL_NUM,(uint8_t*)&sernum,sizeof(stufSerialNumber));
+   \   0000001E   0x2229             MOVS     R2,#+41
+   \   00000020   0xA900             ADD      R1,SP,#+0
+   \   00000022   0x....             LDR.N    R0,??DataTable8_1  ;; 0x8010005
+   \   00000024   0x.... 0x....      BL       _ZN6TFlash17SF_StoreDataArrayEjPhi
+     57          
+     58          //		SF_StoreData32(AD7799_CALIBRATION,AD7799_CALIBRATION_DEF);
+     59          //		SF_StoreData32(T1_CALIBRATION,T1_CALIBRATION_DEF);
+     60          //		SF_StoreData32(T2_CALIBRATION,T2_CALIBRATION_DEF);
+     61          //		SF_StoreData16(T1_ADCFIX,T1_ADCFIX_DEF);
+     62          //		SF_StoreData16(T2_ADCFIX,T2_ADCFIX_DEF);
+     63          //
+     64          //		SF_StoreData32(BAT1_CALIBRATION,BAT1_CALIBRATION_DEF);
+     65          //		SF_StoreData32(BAT2_CALIBRATION,BAT2_CALIBRATION_DEF);
+     66          //		SF_StoreData16(BAT1_ADCFIX,BAT1_ADCFIX_DEF);
+     67          //		SF_StoreData16(BAT2_ADCFIX,BAT2_ADCFIX_DEF);
+     68          //
+     69          //		SF_StoreData8(AD7799_SPLINES_STORED,0xFF);
+     70          
+     71          		SF_StoreData16( LCDOFF_TIMER, 1000 );
+   \   00000028   0xF44F 0x717A      MOV      R1,#+1000
+   \   0000002C   0x....             LDR.N    R0,??DataTable8_2  ;; 0x8010001
+   \   0000002E   0x.... 0x....      BL       _ZN6TFlash14SF_StoreData16Ejt
+     72          		SF_CommitPage();
+   \   00000032   0x.... 0x....      BL       _ZN6TFlash13SF_CommitPageEv
+     73          
+     74          		SF_UpdatePage();
+   \   00000036   0x.... 0x....      BL       _ZN6TFlash13SF_UpdatePageEv
+     75              SF_StoreData8( LCD_BRIGHT, LCD_BRIGHT_DEF );
+   \   0000003A   0x2120             MOVS     R1,#+32
+   \   0000003C   0x....             LDR.N    R0,??DataTable8_3  ;; 0x8010003
+   \   0000003E   0x.... 0x....      BL       _ZN6TFlash13SF_StoreData8Ejh
+     76          		SF_CommitPage();
+   \   00000042   0x.... 0x....      BL       _ZN6TFlash13SF_CommitPageEv
+     77          
+     78          		SF_UpdatePage();
+   \   00000046   0x.... 0x....      BL       _ZN6TFlash13SF_UpdatePageEv
+     79          		SF_StoreData8( FIRST_START, 0xBA );
+   \   0000004A   0x21BA             MOVS     R1,#+186
+   \   0000004C   0x....             LDR.N    R0,??DataTable8  ;; 0x8010000
+   \   0000004E   0x.... 0x....      BL       _ZN6TFlash13SF_StoreData8Ejh
+     80          
+     81          		SF_CommitPage();
+   \   00000052   0x.... 0x....      BL       _ZN6TFlash13SF_CommitPageEv
+     82          }
+   \   00000056   0xB00B             ADD      SP,SP,#+44
+   \   00000058   0xBD00             POP      {PC}             ;; return
+     83          
+     84          
+     85          
+     86          /*----------------------------------------------------------------------------------*/
+
+   \                                 In section .text, align 2, keep-with-next
+     87          void TFlash::SF_Deinit()
+     88          {
+     89            /* Lock the Flash Program Erase controller */
+     90            FLASH_Lock();
+   \                     _ZN6TFlash9SF_DeinitEv: (+1)
+   \   00000000   0x.... 0x....      B.W      FLASH_Lock
+     91          }
+     92          
+     93          
+     94          
+     95          /*----------------------------------------------------------------------------------*/
+
+   \                                 In section .text, align 2, keep-with-next
+     96          void TFlash::SF_UpdatePage()
+     97          {
+     98          	uint32_t AbsAddress;
+     99          
+    100          	for(uint32_t i = 0;i < STORAGEFLASH_SIZE;i++)
+   \                     _ZN6TFlash13SF_UpdatePageEv: (+1)
+   \   00000000   0x2000             MOVS     R0,#+0
+   \   00000002   0x....             LDR.N    R2,??DataTable8_4
+   \   00000004   0xE003             B.N      ??SF_UpdatePage_0
+    101          		{
+    102          			AbsAddress = STORAGEFLASH_START_ADDRESS + i;
+    103          			SF_PageCache[i] = (*(__IO uint8_t*)AbsAddress);
+   \                     ??SF_UpdatePage_1: (+1)
+   \   00000006   0x....             LDR.N    R1,??DataTable8  ;; 0x8010000
+   \   00000008   0x5C09             LDRB     R1,[R1, R0]
+   \   0000000A   0x5481             STRB     R1,[R0, R2]
+    104          		}
+   \   0000000C   0x1C40             ADDS     R0,R0,#+1
+   \                     ??SF_UpdatePage_0: (+1)
+   \   0000000E   0xF5B0 0x3F80      CMP      R0,#+65536
+   \   00000012   0xD3F8             BCC.N    ??SF_UpdatePage_1
+    105          }
+   \   00000014   0x4770             BX       LR               ;; return
+    106          
+    107          
+    108          
+    109          /*----------------------------------------------------------------------------------*/
+
+   \                                 In section .text, align 2, keep-with-next
+    110          FLASH_Status TFlash::SF_CommitPage()
+    111          {
+   \                     _ZN6TFlash13SF_CommitPageEv: (+1)
+   \   00000000   0xB510             PUSH     {R4,LR}
+    112          	FLASH_Status FlashStatus = FLASH_COMPLETE;
+    113          	uint32_t AbsAddress;
+    114          
+    115          	FlashStatus = FLASH_EraseSector(STORAGEFLASH_SECTOR, VoltageRange_3);
+   \   00000002   0x2102             MOVS     R1,#+2
+   \   00000004   0x2020             MOVS     R0,#+32
+   \   00000006   0x.... 0x....      BL       FLASH_EraseSector
+    116          
+    117            if(FlashStatus == FLASH_COMPLETE)
+   \   0000000A   0x2809             CMP      R0,#+9
+   \   0000000C   0xD112             BNE.N    ??SF_CommitPage_0
+    118            {
+    119          		for(uint32_t i = 0;i < STORAGEFLASH_SIZE;i += 2)
+   \   0000000E   0x2400             MOVS     R4,#+0
+   \   00000010   0xE000             B.N      ??SF_CommitPage_1
+   \                     ??SF_CommitPage_2: (+1)
+   \   00000012   0x1CA4             ADDS     R4,R4,#+2
+   \                     ??SF_CommitPage_1: (+1)
+   \   00000014   0xF5B4 0x3F80      CMP      R4,#+65536
+   \   00000018   0xD20C             BCS.N    ??SF_CommitPage_0
+    120          			{
+    121          				uint16_t WordData;
+    122          
+    123          				WordData = (uint16_t)SF_PageCache[i] + (uint16_t)(SF_PageCache[i+1] << 8);
+    124          
+    125          				AbsAddress = STORAGEFLASH_START_ADDRESS + i;
+    126          	      FlashStatus = FLASH_ProgramHalfWord(AbsAddress, WordData);
+   \   0000001A   0x....             LDR.N    R0,??DataTable8_4
+   \   0000001C   0x5C21             LDRB     R1,[R4, R0]
+   \   0000001E   0x1820             ADDS     R0,R4,R0
+   \   00000020   0x7840             LDRB     R0,[R0, #+1]
+   \   00000022   0xEB11 0x2100      ADDS     R1,R1,R0, LSL #+8
+   \   00000026   0xB289             UXTH     R1,R1
+   \   00000028   0x....             LDR.N    R0,??DataTable8  ;; 0x8010000
+   \   0000002A   0x1900             ADDS     R0,R0,R4
+   \   0000002C   0x.... 0x....      BL       FLASH_ProgramHalfWord
+    127          	      /* If program operation was failed, a Flash error code is returned */
+    128          	      if (FlashStatus != FLASH_COMPLETE)
+   \   00000030   0x2809             CMP      R0,#+9
+   \   00000032   0xD0EE             BEQ.N    ??SF_CommitPage_2
+    129          	      {
+    130          	        break;
+    131          	      }
+    132          			}
+    133          	}
+    134          	#ifdef USE_FREERTOS_HEAP
+    135          		vPortFree(SF_PageCache);
+    136          		SF_PageCache = NULL;
+    137          	#endif
+    138          
+    139          	return 	FlashStatus;
+   \                     ??SF_CommitPage_0: (+1)
+   \   00000034   0xBD10             POP      {R4,PC}          ;; return
+    140          }
+    141          
+    142          
+    143          
+    144          /*----------------------------------------------------------------------------------*/
+
+   \                                 In section .text, align 2, keep-with-next
+    145          void TFlash::SF_StoreDataArray(uint32_t Address, uint8_t *Data,int Lenght)
+    146          {
+   \                     _ZN6TFlash17SF_StoreDataArrayEjPhi: (+1)
+   \   00000000   0xB470             PUSH     {R4-R6}
+    147          	for(int i = 0;i < Lenght;i++)
+   \   00000002   0x2300             MOVS     R3,#+0
+   \   00000004   0xE006             B.N      ??SF_StoreDataArray_0
+    148          		SF_PageCache[Address-STORAGEFLASH_START_ADDRESS + i]	= Data[i];
+   \                     ??SF_StoreDataArray_1: (+1)
+   \   00000006   0x5C5C             LDRB     R4,[R3, R1]
+   \   00000008   0x....             LDR.N    R5,??DataTable8_4
+   \   0000000A   0x181E             ADDS     R6,R3,R0
+   \   0000000C   0x1975             ADDS     R5,R6,R5
+   \   0000000E   0x....             LDR.N    R6,??DataTable8_5  ;; 0xf7ff0000
+   \   00000010   0x5574             STRB     R4,[R6, R5]
+   \   00000012   0x1C5B             ADDS     R3,R3,#+1
+   \                     ??SF_StoreDataArray_0: (+1)
+   \   00000014   0x4293             CMP      R3,R2
+   \   00000016   0xDBF6             BLT.N    ??SF_StoreDataArray_1
+    149          }
+   \   00000018   0xBC70             POP      {R4-R6}
+   \   0000001A   0x4770             BX       LR               ;; return
+    150          
+    151          
+    152          
+    153          /*----------------------------------------------------------------------------------*/
+
+   \                                 In section .text, align 2, keep-with-next
+    154          void TFlash::SF_StoreData8(uint32_t Address, uint8_t Data)
+    155          {
+    156          	SF_PageCache[Address-STORAGEFLASH_START_ADDRESS]	= Data;
+   \                     _ZN6TFlash13SF_StoreData8Ejh: (+1)
+   \   00000000   0x....             LDR.N    R2,??DataTable8_4
+   \   00000002   0x1880             ADDS     R0,R0,R2
+   \   00000004   0x....             LDR.N    R2,??DataTable8_5  ;; 0xf7ff0000
+   \   00000006   0x5411             STRB     R1,[R2, R0]
+    157          }
+   \   00000008   0x4770             BX       LR               ;; return
+    158          
+    159          
+    160          
+    161          /*----------------------------------------------------------------------------------*/
+
+   \                                 In section .text, align 2, keep-with-next
+    162          void TFlash::SF_StoreData16(uint32_t Address, uint16_t Data)
+    163          {
+    164          	SF_PageCache[Address-STORAGEFLASH_START_ADDRESS]	= (BYTE)(Data & 0x00FF);
+   \                     _ZN6TFlash14SF_StoreData16Ejt: (+1)
+   \   00000000   0x....             LDR.N    R2,??DataTable8_4
+   \   00000002   0x1880             ADDS     R0,R0,R2
+   \   00000004   0x....             LDR.N    R2,??DataTable8_5  ;; 0xf7ff0000
+   \   00000006   0x1810             ADDS     R0,R2,R0
+   \   00000008   0x7001             STRB     R1,[R0, #+0]
+    165          	SF_PageCache[Address-STORAGEFLASH_START_ADDRESS+1]	= (BYTE)((Data & 0xFF00)>>8);
+   \   0000000A   0x0A09             LSRS     R1,R1,#+8
+   \   0000000C   0x7041             STRB     R1,[R0, #+1]
+    166          }
+   \   0000000E   0x4770             BX       LR               ;; return
+    167          
+    168          
+    169          
+    170          /*----------------------------------------------------------------------------------*/
+
+   \                                 In section .text, align 2, keep-with-next
+    171          void TFlash::SF_StoreData32(uint32_t Address, uint32_t Data)
+    172          {
+    173          	SF_PageCache[Address-STORAGEFLASH_START_ADDRESS]	= (BYTE)(Data & 0x000000FF);
+   \                     _ZN6TFlash14SF_StoreData32Ejj: (+1)
+   \   00000000   0x....             LDR.N    R2,??DataTable8_4
+   \   00000002   0x1880             ADDS     R0,R0,R2
+   \   00000004   0x....             LDR.N    R2,??DataTable8_5  ;; 0xf7ff0000
+   \   00000006   0x1810             ADDS     R0,R2,R0
+   \   00000008   0x7001             STRB     R1,[R0, #+0]
+    174          	SF_PageCache[Address-STORAGEFLASH_START_ADDRESS+1]	= (BYTE)((Data & 0x0000FF00) >> 8);
+   \   0000000A   0x0A0A             LSRS     R2,R1,#+8
+   \   0000000C   0x7042             STRB     R2,[R0, #+1]
+    175          	SF_PageCache[Address-STORAGEFLASH_START_ADDRESS+2]	= (BYTE)((Data & 0x00FF0000) >> 16);
+   \   0000000E   0x0C0A             LSRS     R2,R1,#+16
+   \   00000010   0x7082             STRB     R2,[R0, #+2]
+    176          	SF_PageCache[Address-STORAGEFLASH_START_ADDRESS+3]	= (BYTE)((Data & 0xFF000000) >> 24);
+   \   00000012   0x0E09             LSRS     R1,R1,#+24
+   \   00000014   0x70C1             STRB     R1,[R0, #+3]
+    177          }
+   \   00000016   0x4770             BX       LR               ;; return
+    178          
+    179          
+    180          
+    181          /*----------------------------------------------------------------------------------*/
+
+   \                                 In section .text, align 2, keep-with-next
+    182          uint8_t TFlash::SF_GetData8(uint32_t Address)
+    183          {
+    184          	uint32_t AbsAddress;
+    185          	AbsAddress = Address;
+    186          	return (*(__IO uint8_t*)AbsAddress);
+   \                     _ZN6TFlash11SF_GetData8Ej: (+1)
+   \   00000000   0x7800             LDRB     R0,[R0, #+0]
+   \   00000002   0x4770             BX       LR               ;; return
+    187          }
+    188          
+    189          
+    190          
+    191          /*----------------------------------------------------------------------------------*/
+
+   \                                 In section .text, align 2, keep-with-next
+    192          uint16_t TFlash::SF_GetData16(uint32_t Address)
+    193          {
+    194          	uint32_t AbsAddress;
+    195          	AbsAddress = Address;
+    196          	return (*(__IO uint16_t*)AbsAddress);
+   \                     _ZN6TFlash12SF_GetData16Ej: (+1)
+   \   00000000   0x8800             LDRH     R0,[R0, #+0]
+   \   00000002   0x4770             BX       LR               ;; return
+    197          }
+    198          
+    199          
+    200          
+    201          /*----------------------------------------------------------------------------------*/
+
+   \                                 In section .text, align 2, keep-with-next
+    202          uint32_t TFlash::SF_GetData32(uint32_t Address)
+    203          {
+    204          	uint32_t AbsAddress;
+    205          	AbsAddress = Address;
+    206          	return (*(__IO uint32_t*)AbsAddress);
+   \                     _ZN6TFlash12SF_GetData32Ej: (+1)
+   \   00000000   0x6800             LDR      R0,[R0, #+0]
+   \   00000002   0x4770             BX       LR               ;; return
+    207          }
+
+   \                                 In section .text, align 4, keep-with-next
+   \                     ??DataTable8:
+   \   00000000   0x08010000         DC32     0x8010000
+
+   \                                 In section .text, align 4, keep-with-next
+   \                     ??DataTable8_1:
+   \   00000000   0x08010005         DC32     0x8010005
+
+   \                                 In section .text, align 4, keep-with-next
+   \                     ??DataTable8_2:
+   \   00000000   0x08010001         DC32     0x8010001
+
+   \                                 In section .text, align 4, keep-with-next
+   \                     ??DataTable8_3:
+   \   00000000   0x08010003         DC32     0x8010003
+
+   \                                 In section .text, align 4, keep-with-next
+   \                     ??DataTable8_4:
+   \   00000000   0x........         DC32     _ZN6TFlash12SF_PageCacheE
+
+   \                                 In section .text, align 4, keep-with-next
+   \                     ??DataTable8_5:
+   \   00000000   0xF7FF0000         DC32     0xf7ff0000
+
+   Maximum stack usage in bytes:
+
+   .cstack Function
+   ------- --------
+       8   TFlash::SF_CommitPage()
+         8   -> FLASH_EraseSector
+         8   -> FLASH_ProgramHalfWord
+       0   TFlash::SF_Deinit()
+         0   -> FLASH_Lock
+       0   TFlash::SF_GetData16(uint32_t)
+       0   TFlash::SF_GetData32(uint32_t)
+       0   TFlash::SF_GetData8(uint32_t)
+       8   TFlash::SF_Init()
+         8   -> FLASH_Unlock
+         8   -> TFlash::SF_GetData8(uint32_t)
+      48   TFlash::SF_SetDefaults()
+        48   -> TFlash::SF_CommitPage()
+        48   -> TFlash::SF_StoreData16(uint32_t, uint16_t)
+        48   -> TFlash::SF_StoreData8(uint32_t, uint8_t)
+        48   -> TFlash::SF_StoreDataArray(uint32_t, uint8_t *, int)
+        48   -> TFlash::SF_UpdatePage()
+        48   -> strcpy
+       0   TFlash::SF_StoreData16(uint32_t, uint16_t)
+       0   TFlash::SF_StoreData32(uint32_t, uint32_t)
+       0   TFlash::SF_StoreData8(uint32_t, uint8_t)
+      12   TFlash::SF_StoreDataArray(uint32_t, uint8_t *, int)
+       0   TFlash::SF_UpdatePage()
+
+
+   Section sizes:
+
+   Bytes  Function/Label
+   -----  --------------
+       4  ??DataTable8
+       4  ??DataTable8_1
+       4  ??DataTable8_2
+       4  ??DataTable8_3
+       4  ??DataTable8_4
+       4  ??DataTable8_5
+      54  TFlash::SF_CommitPage()
+       4  TFlash::SF_Deinit()
+       4  TFlash::SF_GetData16(uint32_t)
+       4  TFlash::SF_GetData32(uint32_t)
+       4  TFlash::SF_GetData8(uint32_t)
+      24  TFlash::SF_Init()
+   65536  TFlash::SF_PageCache
+      90  TFlash::SF_SetDefaults()
+      16  TFlash::SF_StoreData16(uint32_t, uint16_t)
+      24  TFlash::SF_StoreData32(uint32_t, uint32_t)
+      10  TFlash::SF_StoreData8(uint32_t, uint8_t)
+      28  TFlash::SF_StoreDataArray(uint32_t, uint8_t *, int)
+      22  TFlash::SF_UpdatePage()
+      28  defDeviceName
+
+ 
+ 65 536 bytes in section .bss
+    336 bytes in section .text
+ 
+    336 bytes of CODE memory
+ 65 536 bytes of DATA memory
+
+Errors: none
+Warnings: none

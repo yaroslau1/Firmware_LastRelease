@@ -1,0 +1,1397 @@
+###############################################################################
+#
+# IAR ANSI C/C++ Compiler V7.40.2.8542/W32 for ARM        08/Oct/2018  09:58:04
+# Copyright 1999-2015 IAR Systems AB.
+#
+#    Cpu mode     =  thumb
+#    Endian       =  little
+#    Source file  =  D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\TADS1298.cpp
+#    Command line =  
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\TADS1298.cpp -D
+#        IAR_ARM_CM4 -D USE_STDPERIPH_DRIVER -D STM32F40_41xxx -D HAVE_CONFIG_H
+#        -D SD_SPI_MODE -D USE_FULL_ASSERT -D DEVICE_2 -D TFT -D
+#        STENDBUY_NOT_USE -D SCREEN_NOT_ROTATE -D USE_ADS1292R -D DISPLAY_GPIO
+#        -D BUFFERED_TRANSFER -D LCD_TRACE -lCN
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\KP02_DEVICE_2\List\ -o
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\KP02_DEVICE_2\Obj\
+#        --no_unroll --no_inline --no_tbaa --no_scheduling --debug
+#        --endian=little --cpu=Cortex-M4F -e --fpu=VFPv4_sp --dlib_config
+#        "D:\Program Files (x86)\IAR Systems\Embedded Workbench
+#        7.2\arm\INC\c\DLib_Config_Normal.h" -I
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\ -I
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\FatFs\ -I
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\FreeRTOS\Source\include\
+#        -I
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\FreeRTOS\Source\portable\IAR\ARM_CM3\
+#        -I
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\Libraries\CMSIS\CM4\CoreSupport\
+#        -I
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\Libraries\CMSIS\CM4\DeviceSupport\STM32F4xx\
+#        -I
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\Libraries\STM32F4xx_StdPeriph_Driver\inc\
+#        -I
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\Libraries\STM32F10x_Speex_Lib\include\speex\
+#        -I
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\Libraries\STM32F10x_Speex_Lib\include\
+#        -I
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\Libraries\STM32F10x_Speex_Lib\libspeex\
+#        -I
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\Libraries\STM32F10x_Speex_Lib\STM32\include\speex\
+#        -I
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\Libraries\STM32F10x_Speex_Lib\STM32\include\
+#        -I
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\Libraries\STM32F10x_Speex_Lib\STM32\
+#        -I
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\Libraries\STM32F10x_Speex_Lib\STM32\libspeex\
+#        -I
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\Libraries\STM32F10x_Speex_Lib\STM32\libspeex\iar\
+#        -I D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\Fonts\ -Om --ec++
+#    List file    =  
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\KP02_DEVICE_2\List\TADS1298.lst
+#    Object file  =  
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\KP02_DEVICE_2\Obj\TADS1298.o
+#
+###############################################################################
+
+D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\TADS1298.cpp
+      1          /************************************************************************************/
+      2          /* @title		ADS1298 control														*/
+      3          /* @author		Cyber Genius														*/
+      4          /* @version		0.1																	*/
+      5          /* @date		13.07.2012															*/
+      6          /************************************************************************************/
+      7          /* @brief																			*/
+      8          /************************************************************************************/
+      9          #include "TADS1298.h"
+
+   \                                 In section .text, align 2
+   \   __interwork __softfp void __delay_cycles(int)
+   \                     _Z14__delay_cyclesi: (+1)
+   \   00000000   0xB401             PUSH     {R0}
+   \   00000002   0x2000             MOVS     R0,#+0
+   \   00000004   0xE001             B.N      ??__delay_cycles_0
+   \                     ??__delay_cycles_1: (+1)
+   \   00000006   0xBF00             Nop      
+   \   00000008   0x1C40             ADDS     R0,R0,#+1
+   \                     ??__delay_cycles_0: (+1)
+   \   0000000A   0x9900             LDR      R1,[SP, #+0]
+   \   0000000C   0x4288             CMP      R0,R1
+   \   0000000E   0xDBFA             BLT.N    ??__delay_cycles_1
+   \   00000010   0xB001             ADD      SP,SP,#+4
+   \   00000012   0x4770             BX       LR               ;; return
+     10          #include "TSDProcessor.h"
+     11          #include "main.h"
+     12          #include "TEcgProcessor.h"
+     13          #include "TAppProcessor.h"
+     14          #include "TDevice.h"
+     15          #include "TRespProcessor.h"
+     16          #include "TSpiSram.h"
+     17          
+     18          
+     19          /*----------------------------------------------------------------------------------*/
+     20          /* @brief	заполняет буффер как результат одного преобразования ADS1298			*/
+     21          /* @param	None																	*/
+     22          /* @return	None																	*/
+     23          /*----------------------------------------------------------------------------------*/
+
+   \                                 In section .text, align 2, keep-with-next
+     24          bool TADS1298::GetConvertResultTest( void )
+     25          {
+   \                     _ZN8TADS129820GetConvertResultTestEv: (+1)
+   \   00000000   0xB570             PUSH     {R4-R6,LR}
+     26            bool res = true;
+   \   00000002   0x2401             MOVS     R4,#+1
+     27            static BYTE incSeq = 0;
+     28            static BYTE dummyByte[32] ;
+     29            static BYTE dummyByte2[32] ;
+     30          
+     31          /*
+     32          	ADS1298PHYReinit();
+     33          	SPI_SSControl( 0 );
+     34          
+     35          	SPI_SendByte( 0x01 );
+     36          	SPI_SendByte( 0x40 );
+     37          
+     38          	SPI_SSControl( 1 );
+     39          	SPI_SSControl( 0 );
+     40          
+     41          	SPI_SendByte( 0x03 );
+     42          //	SPI_SendByte( 0x00 );
+     43          //	SPI_SendByte( 0x00 );
+     44          //	SPI_SendByte( 0x00 );
+     45          
+     46            uint8_t address[4];
+     47            uint32_t addr = TEcgProcessor::ram_addr;
+     48            for(int i = 0; i < SPISRAM_ADDR_SIZE; i++)
+     49            {
+     50              address[i] = (uint8_t) (addr & 0xFF);
+     51              addr = addr >> 8;
+     52            }
+     53            for(int i = SPISRAM_ADDR_SIZE; i > 0; i--)
+     54            {
+     55              SPI_SendByte(address[i - 1]);
+     56            }
+     57          
+     58            TEcgProcessor::ram_addr += 32;
+     59            
+     60            SPI_ReceiveByte( 0x00 );
+     61          
+     62          
+     63            for(int j = 0;j < 32;j++)
+     64            {
+     65              dummyByte[j] = SPI_ReceiveByte( 0x00 );
+     66              if(dummyByte[j] != incSeq) res = false;
+     67              incSeq++;
+     68            }
+     69          
+     70          
+     71          	SPI_SSControl( 1 );
+     72          	ADS1298PHYDeinit();
+     73          */  
+     74          
+     75            TSPISRAM::ReadSeq( TEcgProcessor::ram_addr, 32, &dummyByte[0] );
+   \   00000004   0x....             LDR.N    R6,??DataTable6
+   \   00000006   0x....             LDR.N    R5,??DataTable6_1
+   \   00000008   0x1D2A             ADDS     R2,R5,#+4
+   \   0000000A   0x2120             MOVS     R1,#+32
+   \   0000000C   0x6830             LDR      R0,[R6, #+0]
+   \   0000000E   0x.... 0x....      BL       _ZN8TSPISRAM7ReadSeqEjjPh
+     76            TSPISRAM::ReadSeq( TEcgProcessor::ram_addr, 32, &dummyByte2[0] );
+   \   00000012   0xF105 0x0224      ADD      R2,R5,#+36
+   \   00000016   0x2120             MOVS     R1,#+32
+   \   00000018   0x6830             LDR      R0,[R6, #+0]
+   \   0000001A   0x.... 0x....      BL       _ZN8TSPISRAM7ReadSeqEjjPh
+     77            TEcgProcessor::ram_addr += 32;
+   \   0000001E   0x6830             LDR      R0,[R6, #+0]
+   \   00000020   0x3020             ADDS     R0,R0,#+32
+   \   00000022   0x6030             STR      R0,[R6, #+0]
+     78            for(int j = 0;j < 32;j++)
+   \   00000024   0x2000             MOVS     R0,#+0
+   \   00000026   0xE008             B.N      ??GetConvertResultTest_0
+     79            {
+     80              if(dummyByte[j] != dummyByte2[j]) 
+   \                     ??GetConvertResultTest_1: (+1)
+   \   00000028   0x1941             ADDS     R1,R0,R5
+   \   0000002A   0x7909             LDRB     R1,[R1, #+4]
+   \   0000002C   0x1942             ADDS     R2,R0,R5
+   \   0000002E   0xF892 0x2024      LDRB     R2,[R2, #+36]
+   \   00000032   0x4291             CMP      R1,R2
+   \   00000034   0xD000             BEQ.N    ??GetConvertResultTest_2
+     81                res = false;
+   \   00000036   0x2400             MOVS     R4,#+0
+     82            }
+   \                     ??GetConvertResultTest_2: (+1)
+   \   00000038   0x1C40             ADDS     R0,R0,#+1
+   \                     ??GetConvertResultTest_0: (+1)
+   \   0000003A   0x2820             CMP      R0,#+32
+   \   0000003C   0xDBF4             BLT.N    ??GetConvertResultTest_1
+     83            for(int j = 0;j < 32;j++)
+   \   0000003E   0x2000             MOVS     R0,#+0
+   \   00000040   0xE008             B.N      ??GetConvertResultTest_3
+     84            {
+     85              if(dummyByte[j] != incSeq) 
+   \                     ??GetConvertResultTest_4: (+1)
+   \   00000042   0x7829             LDRB     R1,[R5, #+0]
+   \   00000044   0x1942             ADDS     R2,R0,R5
+   \   00000046   0x7912             LDRB     R2,[R2, #+4]
+   \   00000048   0x428A             CMP      R2,R1
+   \   0000004A   0xD000             BEQ.N    ??GetConvertResultTest_5
+     86                res = false;
+   \   0000004C   0x2400             MOVS     R4,#+0
+     87              incSeq++;
+   \                     ??GetConvertResultTest_5: (+1)
+   \   0000004E   0x1C49             ADDS     R1,R1,#+1
+   \   00000050   0x7029             STRB     R1,[R5, #+0]
+     88            }
+   \   00000052   0x1C40             ADDS     R0,R0,#+1
+   \                     ??GetConvertResultTest_3: (+1)
+   \   00000054   0x2820             CMP      R0,#+32
+   \   00000056   0xDBF4             BLT.N    ??GetConvertResultTest_4
+     89          
+     90            if (res) 
+   \   00000058   0x4620             MOV      R0,R4
+   \   0000005A   0x1E40             SUBS     R0,R0,#+1
+   \   0000005C   0x4180             SBCS     R0,R0,R0
+   \   0000005E   0x43C0             MVNS     R0,R0
+   \   00000060   0x0FC0             LSRS     R0,R0,#+31
+     91              return true;
+     92            else
+     93              return false;
+   \   00000062   0xBD70             POP      {R4-R6,PC}       ;; return
+     94          
+     95          //  return res;
+     96          }
+
+   \                                 In section .bss, align 4
+   \                     ??incSeq:
+   \   00000000                      DS8 1
+   \   00000001                      DS8 3
+   \   00000004                      DS8 32
+   \   00000024                      DS8 32
+     97          
+     98          /*
+     99          void TADS1298::GetConvertResult( void )
+    100          {
+    101          
+    102          
+    103          	ADS1298PHYReinit();
+    104          	SPI_SSControl( 0 );
+    105          
+    106          	SPI_SendByte( 0x01 );
+    107          	SPI_SendByte( 0x40 );
+    108          
+    109          	SPI_SSControl( 1 );
+    110          	SPI_SSControl( 0 );
+    111          
+    112          	SPI_SendByte( 0x03 );
+    113          //	SPI_SendByte( 0x00 );
+    114          //	SPI_SendByte( 0x00 );
+    115          //	SPI_SendByte( 0x00 );
+    116          
+    117            uint8_t address[4];
+    118            uint32_t addr = TEcgProcessor::ram_addr;
+    119            for(int i = 0; i < SPISRAM_ADDR_SIZE; i++)
+    120            {
+    121              address[i] = (uint8_t) (addr & 0xFF);
+    122              addr = addr >> 8;
+    123            }
+    124            for(int i = SPISRAM_ADDR_SIZE; i > 0; i--)
+    125            {
+    126              SPI_SendByte(address[i - 1]);
+    127            }
+    128          
+    129            TEcgProcessor::ram_addr += 32;
+    130          
+    131          	int16_t tmp = SPI_ReceiveByte( 0x00 ) << 8;
+    132          	tmp += SPI_ReceiveByte( 0x00 );
+    133          
+    134          	TEcgProcessor::WrEcgData.Status.ChannelBytes[3] = 0;
+    135          	TEcgProcessor::WrEcgData.Status.ChannelBytes[2] = 0;
+    136          	TEcgProcessor::WrEcgData.Status.ChannelBytes[1] = 0;
+    137          //	TEcgProcessor::WrEcgData.Status.ChannelBytes[2] = SPI_ReceiveByte( 0x00 );
+    138          //	TEcgProcessor::WrEcgData.Status.ChannelBytes[1] = SPI_ReceiveByte( 0x00 );
+    139          	TEcgProcessor::WrEcgData.Status.ChannelBytes[0] = SPI_ReceiveByte( 0x00 );
+    140          
+    141          	if (TAppProcessor::cable_state == ct10Leads)
+    142          	{
+    143          		TEcgProcessor::WrEcgData.Channel_3.ChannelBytes[3] = SPI_ReceiveByte( 0x00 );
+    144          		TEcgProcessor::WrEcgData.Channel_3.ChannelBytes[2] = SPI_ReceiveByte( 0x00 );
+    145          		TEcgProcessor::WrEcgData.Channel_3.ChannelBytes[1] = SPI_ReceiveByte( 0x00 );
+    146          
+    147          		TEcgProcessor::WrEcgData.Channel_1.ChannelBytes[3] = SPI_ReceiveByte( 0x00 );
+    148          		TEcgProcessor::WrEcgData.Channel_1.ChannelBytes[2] = SPI_ReceiveByte( 0x00 );
+    149          		TEcgProcessor::WrEcgData.Channel_1.ChannelBytes[1] = SPI_ReceiveByte( 0x00 );
+    150          
+    151          		TEcgProcessor::WrEcgData.Channel_2.ChannelBytes[3] = SPI_ReceiveByte( 0x00 );
+    152          		TEcgProcessor::WrEcgData.Channel_2.ChannelBytes[2] = SPI_ReceiveByte( 0x00 );
+    153          		TEcgProcessor::WrEcgData.Channel_2.ChannelBytes[1] = SPI_ReceiveByte( 0x00 );
+    154          
+    155          		TEcgProcessor::WrEcgData.Channel_7.ChannelBytes[3] = SPI_ReceiveByte( 0x00 );
+    156          		TEcgProcessor::WrEcgData.Channel_7.ChannelBytes[2] = SPI_ReceiveByte( 0x00 );
+    157          		TEcgProcessor::WrEcgData.Channel_7.ChannelBytes[1] = SPI_ReceiveByte( 0x00 );
+    158          
+    159          		TEcgProcessor::WrEcgData.Channel_8.ChannelBytes[3] = SPI_ReceiveByte( 0x00 );
+    160          		TEcgProcessor::WrEcgData.Channel_8.ChannelBytes[2] = SPI_ReceiveByte( 0x00 );
+    161          		TEcgProcessor::WrEcgData.Channel_8.ChannelBytes[1] = SPI_ReceiveByte( 0x00 );
+    162          
+    163          		TEcgProcessor::WrEcgData.Channel_6.ChannelBytes[3] = SPI_ReceiveByte( 0x00 );
+    164          		TEcgProcessor::WrEcgData.Channel_6.ChannelBytes[2] = SPI_ReceiveByte( 0x00 );
+    165          		TEcgProcessor::WrEcgData.Channel_6.ChannelBytes[1] = SPI_ReceiveByte( 0x00 );
+    166          
+    167          		TEcgProcessor::WrEcgData.Channel_5.ChannelBytes[3] = SPI_ReceiveByte( 0x00 );
+    168          		TEcgProcessor::WrEcgData.Channel_5.ChannelBytes[2] = SPI_ReceiveByte( 0x00 );
+    169          		TEcgProcessor::WrEcgData.Channel_5.ChannelBytes[1] = SPI_ReceiveByte( 0x00 );
+    170          
+    171          		TEcgProcessor::WrEcgData.Channel_4.ChannelBytes[3] = SPI_ReceiveByte( 0x00 );
+    172          		TEcgProcessor::WrEcgData.Channel_4.ChannelBytes[2] = SPI_ReceiveByte( 0x00 );
+    173          		TEcgProcessor::WrEcgData.Channel_4.ChannelBytes[1] = SPI_ReceiveByte( 0x00 );
+    174          	} else {
+    175          		TEcgProcessor::WrEcgData.Channel_1.ChannelBytes[3] = SPI_ReceiveByte( 0x00 );
+    176          		TEcgProcessor::WrEcgData.Channel_1.ChannelBytes[2] = SPI_ReceiveByte( 0x00 );
+    177          		TEcgProcessor::WrEcgData.Channel_1.ChannelBytes[1] = SPI_ReceiveByte( 0x00 );
+    178          
+    179          		TEcgProcessor::WrEcgData.Channel_3.ChannelBytes[3] = SPI_ReceiveByte( 0x00 );
+    180          		TEcgProcessor::WrEcgData.Channel_3.ChannelBytes[2] = SPI_ReceiveByte( 0x00 );
+    181          		TEcgProcessor::WrEcgData.Channel_3.ChannelBytes[1] = SPI_ReceiveByte( 0x00 );
+    182          
+    183          		TEcgProcessor::WrEcgData.Channel_2.ChannelBytes[3] = SPI_ReceiveByte( 0x00 );
+    184          		TEcgProcessor::WrEcgData.Channel_2.ChannelBytes[2] = SPI_ReceiveByte( 0x00 );
+    185          		TEcgProcessor::WrEcgData.Channel_2.ChannelBytes[1] = SPI_ReceiveByte( 0x00 );
+    186          
+    187          		TEcgProcessor::WrEcgData.Channel_4.ChannelBytes[3] = SPI_ReceiveByte( 0x00 );
+    188          		TEcgProcessor::WrEcgData.Channel_4.ChannelBytes[2] = SPI_ReceiveByte( 0x00 );
+    189          		TEcgProcessor::WrEcgData.Channel_4.ChannelBytes[1] = SPI_ReceiveByte( 0x00 );
+    190          
+    191          		TEcgProcessor::WrEcgData.Channel_5.ChannelBytes[3] = SPI_ReceiveByte( 0x00 );
+    192          		TEcgProcessor::WrEcgData.Channel_5.ChannelBytes[2] = SPI_ReceiveByte( 0x00 );
+    193          		TEcgProcessor::WrEcgData.Channel_5.ChannelBytes[1] = SPI_ReceiveByte( 0x00 );
+    194          
+    195          		TEcgProcessor::WrEcgData.Channel_6.ChannelBytes[3] = SPI_ReceiveByte( 0x00 );
+    196          		TEcgProcessor::WrEcgData.Channel_6.ChannelBytes[2] = SPI_ReceiveByte( 0x00 );
+    197          		TEcgProcessor::WrEcgData.Channel_6.ChannelBytes[1] = SPI_ReceiveByte( 0x00 );
+    198          
+    199          		TEcgProcessor::WrEcgData.Channel_7.ChannelBytes[3] = SPI_ReceiveByte( 0x00 );
+    200          		TEcgProcessor::WrEcgData.Channel_7.ChannelBytes[2] = SPI_ReceiveByte( 0x00 );
+    201          		TEcgProcessor::WrEcgData.Channel_7.ChannelBytes[1] = SPI_ReceiveByte( 0x00 );
+    202          
+    203          		TEcgProcessor::WrEcgData.Channel_8.ChannelBytes[3] = SPI_ReceiveByte( 0x00 );
+    204          		TEcgProcessor::WrEcgData.Channel_8.ChannelBytes[2] = SPI_ReceiveByte( 0x00 );
+    205          		TEcgProcessor::WrEcgData.Channel_8.ChannelBytes[1] = SPI_ReceiveByte( 0x00 );
+    206          	}
+    207          
+    208          
+    209          	TRespProcessor::WrRespData.Status.ChannelBytes[3] = 0;
+    210          	TRespProcessor::WrRespData.Status.ChannelBytes[2] = 0;
+    211          	TRespProcessor::WrRespData.Status.ChannelBytes[1] = 0;
+    212          	TRespProcessor::WrRespData.Status.ChannelBytes[0] = 0;
+    213          //	TRespProcessor::WrRespData.Status.ChannelBytes[2] = SPI_ReceiveByte( 0x00 );
+    214          //	TRespProcessor::WrRespData.Status.ChannelBytes[1] = SPI_ReceiveByte( 0x00 );
+    215          //	TRespProcessor::WrRespData.Status.ChannelBytes[0] = SPI_ReceiveByte( 0x00 );
+    216          
+    217          	TRespProcessor::WrRespData.Channel_1.ChannelBytes[3] = SPI_ReceiveByte( 0x00 );
+    218          	TRespProcessor::WrRespData.Channel_1.ChannelBytes[2] = SPI_ReceiveByte( 0x00 );
+    219          	TRespProcessor::WrRespData.Channel_1.ChannelBytes[1] = SPI_ReceiveByte( 0x00 );
+    220          
+    221          //	TRespProcessor::WrRespData.Channel_2.ChannelBytes[3] = SPI_ReceiveByte( 0x00 );
+    222          //	TRespProcessor::WrRespData.Channel_2.ChannelBytes[2] = SPI_ReceiveByte( 0x00 );
+    223          //	TRespProcessor::WrRespData.Channel_2.ChannelBytes[1] = SPI_ReceiveByte( 0x00 );
+    224          
+    225          
+    226          
+    227          	SPI_SSControl( 1 );
+    228          	ADS1298PHYDeinit();
+    229          
+    230          	uint8_t ADCi = (TEcgProcessor::WrEcgData.Status.ChannelBytes[0] & 0x30) >> 4;
+    231          	if(ADCi == 6)
+    232              TAppProcessor::SysVoltageValue = tmp;
+    233          	else if(ADCi == 5)
+    234              TAppProcessor::AnalogVoltageValue = tmp;
+    235          	else if(ADCi == 4)
+    236              TAppProcessor::LiVoltageValue = tmp;
+    237          	else if(ADCi == 3)
+    238              TAppProcessor::BatVoltageValue = tmp;
+    239          	else if(ADCi == 2)
+    240          	{
+    241          		TAppProcessor::AX_CoordWr[ADCi] = ((tmp - 2048) * 100 / ADXL_WR_DIVIDE);
+    242          	}
+    243          	else
+    244          	{
+    245          		TAppProcessor::AX_CoordWr[ADCi] = -((tmp - 2048) * 100 / ADXL_WR_DIVIDE);
+    246          	}
+    247          
+    248          
+    249          
+    250          
+    251          
+    252          	TEcgProcessor::WrEcgData.Channel_1.ChannelData = TEcgProcessor::WrEcgData.Channel_1.ChannelData >> 8;		// сдвигаем на 8 и делаем 24 битные данные 
+    253          	TEcgProcessor::WrEcgData.Channel_2.ChannelData = TEcgProcessor::WrEcgData.Channel_2.ChannelData >> 8;
+    254          	TEcgProcessor::WrEcgData.Channel_3.ChannelData = TEcgProcessor::WrEcgData.Channel_3.ChannelData >> 8;
+    255          	TEcgProcessor::WrEcgData.Channel_4.ChannelData = TEcgProcessor::WrEcgData.Channel_4.ChannelData >> 8;
+    256          	TEcgProcessor::WrEcgData.Channel_5.ChannelData = TEcgProcessor::WrEcgData.Channel_5.ChannelData >> 8;
+    257          	TEcgProcessor::WrEcgData.Channel_6.ChannelData = TEcgProcessor::WrEcgData.Channel_6.ChannelData >> 8;
+    258          	TEcgProcessor::WrEcgData.Channel_7.ChannelData = TEcgProcessor::WrEcgData.Channel_7.ChannelData >> 8;
+    259          	TEcgProcessor::WrEcgData.Channel_8.ChannelData = TEcgProcessor::WrEcgData.Channel_8.ChannelData >> 8;
+    260          	TRespProcessor::WrRespData.Channel_1.ChannelData = TRespProcessor::WrRespData.Channel_1.ChannelData >> 8;		// сдвигаем на 8 и делаем 24 битные данные 
+    261          	TRespProcessor::WrRespData.Channel_2.ChannelData = TRespProcessor::WrRespData.Channel_2.ChannelData >> 8;
+    262          
+    263          
+    264          #ifdef LED_PACE_HARD
+    265          //	TDevice::LedOff();
+    266          	if((TEcgProcessor::WrEcgData.Status.ChannelBytes[0] & 0x08) != 0) TDevice::LedOn();
+    267          	else TDevice::LedOff();
+    268          #endif
+    269          
+    270          }
+    271          */
+    272          
+
+   \                                 In section .text, align 2, keep-with-next
+    273          void TADS1298::GetConvertResult( void )
+    274          {
+   \                     _ZN8TADS129816GetConvertResultEv: (+1)
+   \   00000000   0xE92D 0x4FF0      PUSH     {R4-R11,LR}
+    275          
+    276            static BYTE Recived[32] ;
+    277          //  static BYTE Recived2[32] ;
+    278          //  static bool res;
+    279          
+    280          //  TSPISRAM::ReadSeq( TEcgProcessor::ram_addr, 32, &Recived[0] );
+    281          //  TSPISRAM::ReadSeq( TEcgProcessor::ram_addr, 32, &Recived2[0] );
+    282          
+    283            for (uint32_t j = 0; j < 32; j++)
+   \   00000004   0x2100             MOVS     R1,#+0
+   \   00000006   0x....             LDR.N    R0,??DataTable6_2
+   \   00000008   0xE004             B.N      ??GetConvertResult_0
+    284            {
+    285              Recived[j] = TEcgProcessor::BuffEcgData[TEcgProcessor::ram_addr + j];
+   \                     ??GetConvertResult_1: (+1)
+   \   0000000A   0x....             LDR.N    R3,??DataTable6_3
+   \   0000000C   0x188A             ADDS     R2,R1,R2
+   \   0000000E   0x5CD2             LDRB     R2,[R2, R3]
+   \   00000010   0x540A             STRB     R2,[R1, R0]
+    286            }
+   \   00000012   0x1C49             ADDS     R1,R1,#+1
+   \                     ??GetConvertResult_0: (+1)
+   \   00000014   0x....             LDR.N    R3,??DataTable6
+   \   00000016   0x681A             LDR      R2,[R3, #+0]
+   \   00000018   0x2920             CMP      R1,#+32
+   \   0000001A   0xD3F6             BCC.N    ??GetConvertResult_1
+    287            
+    288            TEcgProcessor::ram_addr += 32;
+   \   0000001C   0xF102 0x0120      ADD      R1,R2,#+32
+   \   00000020   0x6019             STR      R1,[R3, #+0]
+    289          /*
+    290            for(int j = 0;j < 32;j++)
+    291            {
+    292              if(Recived[j] != Recived2[j]) 
+    293                res = false;
+    294            }
+    295          */
+    296          	int16_t tmp = Recived[0] << 8;
+    297          	tmp += Recived[1];
+   \   00000022   0x7801             LDRB     R1,[R0, #+0]
+   \   00000024   0x7842             LDRB     R2,[R0, #+1]
+   \   00000026   0xEB12 0x2101      ADDS     R1,R2,R1, LSL #+8
+   \   0000002A   0xB209             SXTH     R1,R1
+    298          
+    299          	TEcgProcessor::WrEcgData.Status.ChannelBytes[3] = 0;
+   \   0000002C   0x....             LDR.N    R2,??DataTable6_4
+   \   0000002E   0x2300             MOVS     R3,#+0
+    300          	TEcgProcessor::WrEcgData.Status.ChannelBytes[2] = 0;
+   \   00000030   0x8053             STRH     R3,[R2, #+2]
+    301          	TEcgProcessor::WrEcgData.Status.ChannelBytes[1] = 0;
+   \   00000032   0x7053             STRB     R3,[R2, #+1]
+    302          	TEcgProcessor::WrEcgData.Status.ChannelBytes[0] = Recived[2];
+   \   00000034   0x7883             LDRB     R3,[R0, #+2]
+   \   00000036   0x7013             STRB     R3,[R2, #+0]
+    303          
+    304          	if (TAppProcessor::cable_state == ct10Leads)
+   \   00000038   0x7AC5             LDRB     R5,[R0, #+11]
+   \   0000003A   0x7A86             LDRB     R6,[R0, #+10]
+   \   0000003C   0x7A47             LDRB     R7,[R0, #+9]
+   \   0000003E   0xF890 0xC008      LDRB     R12,[R0, #+8]
+   \   00000042   0xF890 0xE007      LDRB     LR,[R0, #+7]
+   \   00000046   0xF890 0x8006      LDRB     R8,[R0, #+6]
+   \   0000004A   0xF890 0x9005      LDRB     R9,[R0, #+5]
+   \   0000004E   0xF890 0xA004      LDRB     R10,[R0, #+4]
+   \   00000052   0xF890 0xB003      LDRB     R11,[R0, #+3]
+   \   00000056   0x....             LDR.N    R4,??DataTable6_5
+   \   00000058   0x6824             LDR      R4,[R4, #+0]
+   \   0000005A   0x2C03             CMP      R4,#+3
+   \   0000005C   0xD12F             BNE.N    ??GetConvertResult_2
+    305          	{
+    306          		TEcgProcessor::WrEcgData.Channel[2].ChannelBytes[3] = Recived[3];
+   \   0000005E   0xF882 0xB00F      STRB     R11,[R2, #+15]
+    307          		TEcgProcessor::WrEcgData.Channel[2].ChannelBytes[2] = Recived[4];
+   \   00000062   0xF882 0xA00E      STRB     R10,[R2, #+14]
+    308          		TEcgProcessor::WrEcgData.Channel[2].ChannelBytes[1] = Recived[5];
+   \   00000066   0xF882 0x900D      STRB     R9,[R2, #+13]
+    309          
+    310          		TEcgProcessor::WrEcgData.Channel[0].ChannelBytes[3] = Recived[6];
+   \   0000006A   0xF882 0x8007      STRB     R8,[R2, #+7]
+    311          		TEcgProcessor::WrEcgData.Channel[0].ChannelBytes[2] = Recived[7];
+   \   0000006E   0xF882 0xE006      STRB     LR,[R2, #+6]
+    312          		TEcgProcessor::WrEcgData.Channel[0].ChannelBytes[1] = Recived[8];
+   \   00000072   0xF882 0xC005      STRB     R12,[R2, #+5]
+    313          
+    314          		TEcgProcessor::WrEcgData.Channel[1].ChannelBytes[3] = Recived[9];
+   \   00000076   0x72D7             STRB     R7,[R2, #+11]
+    315          		TEcgProcessor::WrEcgData.Channel[1].ChannelBytes[2] = Recived[10];
+   \   00000078   0x7296             STRB     R6,[R2, #+10]
+    316          		TEcgProcessor::WrEcgData.Channel[1].ChannelBytes[1] = Recived[11];
+   \   0000007A   0x7255             STRB     R5,[R2, #+9]
+    317          
+    318          		TEcgProcessor::WrEcgData.Channel[6].ChannelBytes[3] = Recived[12];
+   \   0000007C   0x7B05             LDRB     R5,[R0, #+12]
+   \   0000007E   0x77D5             STRB     R5,[R2, #+31]
+    319          		TEcgProcessor::WrEcgData.Channel[6].ChannelBytes[2] = Recived[13];
+   \   00000080   0x7B45             LDRB     R5,[R0, #+13]
+   \   00000082   0x7795             STRB     R5,[R2, #+30]
+    320          		TEcgProcessor::WrEcgData.Channel[6].ChannelBytes[1] = Recived[14];
+   \   00000084   0x7B85             LDRB     R5,[R0, #+14]
+   \   00000086   0x7755             STRB     R5,[R2, #+29]
+    321          
+    322          		TEcgProcessor::WrEcgData.Channel[7].ChannelBytes[3] = Recived[15];
+   \   00000088   0xF102 0x0521      ADD      R5,R2,#+33
+   \   0000008C   0x7BC6             LDRB     R6,[R0, #+15]
+   \   0000008E   0x70AE             STRB     R6,[R5, #+2]
+    323          		TEcgProcessor::WrEcgData.Channel[7].ChannelBytes[2] = Recived[16];
+   \   00000090   0x7C06             LDRB     R6,[R0, #+16]
+   \   00000092   0x706E             STRB     R6,[R5, #+1]
+    324          		TEcgProcessor::WrEcgData.Channel[7].ChannelBytes[1] = Recived[17];
+   \   00000094   0x7C46             LDRB     R6,[R0, #+17]
+   \   00000096   0x702E             STRB     R6,[R5, #+0]
+    325          
+    326          		TEcgProcessor::WrEcgData.Channel[5].ChannelBytes[3] = Recived[18];
+   \   00000098   0x7C85             LDRB     R5,[R0, #+18]
+   \   0000009A   0x76D5             STRB     R5,[R2, #+27]
+    327          		TEcgProcessor::WrEcgData.Channel[5].ChannelBytes[2] = Recived[19];
+   \   0000009C   0x7CC5             LDRB     R5,[R0, #+19]
+   \   0000009E   0x7695             STRB     R5,[R2, #+26]
+    328          		TEcgProcessor::WrEcgData.Channel[5].ChannelBytes[1] = Recived[20];
+   \   000000A0   0x7D05             LDRB     R5,[R0, #+20]
+   \   000000A2   0x7655             STRB     R5,[R2, #+25]
+    329          
+    330          		TEcgProcessor::WrEcgData.Channel[4].ChannelBytes[3] = Recived[21];
+   \   000000A4   0x7D45             LDRB     R5,[R0, #+21]
+   \   000000A6   0x75D5             STRB     R5,[R2, #+23]
+    331          		TEcgProcessor::WrEcgData.Channel[4].ChannelBytes[2] = Recived[22];
+   \   000000A8   0x7D85             LDRB     R5,[R0, #+22]
+   \   000000AA   0x7595             STRB     R5,[R2, #+22]
+    332          		TEcgProcessor::WrEcgData.Channel[4].ChannelBytes[1] = Recived[23];
+   \   000000AC   0x7DC5             LDRB     R5,[R0, #+23]
+   \   000000AE   0x7555             STRB     R5,[R2, #+21]
+    333          
+    334          		TEcgProcessor::WrEcgData.Channel[3].ChannelBytes[3] = Recived[24];
+   \   000000B0   0x7E05             LDRB     R5,[R0, #+24]
+   \   000000B2   0x74D5             STRB     R5,[R2, #+19]
+    335          		TEcgProcessor::WrEcgData.Channel[3].ChannelBytes[2] = Recived[25];
+   \   000000B4   0x7E45             LDRB     R5,[R0, #+25]
+   \   000000B6   0x7495             STRB     R5,[R2, #+18]
+    336          		TEcgProcessor::WrEcgData.Channel[3].ChannelBytes[1] = Recived[26];
+   \   000000B8   0x7E85             LDRB     R5,[R0, #+26]
+   \   000000BA   0x7455             STRB     R5,[R2, #+17]
+   \   000000BC   0xE00E             B.N      ??GetConvertResult_3
+    337          	} else {
+    338          		TEcgProcessor::WrEcgData.Channel[0].ChannelBytes[3] = Recived[3];
+   \                     ??GetConvertResult_2: (+1)
+   \   000000BE   0xF882 0xB007      STRB     R11,[R2, #+7]
+    339          		TEcgProcessor::WrEcgData.Channel[0].ChannelBytes[2] = Recived[4];
+   \   000000C2   0xF882 0xA006      STRB     R10,[R2, #+6]
+    340          		TEcgProcessor::WrEcgData.Channel[0].ChannelBytes[1] = Recived[5];
+   \   000000C6   0xF882 0x9005      STRB     R9,[R2, #+5]
+    341          
+    342          		TEcgProcessor::WrEcgData.Channel[2].ChannelBytes[3] = Recived[6];
+   \   000000CA   0xF882 0x800F      STRB     R8,[R2, #+15]
+    343          		TEcgProcessor::WrEcgData.Channel[2].ChannelBytes[2] = Recived[7];
+   \   000000CE   0xF882 0xE00E      STRB     LR,[R2, #+14]
+    344          		TEcgProcessor::WrEcgData.Channel[2].ChannelBytes[1] = Recived[8];
+   \   000000D2   0xF882 0xC00D      STRB     R12,[R2, #+13]
+    345          
+    346          		TEcgProcessor::WrEcgData.Channel[1].ChannelBytes[3] = Recived[9];
+   \   000000D6   0x72D7             STRB     R7,[R2, #+11]
+    347          		TEcgProcessor::WrEcgData.Channel[1].ChannelBytes[2] = Recived[10];
+   \   000000D8   0x7296             STRB     R6,[R2, #+10]
+    348          		TEcgProcessor::WrEcgData.Channel[1].ChannelBytes[1] = Recived[11];
+   \   000000DA   0x7255             STRB     R5,[R2, #+9]
+    349          	}
+    350          
+    351          
+    352          	TRespProcessor::WrRespData.Status.ChannelBytes[3] = 0;
+   \                     ??GetConvertResult_3: (+1)
+   \   000000DC   0x....             LDR.N    R5,??DataTable6_6
+   \   000000DE   0x2600             MOVS     R6,#+0
+    353          	TRespProcessor::WrRespData.Status.ChannelBytes[2] = 0;
+    354          	TRespProcessor::WrRespData.Status.ChannelBytes[1] = 0;
+    355          	TRespProcessor::WrRespData.Status.ChannelBytes[0] = 0;
+   \   000000E0   0x602E             STR      R6,[R5, #+0]
+    356          
+    357          	TRespProcessor::WrRespData.Channel_1.ChannelBytes[3] = Recived[27];
+   \   000000E2   0x7EC6             LDRB     R6,[R0, #+27]
+   \   000000E4   0x71EE             STRB     R6,[R5, #+7]
+    358          	TRespProcessor::WrRespData.Channel_1.ChannelBytes[2] = Recived[28];
+   \   000000E6   0x7F06             LDRB     R6,[R0, #+28]
+   \   000000E8   0x71AE             STRB     R6,[R5, #+6]
+    359          	TRespProcessor::WrRespData.Channel_1.ChannelBytes[1] = Recived[29];
+   \   000000EA   0x7F40             LDRB     R0,[R0, #+29]
+   \   000000EC   0x7168             STRB     R0,[R5, #+5]
+    360          
+    361          	uint8_t ADCi = (TEcgProcessor::WrEcgData.Status.ChannelBytes[0] & 0x70) >> 4;
+   \   000000EE   0xF3C3 0x1002      UBFX     R0,R3,#+4,#+3
+    362          	if(ADCi == 6)
+   \   000000F2   0x2806             CMP      R0,#+6
+   \   000000F4   0xD102             BNE.N    ??GetConvertResult_4
+    363              TAppProcessor::SysVoltageValue = tmp;
+   \   000000F6   0x....             LDR.N    R0,??DataTable6_7
+   \   000000F8   0x8001             STRH     R1,[R0, #+0]
+   \   000000FA   0xE01F             B.N      ??GetConvertResult_5
+    364          	else if(ADCi == 5)
+   \                     ??GetConvertResult_4: (+1)
+   \   000000FC   0x2805             CMP      R0,#+5
+   \   000000FE   0xD102             BNE.N    ??GetConvertResult_6
+    365              TAppProcessor::AnalogVoltageValue = tmp;
+   \   00000100   0x....             LDR.N    R0,??DataTable6_8
+   \   00000102   0x8001             STRH     R1,[R0, #+0]
+   \   00000104   0xE01A             B.N      ??GetConvertResult_5
+    366          	else if(ADCi == 4)
+   \                     ??GetConvertResult_6: (+1)
+   \   00000106   0x2804             CMP      R0,#+4
+   \   00000108   0xD102             BNE.N    ??GetConvertResult_7
+    367              TAppProcessor::LiVoltageValue = tmp;
+   \   0000010A   0x....             LDR.N    R0,??DataTable6_9
+   \   0000010C   0x8001             STRH     R1,[R0, #+0]
+   \   0000010E   0xE015             B.N      ??GetConvertResult_5
+    368          	else if(ADCi == 3)
+   \                     ??GetConvertResult_7: (+1)
+   \   00000110   0x2803             CMP      R0,#+3
+   \   00000112   0xD102             BNE.N    ??GetConvertResult_8
+    369              TAppProcessor::BatVoltageValue = tmp;
+   \   00000114   0x....             LDR.N    R0,??DataTable6_10
+   \   00000116   0x8001             STRH     R1,[R0, #+0]
+   \   00000118   0xE010             B.N      ??GetConvertResult_5
+    370          	else if(ADCi == 2)
+   \                     ??GetConvertResult_8: (+1)
+   \   0000011A   0xF5A1 0x6100      SUB      R1,R1,#+2048
+   \   0000011E   0x2364             MOVS     R3,#+100
+   \   00000120   0x4359             MULS     R1,R3,R1
+   \   00000122   0x....             LDR.N    R3,??DataTable6_11
+   \   00000124   0x2802             CMP      R0,#+2
+   \   00000126   0xD105             BNE.N    ??GetConvertResult_9
+    371          	{
+    372          		TAppProcessor::AX_CoordWr[ADCi] = ((tmp - 2048) * 100 / ADXL_WR_DIVIDE);
+   \   00000128   0xF44F 0x7616      MOV      R6,#+600
+   \   0000012C   0xFB91 0xF1F6      SDIV     R1,R1,R6
+   \   00000130   0x54C1             STRB     R1,[R0, R3]
+   \   00000132   0xE003             B.N      ??GetConvertResult_5
+    373          	}
+    374          	else
+    375          	{
+    376          		TAppProcessor::AX_CoordWr[ADCi] = -((tmp - 2048) * 100 / ADXL_WR_DIVIDE);
+   \                     ??GetConvertResult_9: (+1)
+   \   00000134   0x....             LDR.N    R6,??DataTable6_12  ;; 0xfffffda8
+   \   00000136   0xFB91 0xF1F6      SDIV     R1,R1,R6
+   \   0000013A   0x54C1             STRB     R1,[R0, R3]
+    377          	}
+    378          
+    379            uint8_t ch_cnt = 3;
+   \                     ??GetConvertResult_5: (+1)
+   \   0000013C   0x2003             MOVS     R0,#+3
+    380            if (TAppProcessor::cable_state == ct10Leads)
+   \   0000013E   0x2C03             CMP      R4,#+3
+   \   00000140   0xD100             BNE.N    ??GetConvertResult_10
+    381          	{
+    382              ch_cnt = 8;
+   \   00000142   0x2008             MOVS     R0,#+8
+    383          	}
+    384          
+    385            for(uint8_t i = 0; i < ch_cnt; i++)
+   \                     ??GetConvertResult_10: (+1)
+   \   00000144   0x2100             MOVS     R1,#+0
+   \   00000146   0xE006             B.N      ??GetConvertResult_11
+    386            {
+    387              TEcgProcessor::WrEcgData.Channel[i].ChannelData = TEcgProcessor::WrEcgData.Channel[i].ChannelData >> 8;		/* сдвигаем на 8 и делаем 24 битные данные */
+   \                     ??GetConvertResult_12: (+1)
+   \   00000148   0xEB02 0x0381      ADD      R3,R2,R1, LSL #+2
+   \   0000014C   0x685C             LDR      R4,[R3, #+4]
+   \   0000014E   0x1224             ASRS     R4,R4,#+8
+   \   00000150   0x605C             STR      R4,[R3, #+4]
+    388            }
+   \   00000152   0x1C49             ADDS     R1,R1,#+1
+   \   00000154   0xB2C9             UXTB     R1,R1
+   \                     ??GetConvertResult_11: (+1)
+   \   00000156   0x4281             CMP      R1,R0
+   \   00000158   0xDBF6             BLT.N    ??GetConvertResult_12
+    389          	TRespProcessor::WrRespData.Channel_1.ChannelData = TRespProcessor::WrRespData.Channel_1.ChannelData >> 8;		/* сдвигаем на 8 и делаем 24 битные данные */
+   \   0000015A   0x6868             LDR      R0,[R5, #+4]
+   \   0000015C   0x1200             ASRS     R0,R0,#+8
+   \   0000015E   0x6068             STR      R0,[R5, #+4]
+    390          //	TRespProcessor::WrRespData.Channel_2.ChannelData = TRespProcessor::WrRespData.Channel_2.ChannelData >> 8;
+    391          
+    392          
+    393          #ifdef LED_PACE_HARD
+    394          //	TDevice::LedOff();
+    395          	if((TEcgProcessor::WrEcgData.Status.ChannelBytes[0] & 0x08) != 0) TDevice::LedOn();
+    396          	else TDevice::LedOff();
+    397          #endif
+    398          
+    399          }
+   \   00000160   0xE8BD 0x8FF0      POP      {R4-R11,PC}      ;; return
+
+   \                                 In section .bss, align 4
+   \                     ??Recived:
+   \   00000000                      DS8 32
+    400          
+    401          /*----------------------------------------------------------------------------------*/
+    402          /* @brief	Hастраивает ADS1298 на преобразование									*/
+    403          /* @param	None																	*/
+    404          /* @return	None																	*/
+    405          /*----------------------------------------------------------------------------------*/
+
+   \                                 In section .text, align 2, keep-with-next
+    406          void TADS1298::StartConversation( void )
+    407          {
+    408          }
+   \                     _ZN8TADS129817StartConversationEv: (+1)
+   \   00000000   0x4770             BX       LR               ;; return
+    409          
+    410          
+    411          
+    412          /*----------------------------------------------------------------------------------*/
+    413          /* @brief	Включает тестовые сигналы в виде меандра. Также необходимо запускать	*/
+    414          /*			перед началом работы снятия экг, чтобы прошла внутреняя калибровка АЦП	*/
+    415          /* @param	None																	*/
+    416          /* @return	None																	*/
+    417          /*----------------------------------------------------------------------------------*/
+
+   \                                 In section .text, align 2, keep-with-next
+    418          void TADS1298::TestSignals( void )
+    419          {
+    420          }
+   \                     _ZN8TADS129811TestSignalsEv: (+1)
+   \   00000000   0x4770             BX       LR               ;; return
+    421          
+    422          
+    423          
+    424          /*----------------------------------------------------------------------------------*/
+    425          /* @brief	None																	*/
+    426          /* @param	None																	*/
+    427          /* @return	None																	*/
+    428          /*----------------------------------------------------------------------------------*/
+
+   \                                 In section .text, align 2, keep-with-next
+    429          void TADS1298::StopConversation( void )
+    430          {
+    431          }
+   \                     _ZN8TADS129816StopConversationEv: (+1)
+   \   00000000   0x4770             BX       LR               ;; return
+    432          
+    433          
+    434          
+    435          /*----------------------------------------------------------------------------------*/
+
+   \                                 In section .text, align 2, keep-with-next
+    436          void TADS1298::SPI_Start( bool state )
+    437          {
+    438          }
+   \                     _ZN8TADS12989SPI_StartEb: (+1)
+   \   00000000   0x4770             BX       LR               ;; return
+    439          
+    440          
+    441          
+    442          /*----------------------------------------------------------------------------------*/
+
+   \                                 In section .text, align 2, keep-with-next
+    443          void TADS1298::SPI_Reset( bool state )
+    444          {
+    445          }
+   \                     _ZN8TADS12989SPI_ResetEb: (+1)
+   \   00000000   0x4770             BX       LR               ;; return
+    446          
+    447          
+    448          
+    449          /*----------------------------------------------------------------------------------*/
+
+   \                                 In section .text, align 2, keep-with-next
+    450          void TADS1298::SPI_SSControl( bool state )
+    451          {
+    452          	if( state == true ) GPIO_SetBits( ADS1298_CS_PORT, ADS1298_CS_PIN );
+   \                     _ZN8TADS129813SPI_SSControlEb: (+1)
+   \   00000000   0x....             LDR.N    R2,??DataTable6_13  ;; 0x40020400
+   \   00000002   0x2800             CMP      R0,#+0
+   \   00000004   0xF44F 0x5180      MOV      R1,#+4096
+   \   00000008   0x4610             MOV      R0,R2
+   \   0000000A   0xD001             BEQ.N    ??SPI_SSControl_0
+   \   0000000C   0x.... 0x....      B.W      GPIO_SetBits
+    453          	else GPIO_ResetBits( ADS1298_CS_PORT, ADS1298_CS_PIN );
+   \                     ??SPI_SSControl_0: (+1)
+   \   00000010   0x.... 0x....      B.W      GPIO_ResetBits
+    454          }
+    455          
+    456          
+    457          
+    458          /*----------------------------------------------------------------------------------*/
+
+   \                                 In section .text, align 2, keep-with-next
+    459          void TADS1298::SPI_SendByte( uint8_t byte )
+    460          {
+   \                     _ZN8TADS129812SPI_SendByteEh: (+1)
+   \   00000000   0xB510             PUSH     {R4,LR}
+    461          	SPI_I2S_SendData( ADS1298_SPI, byte );
+   \   00000002   0x....             LDR.N    R4,??DataTable6_14  ;; 0x40003800
+   \   00000004   0x4601             MOV      R1,R0
+   \   00000006   0x4620             MOV      R0,R4
+   \   00000008   0x.... 0x....      BL       SPI_I2S_SendData
+    462          	while( SPI_I2S_GetFlagStatus( ADS1298_SPI, SPI_I2S_FLAG_BSY ) == SET );  // while( SPI_I2S_GetFlagStatus( ADS1298_SPI, SPI_I2S_FLAG_TXE ) == RESET )
+   \                     ??SPI_SendByte_0: (+1)
+   \   0000000C   0x2180             MOVS     R1,#+128
+   \   0000000E   0x4620             MOV      R0,R4
+   \   00000010   0x.... 0x....      BL       SPI_I2S_GetFlagStatus
+   \   00000014   0x2801             CMP      R0,#+1
+   \   00000016   0xD0F9             BEQ.N    ??SPI_SendByte_0
+    463          	__delay_cycles(	1 );
+   \   00000018   0x2001             MOVS     R0,#+1
+   \   0000001A   0xE8BD 0x4010      POP      {R4,LR}
+   \   0000001E   0x.... 0x....      B.W      _Z14__delay_cyclesi
+    464          }
+    465          
+    466          
+    467          
+    468          /*----------------------------------------------------------------------------------*/
+
+   \                                 In section .text, align 2, keep-with-next
+    469          uint8_t TADS1298::SPI_ReceiveByte( uint8_t data )
+    470          {
+   \                     _ZN8TADS129815SPI_ReceiveByteEh: (+1)
+   \   00000000   0xB510             PUSH     {R4,LR}
+   \   00000002   0xB082             SUB      SP,SP,#+8
+    471          	volatile uint8_t Data;
+    472          	SPI_I2S_SendData( ADS1298_SPI, data );
+   \   00000004   0x....             LDR.N    R4,??DataTable6_14  ;; 0x40003800
+   \   00000006   0x4601             MOV      R1,R0
+   \   00000008   0x4620             MOV      R0,R4
+   \   0000000A   0x.... 0x....      BL       SPI_I2S_SendData
+    473          	while( SPI_I2S_GetFlagStatus( ADS1298_SPI, SPI_I2S_FLAG_BSY ) == SET )  // while( SPI_I2S_GetFlagStatus( ADS1298_SPI, SPI_I2S_FLAG_RXNE ) == RESET )
+   \                     ??SPI_ReceiveByte_0: (+1)
+   \   0000000E   0x2180             MOVS     R1,#+128
+   \   00000010   0x4620             MOV      R0,R4
+   \   00000012   0x.... 0x....      BL       SPI_I2S_GetFlagStatus
+   \   00000016   0x2801             CMP      R0,#+1
+   \   00000018   0xD0F9             BEQ.N    ??SPI_ReceiveByte_0
+    474          		;
+    475          	__delay_cycles(	1 );
+   \   0000001A   0x2001             MOVS     R0,#+1
+   \   0000001C   0x.... 0x....      BL       _Z14__delay_cyclesi
+    476          	Data = SPI_I2S_ReceiveData( ADS1298_SPI );
+   \   00000020   0x4620             MOV      R0,R4
+   \   00000022   0x.... 0x....      BL       SPI_I2S_ReceiveData
+   \   00000026   0xF88D 0x0000      STRB     R0,[SP, #+0]
+    477          	return Data;
+   \   0000002A   0xF89D 0x0000      LDRB     R0,[SP, #+0]
+   \   0000002E   0xBD16             POP      {R1,R2,R4,PC}    ;; return
+    478          }
+    479          
+    480          
+    481          
+    482          /*----------------------------------------------------------------------------------*/
+
+   \                                 In section .text, align 2, keep-with-next
+    483          void TADS1298::ADS1298_Init( void )
+    484          {
+   \                     _ZN8TADS129812ADS1298_InitEv: (+1)
+   \   00000000   0xB510             PUSH     {R4,LR}
+    485          /*	SPI_Start( 0 );
+    486          	__delay_cycles( 3000 );
+    487          	SPI_Reset( 1 );
+    488          	__delay_cycles( 3000 );
+    489          	SPI_Reset( 0 );
+    490          	__delay_cycles( 3000 );
+    491          	SPI_Reset( 1 );
+    492          	__delay_cycles( 1000000 );
+    493          */
+    494          	FFHigh_MA0( 0, NULL, true );		/* filters reset */
+   \   00000002   0x2201             MOVS     R2,#+1
+   \   00000004   0x2100             MOVS     R1,#+0
+   \   00000006   0x4608             MOV      R0,R1
+   \   00000008   0x.... 0x....      BL       _ZN4TDSP10FFHigh_MA0EiPib
+    495          	FFHigh_MA1( 0, NULL, true );
+   \   0000000C   0x2201             MOVS     R2,#+1
+   \   0000000E   0x2100             MOVS     R1,#+0
+   \   00000010   0x4608             MOV      R0,R1
+   \   00000012   0x.... 0x....      BL       _ZN4TDSP10FFHigh_MA1EiPib
+    496          	FFHigh_MA2( 0, NULL, true );
+   \   00000016   0x2201             MOVS     R2,#+1
+   \   00000018   0x2100             MOVS     R1,#+0
+   \   0000001A   0x4608             MOV      R0,R1
+   \   0000001C   0x.... 0x....      BL       _ZN4TDSP10FFHigh_MA2EiPib
+    497          
+    498          	for(uint8_t i = 0; i < 8; i++)
+   \   00000020   0x2400             MOVS     R4,#+0
+   \   00000022   0xE006             B.N      ??ADS1298_Init_0
+    499            {
+    500              FHigh_0_32_Fixed( 0, i, true, false );
+   \                     ??ADS1298_Init_1: (+1)
+   \   00000024   0x2300             MOVS     R3,#+0
+   \   00000026   0x2201             MOVS     R2,#+1
+   \   00000028   0x4621             MOV      R1,R4
+   \   0000002A   0x4618             MOV      R0,R3
+   \   0000002C   0x.... 0x....      BL       _ZN4TDSP16FHigh_0_32_FixedEihbh
+    501            }
+   \   00000030   0x1C64             ADDS     R4,R4,#+1
+   \                     ??ADS1298_Init_0: (+1)
+   \   00000032   0x2C08             CMP      R4,#+8
+   \   00000034   0xDBF6             BLT.N    ??ADS1298_Init_1
+    502          	for( int i=0; i<512; i++ ){					/* очистка буфферов */
+   \   00000036   0x2000             MOVS     R0,#+0
+   \   00000038   0x4601             MOV      R1,R0
+   \   0000003A   0xE004             B.N      ??ADS1298_Init_2
+    503          		TSDProcessor::EcgBuffer_1[i] = 0;
+   \                     ??ADS1298_Init_3: (+1)
+   \   0000003C   0x....             LDR.N    R2,??DataTable6_15
+   \   0000003E   0x5481             STRB     R1,[R0, R2]
+    504          		TSDProcessor::EcgBuffer_2[i] = 0;
+   \   00000040   0x....             LDR.N    R2,??DataTable6_16
+   \   00000042   0x5481             STRB     R1,[R0, R2]
+    505          	}
+   \   00000044   0x1C40             ADDS     R0,R0,#+1
+   \                     ??ADS1298_Init_2: (+1)
+   \   00000046   0xF5B0 0x7F00      CMP      R0,#+512
+   \   0000004A   0xDBF7             BLT.N    ??ADS1298_Init_3
+    506          }
+   \   0000004C   0xBD10             POP      {R4,PC}          ;; return
+    507          
+    508          
+    509          
+    510          /*----------------------------------------------------------------------------------*/
+
+   \                                 In section .text, align 2, keep-with-next
+    511          void TADS1298::SetOpcode( uint8_t opcode )
+    512          {
+    513          }
+   \                     _ZN8TADS12989SetOpcodeEh: (+1)
+   \   00000000   0x4770             BX       LR               ;; return
+    514          
+    515          
+    516          /*----------------------------------------------------------------------------------*/
+
+   \                                 In section .text, align 2, keep-with-next
+    517          uint8_t TADS1298::RegisterRead( uint8_t Register )
+    518          {
+    519          /*	volatile uint8_t data;
+    520          	SPI_SSControl( 0 );
+    521          
+    522          	SPI_SendByte( ADS1298_OPCODE_SDATAC );
+    523          
+    524          	SPI_SendByte( ADS1298_OPCODE_RREG | Register );
+    525          
+    526          	data = SPI_ReceiveByte( 0x00 );
+    527          	data = SPI_ReceiveByte( 0x00 );
+    528          
+    529          	SPI_SSControl( 1 );
+    530          	return data;
+    531          */	return 0;
+   \                     _ZN8TADS129812RegisterReadEh: (+1)
+   \   00000000   0x2000             MOVS     R0,#+0
+   \   00000002   0x4770             BX       LR               ;; return
+    532          }
+    533          
+    534          
+    535          
+    536          /*----------------------------------------------------------------------------------*/
+
+   \                                 In section .text, align 2, keep-with-next
+    537          uint8_t TADS1298::DataRead( void )
+    538          {
+   \                     _ZN8TADS12988DataReadEv: (+1)
+   \   00000000   0xB580             PUSH     {R7,LR}
+    539          	volatile uint8_t data;
+    540          	SPI_SSControl( 0 );
+   \   00000002   0x2000             MOVS     R0,#+0
+   \   00000004   0x.... 0x....      BL       _ZN8TADS129813SPI_SSControlEb
+    541          
+    542          	data = SPI_ReceiveByte( 0x00 );
+   \   00000008   0x2000             MOVS     R0,#+0
+   \   0000000A   0x.... 0x....      BL       _ZN8TADS129815SPI_ReceiveByteEh
+   \   0000000E   0xF88D 0x0000      STRB     R0,[SP, #+0]
+    543          
+    544          	SPI_SSControl( 1 );
+   \   00000012   0x2001             MOVS     R0,#+1
+   \   00000014   0x.... 0x....      BL       _ZN8TADS129813SPI_SSControlEb
+    545          	return data;
+   \   00000018   0xF89D 0x0000      LDRB     R0,[SP, #+0]
+   \   0000001C   0xBD02             POP      {R1,PC}          ;; return
+    546          }
+    547          
+    548          
+    549          
+    550          /*----------------------------------------------------------------------------------*/
+
+   \                                 In section .text, align 2, keep-with-next
+    551          void TADS1298::RegisterWrite( uint8_t Register, uint8_t Data )
+    552          {
+   \                     _ZN8TADS129813RegisterWriteEhh: (+1)
+   \   00000000   0xB538             PUSH     {R3-R5,LR}
+   \   00000002   0x4604             MOV      R4,R0
+   \   00000004   0x460D             MOV      R5,R1
+    553          	SPI_SSControl( 0 );
+   \   00000006   0x2000             MOVS     R0,#+0
+   \   00000008   0x.... 0x....      BL       _ZN8TADS129813SPI_SSControlEb
+    554          
+    555          	SPI_SendByte( ADS1298_OPCODE_WREG | Register );
+   \   0000000C   0xF044 0x0040      ORR      R0,R4,#0x40
+   \   00000010   0x.... 0x....      BL       _ZN8TADS129812SPI_SendByteEh
+    556          	SPI_SendByte( 0x00 );
+   \   00000014   0x2000             MOVS     R0,#+0
+   \   00000016   0x.... 0x....      BL       _ZN8TADS129812SPI_SendByteEh
+    557          	SPI_SendByte( Data );
+   \   0000001A   0x4628             MOV      R0,R5
+   \   0000001C   0x.... 0x....      BL       _ZN8TADS129812SPI_SendByteEh
+    558          
+    559          	SPI_SSControl( 1 );
+   \   00000020   0x2001             MOVS     R0,#+1
+   \   00000022   0xE8BD 0x4032      POP      {R1,R4,R5,LR}
+   \   00000026   0x....             B.N      _ZN8TADS129813SPI_SSControlEb
+    560          }
+    561          
+    562          
+    563          
+    564          /*----------------------------------------------------------------------------------*/
+
+   \                                 In section .text, align 2, keep-with-next
+    565          void TADS1298::ADS1298PHYInit( void )
+    566          {
+   \                     _ZN8TADS129814ADS1298PHYInitEv: (+1)
+   \   00000000   0xB500             PUSH     {LR}
+   \   00000002   0xB085             SUB      SP,SP,#+20
+    567          	ADS1298_GPIO_RCC_ENABLE;
+   \   00000004   0x2101             MOVS     R1,#+1
+   \   00000006   0x2002             MOVS     R0,#+2
+   \   00000008   0x.... 0x....      BL       RCC_AHB1PeriphClockCmd
+    568          	ADS1298_SPI_RCC_ENABLE;
+   \   0000000C   0x2101             MOVS     R1,#+1
+   \   0000000E   0xF44F 0x4080      MOV      R0,#+16384
+   \   00000012   0x.... 0x....      BL       RCC_APB1PeriphClockCmd
+    569          
+    570          	GPIO_InitTypeDef GPIO_InitStructure;
+    571          
+    572          #ifdef BUFFERED_TRANSFER
+    573            TSPISRAM::PHYInit();
+   \   00000016   0x.... 0x....      BL       _ZN8TSPISRAM7PHYInitEv
+    574          #else
+    575          	// SPI pins config
+    576          	GPIO_InitStructure.GPIO_Pin = ADS1298_SCK_PIN | ADS1298_MOSI_PIN | ADS1298_MISO_PIN;
+    577          	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF;
+    578          	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+    579          	GPIO_InitStructure.GPIO_OType =  GPIO_OType_PP;
+    580          	GPIO_InitStructure.GPIO_PuPd =  GPIO_PuPd_UP;
+    581          	GPIO_PinAFConfig(ADS1298_SPI_PORT, ADS1298_SCK_PINSOURCE, ADS1298_SPI_AF);
+    582          	GPIO_PinAFConfig(ADS1298_SPI_PORT, ADS1298_MISO_PINSOURCE, ADS1298_SPI_AF);
+    583          	GPIO_PinAFConfig(ADS1298_SPI_PORT, ADS1298_MOSI_PINSOURCE, ADS1298_SPI_AF);
+    584          	GPIO_Init( ADS1298_SPI_PORT, &GPIO_InitStructure );
+    585          
+    586          	// CS
+    587          	GPIO_SetBits( ADS1298_CS_PORT, ADS1298_CS_PIN );
+    588          	GPIO_InitStructure.GPIO_Pin = ADS1298_CS_PIN;
+    589          	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+    590          	GPIO_InitStructure.GPIO_Mode =  GPIO_Mode_OUT;
+    591          	GPIO_InitStructure.GPIO_OType =  GPIO_OType_OD;
+    592          	GPIO_InitStructure.GPIO_PuPd =  GPIO_PuPd_UP;
+    593          	GPIO_Init( ADS1298_CS_PORT, &GPIO_InitStructure );
+    594          
+    595          	// SPI Setup
+    596          	SPI_InitTypeDef SPI_InitStructure;
+    597          
+    598          	SPI_InitStructure.SPI_Direction = SPI_Direction_2Lines_FullDuplex;
+    599          	SPI_InitStructure.SPI_Mode = SPI_Mode_Master;
+    600          	SPI_InitStructure.SPI_DataSize = SPI_DataSize_8b;
+    601          	SPI_InitStructure.SPI_CPOL = SPI_CPOL_Low;
+    602          	SPI_InitStructure.SPI_CPHA = SPI_CPHA_1Edge;
+    603          	SPI_InitStructure.SPI_NSS = SPI_NSS_Soft;
+    604          	SPI_InitStructure.SPI_BaudRatePrescaler = SPI_BaudRatePrescaler_2;    // SPI_BaudRatePrescaler_16
+    605          	SPI_InitStructure.SPI_FirstBit = SPI_FirstBit_MSB;
+    606          	SPI_InitStructure.SPI_CRCPolynomial = 7;
+    607          	SPI_Init( ADS1298_SPI, &SPI_InitStructure );
+    608          
+    609          	SPI_Cmd( ADS1298_SPI, ENABLE );
+    610          #endif
+    611          
+    612          	//---- DRDY CONFIG -----------------------------------------------
+    613          	GPIO_InitStructure.GPIO_Pin = ADS1298_DRDY_PIN;
+   \   0000001A   0x2004             MOVS     R0,#+4
+   \   0000001C   0x9001             STR      R0,[SP, #+4]
+    614          	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+   \   0000001E   0x2002             MOVS     R0,#+2
+   \   00000020   0xF88D 0x0009      STRB     R0,[SP, #+9]
+    615          	GPIO_InitStructure.GPIO_Mode =  GPIO_Mode_IN;
+   \   00000024   0x2000             MOVS     R0,#+0
+   \   00000026   0xF88D 0x0008      STRB     R0,[SP, #+8]
+    616          	GPIO_InitStructure.GPIO_OType =  GPIO_OType_OD;
+   \   0000002A   0x2001             MOVS     R0,#+1
+   \   0000002C   0xF88D 0x000A      STRB     R0,[SP, #+10]
+    617          	GPIO_InitStructure.GPIO_PuPd =  GPIO_PuPd_UP;
+   \   00000030   0xF88D 0x000B      STRB     R0,[SP, #+11]
+    618          	GPIO_Init( ADS1298_DRDY_PORT, &GPIO_InitStructure );
+   \   00000034   0xA901             ADD      R1,SP,#+4
+   \   00000036   0x....             LDR.N    R0,??DataTable6_13  ;; 0x40020400
+   \   00000038   0x.... 0x....      BL       GPIO_Init
+    619          
+    620          	EXTI_InitTypeDef EXTI_InitStructure;
+    621          
+    622          	RCC_APB2PeriphClockCmd(RCC_APB2Periph_SYSCFG, ENABLE);
+   \   0000003C   0x2101             MOVS     R1,#+1
+   \   0000003E   0xF44F 0x4080      MOV      R0,#+16384
+   \   00000042   0x.... 0x....      BL       RCC_APB2PeriphClockCmd
+    623          	SYSCFG_EXTILineConfig( ADS_DRDY_EXTI_PORT, ADS_DRDY_EXTI_PIN);
+   \   00000046   0x2102             MOVS     R1,#+2
+   \   00000048   0x2001             MOVS     R0,#+1
+   \   0000004A   0x.... 0x....      BL       SYSCFG_EXTILineConfig
+    624          
+    625          	EXTI_ClearITPendingBit( ADS_DRDY_EXTI_LINE ); 			// Clear the Key Button EXTI line pending bit
+   \   0000004E   0x2004             MOVS     R0,#+4
+   \   00000050   0x.... 0x....      BL       EXTI_ClearITPendingBit
+    626          	EXTI_InitStructure.EXTI_Line = ADS_DRDY_EXTI_LINE;
+   \   00000054   0x2004             MOVS     R0,#+4
+   \   00000056   0x9003             STR      R0,[SP, #+12]
+    627          	EXTI_InitStructure.EXTI_Mode = EXTI_Mode_Interrupt;
+   \   00000058   0x2000             MOVS     R0,#+0
+   \   0000005A   0xF88D 0x0010      STRB     R0,[SP, #+16]
+    628          	EXTI_InitStructure.EXTI_Trigger = EXTI_Trigger_Falling;
+   \   0000005E   0x200C             MOVS     R0,#+12
+   \   00000060   0xF88D 0x0011      STRB     R0,[SP, #+17]
+    629          	EXTI_InitStructure.EXTI_LineCmd = ENABLE;
+   \   00000064   0x2001             MOVS     R0,#+1
+   \   00000066   0xF88D 0x0012      STRB     R0,[SP, #+18]
+    630          	EXTI_Init( &EXTI_InitStructure );
+   \   0000006A   0xA803             ADD      R0,SP,#+12
+   \   0000006C   0x.... 0x....      BL       EXTI_Init
+    631          
+    632          	NVIC_InitTypeDef NVIC_InitStructure;
+    633          	NVIC_InitStructure.NVIC_IRQChannel = ADS_DRDY_IRQChannel;
+   \   00000070   0x2008             MOVS     R0,#+8
+   \   00000072   0xF88D 0x0000      STRB     R0,[SP, #+0]
+    634          	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 13; //104
+   \   00000076   0x200D             MOVS     R0,#+13
+   \   00000078   0xF88D 0x0001      STRB     R0,[SP, #+1]
+    635          	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
+   \   0000007C   0x2000             MOVS     R0,#+0
+   \   0000007E   0xF88D 0x0002      STRB     R0,[SP, #+2]
+    636          	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
+   \   00000082   0x2001             MOVS     R0,#+1
+   \   00000084   0xF88D 0x0003      STRB     R0,[SP, #+3]
+    637          
+    638          	NVIC_Init( &NVIC_InitStructure );
+   \   00000088   0xA800             ADD      R0,SP,#+0
+   \   0000008A   0x.... 0x....      BL       NVIC_Init
+    639          }
+   \   0000008E   0xB005             ADD      SP,SP,#+20
+   \   00000090   0xBD00             POP      {PC}             ;; return
+    640          /*----------------------------------------------------------------------------------*/
+
+   \                                 In section .text, align 2, keep-with-next
+    641          void TADS1298::ADS1298PHYReinit( void )
+    642          {
+    643          #ifdef BUFFERED_TRANSFER
+    644            TSPISRAM::PHYReinit();
+   \                     _ZN8TADS129816ADS1298PHYReinitEv: (+1)
+   \   00000000   0x.... 0x....      B.W      _ZN8TSPISRAM9PHYReinitEv
+    645          #else
+    646          	GPIO_InitTypeDef GPIO_InitStructure;
+    647          
+    648          	// SPI pins config
+    649          	GPIO_InitStructure.GPIO_Pin = ADS1298_SCK_PIN | ADS1298_MOSI_PIN | ADS1298_MISO_PIN;
+    650          	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF;
+    651          	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+    652          	GPIO_InitStructure.GPIO_OType =  GPIO_OType_PP;
+    653          	GPIO_InitStructure.GPIO_PuPd =  GPIO_PuPd_UP;
+    654          	GPIO_PinAFConfig(ADS1298_SPI_PORT, ADS1298_SCK_PINSOURCE, ADS1298_SPI_AF);
+    655          	GPIO_PinAFConfig(ADS1298_SPI_PORT, ADS1298_MISO_PINSOURCE, ADS1298_SPI_AF);
+    656          	GPIO_PinAFConfig(ADS1298_SPI_PORT, ADS1298_MOSI_PINSOURCE, ADS1298_SPI_AF);
+    657          	GPIO_Init( ADS1298_SPI_PORT, &GPIO_InitStructure );
+    658          #endif
+    659          }
+    660          /*----------------------------------------------------------------------------------*/
+
+   \                                 In section .text, align 2, keep-with-next
+    661          void TADS1298::ADS1298PHYDeinit( void )
+    662          {
+    663          #ifdef BUFFERED_TRANSFER
+    664            TSPISRAM::PHYDeinit();
+   \                     _ZN8TADS129816ADS1298PHYDeinitEv: (+1)
+   \   00000000   0x.... 0x....      B.W      _ZN8TSPISRAM9PHYDeinitEv
+    665          #else
+    666          	GPIO_InitTypeDef GPIO_InitStructure;
+    667          
+    668          	// SPI pins config
+    669          	GPIO_InitStructure.GPIO_Pin = ADS1298_SCK_PIN | ADS1298_MOSI_PIN | ADS1298_MISO_PIN;
+    670          	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN;
+    671          	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_2MHz;
+    672          	GPIO_InitStructure.GPIO_OType =  GPIO_OType_PP;
+    673          	GPIO_InitStructure.GPIO_PuPd =  GPIO_PuPd_UP;
+    674          	GPIO_Init( ADS1298_SPI_PORT, &GPIO_InitStructure );
+    675          #endif
+    676          }
+    677          /*----------------------------------------------------------------------------------*/
+    678          
+
+   \                                 In section .text, align 2, keep-with-next
+    679          void TADS1298::StandBy()
+    680          {
+    681            SetOpcode( ADS1298_OPCODE_STANDBY );
+   \                     _ZN8TADS12987StandByEv: (+1)
+   \   00000000   0x2004             MOVS     R0,#+4
+   \   00000002   0x....             B.N      _ZN8TADS12989SetOpcodeEh
+    682          }
+    683          /*----------------------------------------------------------------------------------*/
+    684          
+
+   \                                 In section .text, align 2, keep-with-next
+    685          void TADS1298::WakeUp()
+    686          {
+    687            SetOpcode( ADS1298_OPCODE_WAKEUP );
+   \                     _ZN8TADS12986WakeUpEv: (+1)
+   \   00000000   0x2002             MOVS     R0,#+2
+   \   00000002   0x....             B.N      _ZN8TADS12989SetOpcodeEh
+    688          }
+
+   \                                 In section .text, align 4, keep-with-next
+   \                     ??DataTable6:
+   \   00000000   0x........         DC32     _ZN13TEcgProcessor8ram_addrE
+
+   \                                 In section .text, align 4, keep-with-next
+   \                     ??DataTable6_1:
+   \   00000000   0x........         DC32     ??incSeq
+
+   \                                 In section .text, align 4, keep-with-next
+   \                     ??DataTable6_2:
+   \   00000000   0x........         DC32     ??Recived
+
+   \                                 In section .text, align 4, keep-with-next
+   \                     ??DataTable6_3:
+   \   00000000   0x........         DC32     _ZN13TEcgProcessor11BuffEcgDataE
+
+   \                                 In section .text, align 4, keep-with-next
+   \                     ??DataTable6_4:
+   \   00000000   0x........         DC32     _ZN13TEcgProcessor9WrEcgDataE
+
+   \                                 In section .text, align 4, keep-with-next
+   \                     ??DataTable6_5:
+   \   00000000   0x........         DC32     _ZN13TAppProcessor11cable_stateE
+
+   \                                 In section .text, align 4, keep-with-next
+   \                     ??DataTable6_6:
+   \   00000000   0x........         DC32     _ZN14TRespProcessor10WrRespDataE
+
+   \                                 In section .text, align 4, keep-with-next
+   \                     ??DataTable6_7:
+   \   00000000   0x........         DC32     _ZN13TAppProcessor15SysVoltageValueE
+
+   \                                 In section .text, align 4, keep-with-next
+   \                     ??DataTable6_8:
+   \   00000000   0x........         DC32     _ZN13TAppProcessor18AnalogVoltageValueE
+
+   \                                 In section .text, align 4, keep-with-next
+   \                     ??DataTable6_9:
+   \   00000000   0x........         DC32     _ZN13TAppProcessor14LiVoltageValueE
+
+   \                                 In section .text, align 4, keep-with-next
+   \                     ??DataTable6_10:
+   \   00000000   0x........         DC32     _ZN13TAppProcessor15BatVoltageValueE
+
+   \                                 In section .text, align 4, keep-with-next
+   \                     ??DataTable6_11:
+   \   00000000   0x........         DC32     _ZN13TAppProcessor10AX_CoordWrE
+
+   \                                 In section .text, align 4, keep-with-next
+   \                     ??DataTable6_12:
+   \   00000000   0xFFFFFDA8         DC32     0xfffffda8
+
+   \                                 In section .text, align 4, keep-with-next
+   \                     ??DataTable6_13:
+   \   00000000   0x40020400         DC32     0x40020400
+
+   \                                 In section .text, align 4, keep-with-next
+   \                     ??DataTable6_14:
+   \   00000000   0x40003800         DC32     0x40003800
+
+   \                                 In section .text, align 4, keep-with-next
+   \                     ??DataTable6_15:
+   \   00000000   0x........         DC32     _ZN12TSDProcessor11EcgBuffer_1E
+
+   \                                 In section .text, align 4, keep-with-next
+   \                     ??DataTable6_16:
+   \   00000000   0x........         DC32     _ZN12TSDProcessor11EcgBuffer_2E
+    689          /*----------------------------------------------------------------------------------*/
+
+   Maximum stack usage in bytes:
+
+   .cstack Function
+   ------- --------
+       0   TADS1298::ADS1298PHYDeinit()
+         0   -> TSPISRAM::PHYDeinit()
+      24   TADS1298::ADS1298PHYInit()
+        24   -> EXTI_ClearITPendingBit
+        24   -> EXTI_Init
+        24   -> GPIO_Init
+        24   -> NVIC_Init
+        24   -> RCC_AHB1PeriphClockCmd
+        24   -> RCC_APB1PeriphClockCmd
+        24   -> RCC_APB2PeriphClockCmd
+        24   -> SYSCFG_EXTILineConfig
+        24   -> TSPISRAM::PHYInit()
+       0   TADS1298::ADS1298PHYReinit()
+         0   -> TSPISRAM::PHYReinit()
+       8   TADS1298::ADS1298_Init()
+         8   -> TDSP::FFHigh_MA0(int, int *, bool)
+         8   -> TDSP::FFHigh_MA1(int, int *, bool)
+         8   -> TDSP::FFHigh_MA2(int, int *, bool)
+         8   -> TDSP::FHigh_0_32_Fixed(int32_t, uint8_t, bool, uint8_t)
+       8   TADS1298::DataRead()
+         8   -> TADS1298::SPI_ReceiveByte(uint8_t)
+         8   -> TADS1298::SPI_SSControl(bool)
+      36   TADS1298::GetConvertResult()
+      16   TADS1298::GetConvertResultTest()
+        16   -> TSPISRAM::ReadSeq(uint32_t, uint32_t, uint8_t *)
+       0   TADS1298::RegisterRead(uint8_t)
+      16   TADS1298::RegisterWrite(uint8_t, uint8_t)
+         0   -> TADS1298::SPI_SSControl(bool)
+        16   -> TADS1298::SPI_SSControl(bool)
+        16   -> TADS1298::SPI_SendByte(uint8_t)
+      16   TADS1298::SPI_ReceiveByte(uint8_t)
+        16   -> SPI_I2S_GetFlagStatus
+        16   -> SPI_I2S_ReceiveData
+        16   -> SPI_I2S_SendData
+        16   -> __delay_cycles(int)
+       0   TADS1298::SPI_Reset(bool)
+       0   TADS1298::SPI_SSControl(bool)
+         0   -> GPIO_ResetBits
+       8   TADS1298::SPI_SendByte(uint8_t)
+         8   -> SPI_I2S_GetFlagStatus
+         8   -> SPI_I2S_SendData
+         0   -> __delay_cycles(int)
+       0   TADS1298::SPI_Start(bool)
+       0   TADS1298::SetOpcode(uint8_t)
+       0   TADS1298::StandBy()
+         0   -> TADS1298::SetOpcode(uint8_t)
+       0   TADS1298::StartConversation()
+       0   TADS1298::StopConversation()
+       0   TADS1298::TestSignals()
+       0   TADS1298::WakeUp()
+         0   -> TADS1298::SetOpcode(uint8_t)
+       4   __delay_cycles(int)
+
+
+   Section sizes:
+
+   Bytes  Function/Label
+   -----  --------------
+       4  ??DataTable6
+       4  ??DataTable6_1
+       4  ??DataTable6_10
+       4  ??DataTable6_11
+       4  ??DataTable6_12
+       4  ??DataTable6_13
+       4  ??DataTable6_14
+       4  ??DataTable6_15
+       4  ??DataTable6_16
+       4  ??DataTable6_2
+       4  ??DataTable6_3
+       4  ??DataTable6_4
+       4  ??DataTable6_5
+       4  ??DataTable6_6
+       4  ??DataTable6_7
+       4  ??DataTable6_8
+       4  ??DataTable6_9
+      32  Recived
+       4  TADS1298::ADS1298PHYDeinit()
+     146  TADS1298::ADS1298PHYInit()
+       4  TADS1298::ADS1298PHYReinit()
+      78  TADS1298::ADS1298_Init()
+      30  TADS1298::DataRead()
+     356  TADS1298::GetConvertResult()
+     100  TADS1298::GetConvertResultTest()
+       4  TADS1298::RegisterRead(uint8_t)
+      40  TADS1298::RegisterWrite(uint8_t, uint8_t)
+      48  TADS1298::SPI_ReceiveByte(uint8_t)
+       2  TADS1298::SPI_Reset(bool)
+      20  TADS1298::SPI_SSControl(bool)
+      34  TADS1298::SPI_SendByte(uint8_t)
+       2  TADS1298::SPI_Start(bool)
+       2  TADS1298::SetOpcode(uint8_t)
+       4  TADS1298::StandBy()
+       2  TADS1298::StartConversation()
+       2  TADS1298::StopConversation()
+       2  TADS1298::TestSignals()
+       4  TADS1298::WakeUp()
+      20  __delay_cycles(int)
+      68  incSeq
+          dummyByte
+          dummyByte2
+
+ 
+ 100 bytes in section .bss
+ 972 bytes in section .text
+ 
+ 952 bytes of CODE memory (+ 20 bytes shared)
+ 100 bytes of DATA memory
+
+Errors: none
+Warnings: none

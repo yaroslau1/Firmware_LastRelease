@@ -1,0 +1,1064 @@
+###############################################################################
+#
+# IAR ANSI C/C++ Compiler V7.40.2.8542/W32 for ARM        08/Oct/2018  09:58:14
+# Copyright 1999-2015 IAR Systems AB.
+#
+#    Cpu mode     =  thumb
+#    Endian       =  little
+#    Source file  =  D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\TRtc.cpp
+#    Command line =  
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\TRtc.cpp -D IAR_ARM_CM4
+#        -D USE_STDPERIPH_DRIVER -D STM32F40_41xxx -D HAVE_CONFIG_H -D
+#        SD_SPI_MODE -D USE_FULL_ASSERT -D DEVICE_2 -D TFT -D STENDBUY_NOT_USE
+#        -D SCREEN_NOT_ROTATE -D USE_ADS1292R -D DISPLAY_GPIO -D
+#        BUFFERED_TRANSFER -D LCD_TRACE -lCN
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\KP02_DEVICE_2\List\ -o
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\KP02_DEVICE_2\Obj\
+#        --no_unroll --no_inline --no_tbaa --no_scheduling --debug
+#        --endian=little --cpu=Cortex-M4F -e --fpu=VFPv4_sp --dlib_config
+#        "D:\Program Files (x86)\IAR Systems\Embedded Workbench
+#        7.2\arm\INC\c\DLib_Config_Normal.h" -I
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\ -I
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\FatFs\ -I
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\FreeRTOS\Source\include\
+#        -I
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\FreeRTOS\Source\portable\IAR\ARM_CM3\
+#        -I
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\Libraries\CMSIS\CM4\CoreSupport\
+#        -I
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\Libraries\CMSIS\CM4\DeviceSupport\STM32F4xx\
+#        -I
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\Libraries\STM32F4xx_StdPeriph_Driver\inc\
+#        -I
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\Libraries\STM32F10x_Speex_Lib\include\speex\
+#        -I
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\Libraries\STM32F10x_Speex_Lib\include\
+#        -I
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\Libraries\STM32F10x_Speex_Lib\libspeex\
+#        -I
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\Libraries\STM32F10x_Speex_Lib\STM32\include\speex\
+#        -I
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\Libraries\STM32F10x_Speex_Lib\STM32\include\
+#        -I
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\Libraries\STM32F10x_Speex_Lib\STM32\
+#        -I
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\Libraries\STM32F10x_Speex_Lib\STM32\libspeex\
+#        -I
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\Libraries\STM32F10x_Speex_Lib\STM32\libspeex\iar\
+#        -I D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\Fonts\ -Om --ec++
+#    List file    =  
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\KP02_DEVICE_2\List\TRtc.lst
+#    Object file  =  
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\KP02_DEVICE_2\Obj\TRtc.o
+#
+###############################################################################
+
+D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\TRtc.cpp
+      1          //------------------------------------------------------------------------------------
+      2          #include "main.h"
+      3          
+      4          #include "TRtc.h"
+      5          //------------------------------------------------------------------------------------
+      6          
+
+   \                                 In section .text, align 4, keep-with-next
+      7          const BYTE YearsMonthArray[] = {
+   \                     YearsMonthArray:
+   \   00000000   0x1F 0x1C          DC8 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31, 31, 28, 31, 30, 31
+   \              0x1F 0x1E    
+   \              0x1F 0x1E    
+   \              0x1F 0x1F    
+   \              0x1E 0x1F    
+   \              0x1E 0x1F    
+   \              0x1F 0x1C    
+   \              0x1F 0x1E    
+   \              0x1F         
+   \   00000011   0x1E 0x1F          DC8 30, 31, 31, 30, 31, 30, 31, 31, 29, 31, 30, 31, 30, 31, 31, 30, 31
+   \              0x1F 0x1E    
+   \              0x1F 0x1E    
+   \              0x1F 0x1F    
+   \              0x1D 0x1F    
+   \              0x1E 0x1F    
+   \              0x1E 0x1F    
+   \              0x1F 0x1E    
+   \              0x1F         
+   \   00000022   0x1E 0x1F          DC8 30, 31, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31, 31, 28, 31
+   \              0x1F 0x1C    
+   \              0x1F 0x1E    
+   \              0x1F 0x1E    
+   \              0x1F 0x1F    
+   \              0x1E 0x1F    
+   \              0x1E 0x1F    
+   \              0x1F 0x1C    
+   \              0x1F         
+   \   00000033   0x1E 0x1F          DC8 30, 31, 30, 31, 31, 30, 31, 30, 31, 31, 28, 31, 30, 31, 30, 31, 31
+   \              0x1E 0x1F    
+   \              0x1F 0x1E    
+   \              0x1F 0x1E    
+   \              0x1F 0x1F    
+   \              0x1C 0x1F    
+   \              0x1E 0x1F    
+   \              0x1E 0x1F    
+   \              0x1F         
+   \   00000044   0x1E 0x1F          DC8 30, 31, 30, 31, 31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31, 31
+   \              0x1E 0x1F    
+   \              0x1F 0x1D    
+   \              0x1F 0x1E    
+   \              0x1F 0x1E    
+   \              0x1F 0x1F    
+   \              0x1E 0x1F    
+   \              0x1E 0x1F    
+   \              0x1F         
+   \   00000055   0x1C 0x1F          DC8 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31, 31, 28, 31, 30, 31, 30
+   \              0x1E 0x1F    
+   \              0x1E 0x1F    
+   \              0x1F 0x1E    
+   \              0x1F 0x1E    
+   \              0x1F 0x1F    
+   \              0x1C 0x1F    
+   \              0x1E 0x1F    
+   \              0x1E         
+   \   00000066   0x1F 0x1F          DC8 31, 31, 30, 31, 30, 31, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30
+   \              0x1E 0x1F    
+   \              0x1E 0x1F    
+   \              0x1F 0x1C    
+   \              0x1F 0x1E    
+   \              0x1F 0x1E    
+   \              0x1F 0x1F    
+   \              0x1E 0x1F    
+   \              0x1E         
+   \   00000077   0x1F 0x1F          DC8 31, 31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31, 31, 28, 31, 30
+   \              0x1D 0x1F    
+   \              0x1E 0x1F    
+   \              0x1E 0x1F    
+   \              0x1F 0x1E    
+   \              0x1F 0x1E    
+   \              0x1F 0x1F    
+   \              0x1C 0x1F    
+   \              0x1E         
+   \   00000088   0x1F 0x1E          DC8 31, 30, 31, 31, 30, 31, 30, 31, 31, 28, 31, 30, 31, 30, 31, 31, 30
+   \              0x1F 0x1F    
+   \              0x1E 0x1F    
+   \              0x1E 0x1F    
+   \              0x1F 0x1C    
+   \              0x1F 0x1E    
+   \              0x1F 0x1E    
+   \              0x1F 0x1F    
+   \              0x1E         
+   \   00000099   0x1F 0x1E          DC8 31, 30, 31, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31, 31, 29
+   \              0x1F 0x1F    
+   \              0x1C 0x1F    
+   \              0x1E 0x1F    
+   \              0x1E 0x1F    
+   \              0x1F 0x1E    
+   \              0x1F 0x1E    
+   \              0x1F 0x1F    
+   \              0x1D         
+   \   000000AA   0x1F 0x1E          DC8 31, 30, 31, 30, 31, 31, 30, 31, 30, 31, 31, 28, 31, 30, 31, 30, 31
+   \              0x1F 0x1E    
+   \              0x1F 0x1F    
+   \              0x1E 0x1F    
+   \              0x1E 0x1F    
+   \              0x1F 0x1C    
+   \              0x1F 0x1E    
+   \              0x1F 0x1E    
+   \              0x1F         
+   \   000000BB   0x1F 0x1E          DC8 31, 30, 31, 30, 31, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31
+   \              0x1F 0x1E    
+   \              0x1F 0x1F    
+   \              0x1C 0x1F    
+   \              0x1E 0x1F    
+   \              0x1E 0x1F    
+   \              0x1F 0x1E    
+   \              0x1F 0x1E    
+   \              0x1F         
+   \   000000CC   0x1F 0x1C          DC8 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31, 31, 29, 31, 30, 31
+   \              0x1F 0x1E    
+   \              0x1F 0x1E    
+   \              0x1F 0x1F    
+   \              0x1E 0x1F    
+   \              0x1E 0x1F    
+   \              0x1F 0x1D    
+   \              0x1F 0x1E    
+   \              0x1F         
+   \   000000DD   0x1E 0x1F          DC8 30, 31, 31, 30, 31, 30, 31, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31
+   \              0x1F 0x1E    
+   \              0x1F 0x1E    
+   \              0x1F 0x1F    
+   \              0x1C 0x1F    
+   \              0x1E 0x1F    
+   \              0x1E 0x1F    
+   \              0x1F 0x1E    
+   \              0x1F         
+   \   000000EE   0x1E 0x1F          DC8 30, 31, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31, 31, 28, 31
+   \              0x1F 0x1C    
+   \              0x1F 0x1E    
+   \              0x1F 0x1E    
+   \              0x1F 0x1F    
+   \              0x1E 0x1F    
+   \              0x1E 0x1F    
+   \              0x1F 0x1C    
+   \              0x1F         
+   \   000000FF   0x1E 0x1F          DC8 30, 31, 30, 31, 31, 30, 31, 30, 31, 31, 29, 31, 30, 31, 30, 31, 31
+   \              0x1E 0x1F    
+   \              0x1F 0x1E    
+   \              0x1F 0x1E    
+   \              0x1F 0x1F    
+   \              0x1D 0x1F    
+   \              0x1E 0x1F    
+   \              0x1E 0x1F    
+   \              0x1F         
+   \   00000110   0x1E 0x1F          DC8 30, 31, 30, 31, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31, 31
+   \              0x1E 0x1F    
+   \              0x1F 0x1C    
+   \              0x1F 0x1E    
+   \              0x1F 0x1E    
+   \              0x1F 0x1F    
+   \              0x1E 0x1F    
+   \              0x1E 0x1F    
+   \              0x1F         
+   \   00000121   0x1C 0x1F          DC8 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31, 31, 28, 31, 30, 31, 30
+   \              0x1E 0x1F    
+   \              0x1E 0x1F    
+   \              0x1F 0x1E    
+   \              0x1F 0x1E    
+   \              0x1F 0x1F    
+   \              0x1C 0x1F    
+   \              0x1E 0x1F    
+   \              0x1E         
+   \   00000132   0x1F 0x1F          DC8 31, 31, 30, 31, 30, 31, 31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30
+   \              0x1E 0x1F    
+   \              0x1E 0x1F    
+   \              0x1F 0x1D    
+   \              0x1F 0x1E    
+   \              0x1F 0x1E    
+   \              0x1F 0x1F    
+   \              0x1E 0x1F    
+   \              0x1E         
+   \   00000143   0x1F               DC8 31
+      8          	31,28,31,30,31,30,31,31,30,31,30,31, //2010
+      9          	31,28,31,30,31,30,31,31,30,31,30,31, //2011
+     10          	31,29,31,30,31,30,31,31,30,31,30,31, //2012
+     11          	31,28,31,30,31,30,31,31,30,31,30,31, //2013
+     12          	31,28,31,30,31,30,31,31,30,31,30,31, //2014
+     13          	31,28,31,30,31,30,31,31,30,31,30,31, //2015
+     14          	31,29,31,30,31,30,31,31,30,31,30,31, //2016
+     15          	31,28,31,30,31,30,31,31,30,31,30,31, //2017
+     16          	31,28,31,30,31,30,31,31,30,31,30,31, //2018
+     17          	31,28,31,30,31,30,31,31,30,31,30,31, //2019
+     18          	31,29,31,30,31,30,31,31,30,31,30,31, //2020
+     19          	31,28,31,30,31,30,31,31,30,31,30,31, //2021
+     20          	31,28,31,30,31,30,31,31,30,31,30,31, //2022
+     21          	31,28,31,30,31,30,31,31,30,31,30,31, //2023
+     22          	31,29,31,30,31,30,31,31,30,31,30,31, //2024
+     23          	31,28,31,30,31,30,31,31,30,31,30,31, //2025
+     24          	31,28,31,30,31,30,31,31,30,31,30,31, //2026
+     25          	31,28,31,30,31,30,31,31,30,31,30,31, //2027
+     26          	31,29,31,30,31,30,31,31,30,31,30,31, //2028
+     27          	31,28,31,30,31,30,31,31,30,31,30,31, //2029
+     28          	31,28,31,30,31,30,31,31,30,31,30,31, //2030
+     29          	31,28,31,30,31,30,31,31,30,31,30,31, //2031
+     30          	31,29,31,30,31,30,31,31,30,31,30,31, //2032
+     31          	31,28,31,30,31,30,31,31,30,31,30,31, //2033
+     32          	31,28,31,30,31,30,31,31,30,31,30,31, //2034
+     33          	31,28,31,30,31,30,31,31,30,31,30,31, //2035
+     34          	31,29,31,30,31,30,31,31,30,31,30,31}; //2036
+     35          
+
+   \                                 In section .text, align 4, keep-with-next
+     36          const WORD YearsDaysArray[] = {
+   \                     YearsDaysArray:
+   \   00000000   0x016D 0x016D      DC16 365, 365, 366, 365, 365, 365, 366, 365, 365, 365, 366, 365, 365
+   \              0x016E 0x016D
+   \              0x016D 0x016D
+   \              0x016E 0x016D
+   \              0x016D 0x016D
+   \              0x016E 0x016D
+   \              0x016D       
+   \   0000001A   0x016D 0x016E      DC16 365, 366, 365, 365, 365, 366, 365, 365, 365, 366, 365, 365, 365
+   \              0x016D 0x016D
+   \              0x016D 0x016E
+   \              0x016D 0x016D
+   \              0x016D 0x016E
+   \              0x016D 0x016D
+   \              0x016D       
+   \   00000034   0x016E             DC16 366
+   \   00000036   0x00 0x00          DC8 0, 0
+     37          	365, //2010
+     38          	365, //2011
+     39          	366, //2012
+     40          	365, //2013
+     41          	365, //2014
+     42          	365, //2015
+     43          	366, //2016
+     44          	365, //2017
+     45          	365, //2018
+     46          	365, //2019
+     47          	366, //2020
+     48          	365, //2021
+     49          	365, //2022
+     50          	365, //2023
+     51          	366, //2024
+     52          	365, //2025
+     53          	365, //2026
+     54          	365, //2027
+     55          	366, //2028
+     56          	365, //2029
+     57          	365, //2030
+     58          	365, //2031
+     59          	366, //2032
+     60          	365, //2033
+     61          	365, //2034
+     62          	365, //2035
+     63          	366}; //2036
+     64          //------------------------------------------------------------------------------------
+     65          
+
+   \                                 In section .data, align 4
+     66          int TRtc::year = 2010;
+   \                     _ZN4TRtc4yearE:
+   \   00000000   0x000007DA         DC32 2010
+     67          
+
+   \                                 In section .data, align 4
+     68          int TRtc::month = 1;
+   \                     _ZN4TRtc5monthE:
+   \   00000000   0x00000001         DC32 1
+     69          
+
+   \                                 In section .data, align 4
+     70          int TRtc::day = 1;
+   \                     _ZN4TRtc3dayE:
+   \   00000000   0x00000001         DC32 1
+     71          
+
+   \                                 In section .bss, align 4
+     72          int TRtc::hours = 0;
+   \                     _ZN4TRtc5hoursE:
+   \   00000000                      DS8 4
+     73          
+
+   \                                 In section .bss, align 4
+     74          int TRtc::minutes = 0;
+   \                     _ZN4TRtc7minutesE:
+   \   00000000                      DS8 4
+     75          
+
+   \                                 In section .bss, align 4
+     76          int TRtc::seconds = 0;
+   \                     _ZN4TRtc7secondsE:
+   \   00000000                      DS8 4
+     77          
+     78          /*
+     79          void _RTC_WaitForLastTask(void)
+     80          {
+     81            // Loop until RTOFF flag is set
+     82            //while ((RTC->CRL & RTC_FLAG_RTOFF) == (uint16_t)RESET)
+     83            //{
+     84            // 	__no_operation();//taskYIELD();
+     85            //}
+     86          
+     87          	while((RTC->ISR & RTC_ISR_RSF) == RESET)
+     88          	{
+     89              __no_operation();//taskYIELD();
+     90          	}
+     91          }
+     92          */
+     93          //------------------------------------------------------------------------------------
+     94          
+     95          /*
+     96          void _RTC_WaitForSynchro(void)
+     97          {
+     98            // Clear RSF flag
+     99            RTC->CRL &= (uint16_t)~RTC_FLAG_RSF;
+    100          
+    101          	// Loop until RSF flag is set
+    102            while ((RTC->CRL & RTC_FLAG_RSF) == (uint16_t)RESET)
+    103            {
+    104            	__no_operation();//taskYIELD();
+    105            }
+    106          }
+    107          */
+    108          //------------------------------------------------------------------------------------
+    109          
+
+   \                                 In section .text, align 2, keep-with-next
+    110          void TRtc::Rtc_Init()
+    111          {
+   \                     _ZN4TRtc8Rtc_InitEv: (+1)
+   \   00000000   0xB580             PUSH     {R7,LR}
+    112            RCC_APB1PeriphClockCmd(RCC_APB1Periph_PWR, ENABLE);
+   \   00000002   0x2101             MOVS     R1,#+1
+   \   00000004   0xF04F 0x5080      MOV      R0,#+268435456
+   \   00000008   0x.... 0x....      BL       RCC_APB1PeriphClockCmd
+    113          
+    114            /* Allow access to BKP Domain */
+    115            PWR_BackupAccessCmd(ENABLE);
+   \   0000000C   0x2001             MOVS     R0,#+1
+   \   0000000E   0x.... 0x....      BL       PWR_BackupAccessCmd
+    116          
+    117            /* Disable the Tamper Pin */
+    118            //BKP_TamperPinCmd(DISABLE); /* To output RTCCLK/64 on Tamper pin, the tamper
+    119            //                               functionality must be disabled */
+    120          
+    121            //RCC_BackupResetCmd(ENABLE);
+    122            //RCC_BackupResetCmd(DISABLE);
+    123          
+    124          	/*
+    125            if (RTC_ReadBackupRegister(RTC_BKP_DR1) != 0xA5A5A5A5)
+    126            {
+    127              // Backup data register value is not correct or not yet programmed (when
+    128              //   the first time the program is executed) 
+    129          
+    130          		#ifdef LCD_TRACE
+    131          			TLcdTrace::AddLine("RTC not yet cfg...");
+    132          		#endif
+    133          
+    134              RTC_Configuration();
+    135          
+    136              // Adjust time by values entred by the user on the hyperterminal
+    137              RTC_TimeAdjust(0);
+    138          
+    139              RTC_WriteBackupRegister(RTC_BKP_DR1, 0xA5A5A5A5);
+    140            }
+    141          	else
+    142            {
+    143            */
+    144            
+    145            //RTC_TimeAdjust(0);  
+    146          
+    147            RTC_Configuration();
+   \   00000012   0x.... 0x....      BL       _ZN4TRtc17RTC_ConfigurationEv
+    148          		
+    149            /* Wait for RTC registers synchronization */
+    150            /* Wait for RTC APB registers synchronisation */
+    151            
+    152            RTC_WaitForSynchro();
+   \   00000016   0x.... 0x....      BL       RTC_WaitForSynchro
+    153          
+    154            /* Clear the RTC Alarm Flag */
+    155            RTC_ClearFlag(RTC_FLAG_ALRAF);
+   \   0000001A   0xF44F 0x7080      MOV      R0,#+256
+   \   0000001E   0x.... 0x....      BL       RTC_ClearFlag
+    156          
+    157            /* Clear the EXTI Line 17 Pending bit (Connected internally to RTC Alarm) */
+    158            EXTI_ClearITPendingBit(EXTI_Line17);
+   \   00000022   0xF44F 0x3000      MOV      R0,#+131072
+   \   00000026   0xE8BD 0x4002      POP      {R1,LR}
+   \   0000002A   0x.... 0x....      B.W      EXTI_ClearITPendingBit
+    159            //}
+    160          
+    161          //  /* Enable PWR and BKP clocks */
+    162          //  RCC_APB1PeriphClockCmd(RCC_APB1Periph_PWR | RCC_APB1Periph_BKP, ENABLE);
+    163          
+    164          }
+    165          //------------------------------------------------------------------------------------
+    166          
+
+   \                                 In section .text, align 2, keep-with-next
+    167          void TRtc::RTC_Configuration(void)
+    168          {
+   \                     _ZN4TRtc17RTC_ConfigurationEv: (+1)
+   \   00000000   0xB500             PUSH     {LR}
+   \   00000002   0xB087             SUB      SP,SP,#+28
+    169            RTC_InitTypeDef  RTC_InitStructure;
+    170          
+    171            //RCC_APB1PeriphClockCmd(RCC_APB1Periph_PWR | RCC_AHB1Periph_BKPSRAM, ENABLE);
+    172            
+    173            RCC_APB1PeriphClockCmd(RCC_APB1Periph_PWR, ENABLE);
+   \   00000004   0x2101             MOVS     R1,#+1
+   \   00000006   0xF04F 0x5080      MOV      R0,#+268435456
+   \   0000000A   0x.... 0x....      BL       RCC_APB1PeriphClockCmd
+    174          
+    175          	RCC_LSICmd( DISABLE );
+   \   0000000E   0x2000             MOVS     R0,#+0
+   \   00000010   0x.... 0x....      BL       RCC_LSICmd
+    176          	// RCC_APB1Periph_BKP
+    177          
+    178          	/* Allow access to BKP Domain */
+    179            PWR_BackupAccessCmd(ENABLE);
+   \   00000014   0x2001             MOVS     R0,#+1
+   \   00000016   0x.... 0x....      BL       PWR_BackupAccessCmd
+    180          
+    181          //  /* Reset Backup Domain */
+    182          //  BKP_DeInit();
+    183          
+    184            /* Enable LSE */
+    185            RCC_LSEConfig(RCC_LSE_ON);
+   \   0000001A   0x2001             MOVS     R0,#+1
+   \   0000001C   0x.... 0x....      BL       RCC_LSEConfig
+    186          
+    187            /* Wait till LSE is ready */
+    188           
+    189            /*
+    190            while (RCC_GetFlagStatus(RCC_FLAG_LSERDY) == RESET)
+    191            {}
+    192            */
+    193          
+    194            /* Select LSE as RTC Clock Source */
+    195            RCC_RTCCLKConfig(RCC_RTCCLKSource_LSE);
+   \   00000020   0xF44F 0x7080      MOV      R0,#+256
+   \   00000024   0x.... 0x....      BL       RCC_RTCCLKConfig
+    196          
+    197            /* Enable RTC Clock */
+    198            RCC_RTCCLKCmd(ENABLE);
+   \   00000028   0x2001             MOVS     R0,#+1
+   \   0000002A   0x.... 0x....      BL       RCC_RTCCLKCmd
+    199          
+    200            /* Wait for RTC registers synchronization */
+    201            //_RTC_WaitForSynchro();
+    202          
+    203            //PWR_BackupRegulatorCmd( ENABLE );
+    204          
+    205            /* Configure the RTC data register and RTC prescaler */
+    206            /* ck_spre(1Hz) = RTCCLK(LSI) /(AsynchPrediv + 1)*(SynchPrediv + 1)*/
+    207            RTC_InitStructure.RTC_AsynchPrediv = 0x7F;
+   \   0000002E   0x207F             MOVS     R0,#+127
+   \   00000030   0x9005             STR      R0,[SP, #+20]
+    208            RTC_InitStructure.RTC_SynchPrediv  = 0xFF;
+   \   00000032   0x20FF             MOVS     R0,#+255
+   \   00000034   0x9006             STR      R0,[SP, #+24]
+    209            RTC_InitStructure.RTC_HourFormat   = RTC_HourFormat_24;
+   \   00000036   0x2000             MOVS     R0,#+0
+   \   00000038   0x9004             STR      R0,[SP, #+16]
+    210            RTC_Init(&RTC_InitStructure);
+   \   0000003A   0xA804             ADD      R0,SP,#+16
+   \   0000003C   0x.... 0x....      BL       RTC_Init
+    211          
+    212          //  /* Set the time to 00h 00mn 00s AM */
+    213          //  RTC_TimeStruct.RTC_H12     = RTC_H12_AM;
+    214          //  RTC_TimeStruct.RTC_Hours   = 0;
+    215          //  RTC_TimeStruct.RTC_Minutes = 0;
+    216          //  RTC_TimeStruct.RTC_Seconds = 0;
+    217          //  RTC_SetTime(RTC_Format_BCD, &RTC_TimeStruct);
+    218          
+    219          	RTC_EXTI_Configuration();
+   \   00000040   0x.... 0x....      BL       _ZN4TRtc22RTC_EXTI_ConfigurationEv
+    220            RTC_NVIC_Configuration();
+   \   00000044   0x.... 0x....      BL       _ZN4TRtc22RTC_NVIC_ConfigurationEv
+    221          
+    222            RTC_AlarmTypeDef RTC_AlarmStructure;
+    223          
+    224            /* Set the alarm A Masks */
+    225            RTC_AlarmStructure.RTC_AlarmMask = RTC_AlarmMask_All;
+   \   00000048   0xF04F 0x3080      MOV      R0,#-2139062144
+   \   0000004C   0x9001             STR      R0,[SP, #+4]
+    226            RTC_AlarmStructure.RTC_AlarmDateWeekDaySel = RTC_AlarmDateWeekDaySel_Date;
+   \   0000004E   0x2000             MOVS     R0,#+0
+   \   00000050   0x9002             STR      R0,[SP, #+8]
+    227            RTC_AlarmStructure.RTC_AlarmDateWeekDay = RTC_Weekday_Monday;
+   \   00000052   0x2001             MOVS     R0,#+1
+   \   00000054   0xF88D 0x000C      STRB     R0,[SP, #+12]
+    228            RTC_AlarmStructure.RTC_AlarmTime.RTC_Hours = 0x0;
+   \   00000058   0x2000             MOVS     R0,#+0
+   \   0000005A   0xF8AD 0x0000      STRH     R0,[SP, #+0]
+    229            RTC_AlarmStructure.RTC_AlarmTime.RTC_Minutes = 0x0;
+    230            RTC_AlarmStructure.RTC_AlarmTime.RTC_Seconds = 0x0;
+   \   0000005E   0xF88D 0x0002      STRB     R0,[SP, #+2]
+    231            RTC_SetAlarm(RTC_Format_BCD, RTC_Alarm_A, &RTC_AlarmStructure);
+   \   00000062   0xAA00             ADD      R2,SP,#+0
+   \   00000064   0xF44F 0x7180      MOV      R1,#+256
+   \   00000068   0x2001             MOVS     R0,#+1
+   \   0000006A   0x.... 0x....      BL       RTC_SetAlarm
+    232          
+    233            /* Set alarm A sub seconds and enable SubSec Alarm : generate 8 interrupts per Second */
+    234            RTC_AlarmSubSecondConfig(RTC_Alarm_A, 0xFF, RTC_AlarmSubSecondMask_SS14_8);
+   \   0000006E   0xF04F 0x6200      MOV      R2,#+134217728
+   \   00000072   0x21FF             MOVS     R1,#+255
+   \   00000074   0xF44F 0x7080      MOV      R0,#+256
+   \   00000078   0x.... 0x....      BL       RTC_AlarmSubSecondConfig
+    235          
+    236            /* Enable alarm A interrupt */
+    237            //RTC_ITConfig(RTC_IT_ALRA, ENABLE);
+    238          
+    239            //RTC_AlarmCmd(RTC_Alarm_A, ENABLE);
+    240            
+    241            //RTC_ClearFlag(RTC_FLAG_ALRAF);
+    242          }
+   \   0000007C   0xB007             ADD      SP,SP,#+28
+   \   0000007E   0xBD00             POP      {PC}             ;; return
+    243          //------------------------------------------------------------------------------------
+    244          
+
+   \                                 In section .text, align 2, keep-with-next
+    245          void TRtc::RTC_EXTI_Configuration()
+    246          {
+   \                     _ZN4TRtc22RTC_EXTI_ConfigurationEv: (+1)
+   \   00000000   0xB500             PUSH     {LR}
+   \   00000002   0xB083             SUB      SP,SP,#+12
+    247            EXTI_InitTypeDef EXTI_InitStructure;
+    248          
+    249            /* Configure EXTI Line17(RTC Alarm) to generate an interrupt on rising edge */
+    250            EXTI_ClearITPendingBit(EXTI_Line17);
+   \   00000004   0xF44F 0x3000      MOV      R0,#+131072
+   \   00000008   0x.... 0x....      BL       EXTI_ClearITPendingBit
+    251            EXTI_InitStructure.EXTI_Line = EXTI_Line17;
+   \   0000000C   0xF44F 0x3000      MOV      R0,#+131072
+   \   00000010   0x9000             STR      R0,[SP, #+0]
+    252            EXTI_InitStructure.EXTI_Mode = EXTI_Mode_Interrupt;
+   \   00000012   0x2000             MOVS     R0,#+0
+   \   00000014   0xF88D 0x0004      STRB     R0,[SP, #+4]
+    253            EXTI_InitStructure.EXTI_Trigger = EXTI_Trigger_Rising;
+   \   00000018   0x2008             MOVS     R0,#+8
+   \   0000001A   0xF88D 0x0005      STRB     R0,[SP, #+5]
+    254            EXTI_InitStructure.EXTI_LineCmd = ENABLE;
+   \   0000001E   0x2001             MOVS     R0,#+1
+   \   00000020   0xF88D 0x0006      STRB     R0,[SP, #+6]
+    255            EXTI_Init(&EXTI_InitStructure);
+   \   00000024   0xA800             ADD      R0,SP,#+0
+   \   00000026   0x.... 0x....      BL       EXTI_Init
+    256          }
+   \   0000002A   0xBD07             POP      {R0-R2,PC}       ;; return
+    257          //------------------------------------------------------------------------------------
+    258          
+
+   \                                 In section .text, align 2, keep-with-next
+    259          void TRtc::RTC_NVIC_Configuration()
+    260          {
+   \                     _ZN4TRtc22RTC_NVIC_ConfigurationEv: (+1)
+   \   00000000   0xB580             PUSH     {R7,LR}
+    261            NVIC_InitTypeDef NVIC_InitStructure;
+    262          
+    263            //NVIC_InitStructure.NVIC_IRQChannel = RTC_IRQn;
+    264            NVIC_InitStructure.NVIC_IRQChannel = RTC_Alarm_IRQn;
+   \   00000002   0x2029             MOVS     R0,#+41
+   \   00000004   0xF88D 0x0000      STRB     R0,[SP, #+0]
+    265            
+    266            NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 12;
+   \   00000008   0x200C             MOVS     R0,#+12
+   \   0000000A   0xF88D 0x0001      STRB     R0,[SP, #+1]
+    267            
+    268            NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0; 
+   \   0000000E   0x2000             MOVS     R0,#+0
+   \   00000010   0xF88D 0x0002      STRB     R0,[SP, #+2]
+    269            
+    270            NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
+   \   00000014   0x2001             MOVS     R0,#+1
+   \   00000016   0xF88D 0x0003      STRB     R0,[SP, #+3]
+    271            NVIC_Init(&NVIC_InitStructure);
+   \   0000001A   0xA800             ADD      R0,SP,#+0
+   \   0000001C   0x.... 0x....      BL       NVIC_Init
+    272          }
+   \   00000020   0xBD01             POP      {R0,PC}          ;; return
+    273          //------------------------------------------------------------------------------------
+    274          
+
+   \                                 In section .text, align 2, keep-with-next
+    275          void TRtc::RTC_TimeAdjust(uint32_t TimeSec)
+    276          {
+   \                     _ZN4TRtc14RTC_TimeAdjustEj: (+1)
+   \   00000000   0xB500             PUSH     {LR}
+   \   00000002   0xB08B             SUB      SP,SP,#+44
+    277            RTC_TimeTypeDef  RTC_TimeStructure;
+    278            RTC_DateTypeDef  RTC_DateStructure;
+    279          
+    280            if(TimeSec == 0)
+   \   00000004   0x2800             CMP      R0,#+0
+   \   00000006   0xD10D             BNE.N    ??RTC_TimeAdjust_0
+    281            {
+    282              /* Set the time to 00h 00mn 00s AM */
+    283              RTC_TimeStructure.RTC_H12     = RTC_H12_AM;
+   \   00000008   0x2000             MOVS     R0,#+0
+    284              RTC_TimeStructure.RTC_Hours   = 0;
+   \   0000000A   0x9004             STR      R0,[SP, #+16]
+    285              RTC_TimeStructure.RTC_Minutes = 0;
+    286              RTC_TimeStructure.RTC_Seconds = 0;
+    287              RTC_DateStructure.RTC_Year = 10;
+   \   0000000C   0x200A             MOVS     R0,#+10
+   \   0000000E   0xF88D 0x000F      STRB     R0,[SP, #+15]
+    288              RTC_DateStructure.RTC_Month = 1;
+   \   00000012   0x2001             MOVS     R0,#+1
+   \   00000014   0xF88D 0x000D      STRB     R0,[SP, #+13]
+    289              RTC_DateStructure.RTC_Date = 1;
+   \   00000018   0xF88D 0x000E      STRB     R0,[SP, #+14]
+    290              RTC_DateStructure.RTC_WeekDay = RTC_Weekday_Friday;
+   \   0000001C   0x2005             MOVS     R0,#+5
+   \   0000001E   0xF88D 0x000C      STRB     R0,[SP, #+12]
+   \   00000022   0xE023             B.N      ??RTC_TimeAdjust_1
+    291            }
+    292            else
+    293            {
+    294              int y,m,d,hr,mi,se;
+    295          		TRtc::RTC_TimeStampToTDMY(TimeSec,&y,&m,&d,&hr,&mi,&se);
+   \                     ??RTC_TimeAdjust_0: (+1)
+   \   00000024   0xA905             ADD      R1,SP,#+20
+   \   00000026   0x9102             STR      R1,[SP, #+8]
+   \   00000028   0xA906             ADD      R1,SP,#+24
+   \   0000002A   0x9101             STR      R1,[SP, #+4]
+   \   0000002C   0xA907             ADD      R1,SP,#+28
+   \   0000002E   0x9100             STR      R1,[SP, #+0]
+   \   00000030   0xAB08             ADD      R3,SP,#+32
+   \   00000032   0xAA09             ADD      R2,SP,#+36
+   \   00000034   0xA90A             ADD      R1,SP,#+40
+   \   00000036   0x.... 0x....      BL       _ZN4TRtc19RTC_TimeStampToTDMYEjPiS0_S0_S0_S0_S0_
+    296              RTC_TimeStructure.RTC_H12     = RTC_H12_AM;
+   \   0000003A   0x2000             MOVS     R0,#+0
+   \   0000003C   0xF88D 0x0013      STRB     R0,[SP, #+19]
+    297              RTC_TimeStructure.RTC_Hours   = hr;
+   \   00000040   0x9807             LDR      R0,[SP, #+28]
+   \   00000042   0xF88D 0x0010      STRB     R0,[SP, #+16]
+    298              RTC_TimeStructure.RTC_Minutes = mi;
+   \   00000046   0x9806             LDR      R0,[SP, #+24]
+   \   00000048   0xF88D 0x0011      STRB     R0,[SP, #+17]
+    299              RTC_TimeStructure.RTC_Seconds = se;
+   \   0000004C   0x9805             LDR      R0,[SP, #+20]
+   \   0000004E   0xF88D 0x0012      STRB     R0,[SP, #+18]
+    300              RTC_DateStructure.RTC_Year = (uint8_t)(y-2000L);
+   \   00000052   0x980A             LDR      R0,[SP, #+40]
+   \   00000054   0x3030             ADDS     R0,R0,#+48
+   \   00000056   0xF88D 0x000F      STRB     R0,[SP, #+15]
+    301              RTC_DateStructure.RTC_Month = m;
+   \   0000005A   0x9809             LDR      R0,[SP, #+36]
+   \   0000005C   0xF88D 0x000D      STRB     R0,[SP, #+13]
+    302              RTC_DateStructure.RTC_Date = d;
+   \   00000060   0x9808             LDR      R0,[SP, #+32]
+   \   00000062   0xF88D 0x000E      STRB     R0,[SP, #+14]
+    303              RTC_DateStructure.RTC_WeekDay = RTC_Weekday_Friday;
+   \   00000066   0x2005             MOVS     R0,#+5
+   \   00000068   0xF88D 0x000C      STRB     R0,[SP, #+12]
+    304            }
+    305          
+    306            RTC_SetDate(RTC_Format_BIN, &RTC_DateStructure);
+   \                     ??RTC_TimeAdjust_1: (+1)
+   \   0000006C   0xA903             ADD      R1,SP,#+12
+   \   0000006E   0x2000             MOVS     R0,#+0
+   \   00000070   0x.... 0x....      BL       RTC_SetDate
+    307            RTC_SetTime(RTC_Format_BIN, &RTC_TimeStructure);
+   \   00000074   0xA904             ADD      R1,SP,#+16
+   \   00000076   0x2000             MOVS     R0,#+0
+   \   00000078   0x.... 0x....      BL       RTC_SetTime
+    308          }
+   \   0000007C   0xB00B             ADD      SP,SP,#+44
+   \   0000007E   0xBD00             POP      {PC}             ;; return
+    309          //------------------------------------------------------------------------------------
+    310          
+
+   \                                 In section .text, align 2, keep-with-next
+    311          uint32_t TRtc::RTC_TimeRead()
+    312          {
+   \                     _ZN4TRtc12RTC_TimeReadEv: (+1)
+   \   00000000   0xB530             PUSH     {R4,R5,LR}
+   \   00000002   0xB083             SUB      SP,SP,#+12
+    313            RTC_TimeTypeDef  RTC_TimeStructure;
+    314            RTC_DateTypeDef RTC_DateStructure;
+    315          
+    316            uint32_t ret = 0;
+    317          
+    318            RTC_GetDate(RTC_Format_BIN, &RTC_DateStructure);
+   \   00000004   0xA900             ADD      R1,SP,#+0
+   \   00000006   0x2000             MOVS     R0,#+0
+   \   00000008   0x.... 0x....      BL       RTC_GetDate
+    319            RTC_GetTime(RTC_Format_BIN, &RTC_TimeStructure);
+   \   0000000C   0xA901             ADD      R1,SP,#+4
+   \   0000000E   0x2000             MOVS     R0,#+0
+   \   00000010   0x.... 0x....      BL       RTC_GetTime
+    320          
+    321            uint32_t y_sec = 0;
+   \   00000014   0x2000             MOVS     R0,#+0
+    322            int i;
+    323          	for(i = 0;i < 27;i++)
+   \   00000016   0x4601             MOV      R1,R0
+   \   00000018   0x....             LDR.N    R3,??DataTable4  ;; 0x15180
+   \   0000001A   0xE006             B.N      ??RTC_TimeRead_0
+    324          	{
+    325          		if(i == (RTC_DateStructure.RTC_Year-10)) break;
+    326          		y_sec += (YearsDaysArray[i]*86400L);
+   \                     ??RTC_TimeRead_1: (+1)
+   \   0000001C   0x.... 0x....      ADR.W    R2,YearsDaysArray
+   \   00000020   0xF832 0x2011      LDRH     R2,[R2, R1, LSL #+1]
+   \   00000024   0xFB03 0x0002      MLA      R0,R3,R2,R0
+   \   00000028   0x1C49             ADDS     R1,R1,#+1
+   \                     ??RTC_TimeRead_0: (+1)
+   \   0000002A   0x291B             CMP      R1,#+27
+   \   0000002C   0xDA04             BGE.N    ??RTC_TimeRead_2
+   \   0000002E   0xF89D 0x2003      LDRB     R2,[SP, #+3]
+   \   00000032   0x3A0A             SUBS     R2,R2,#+10
+   \   00000034   0x4291             CMP      R1,R2
+   \   00000036   0xD1F1             BNE.N    ??RTC_TimeRead_1
+    327          	}
+    328            i *= 12;
+   \                     ??RTC_TimeRead_2: (+1)
+   \   00000038   0xEB01 0x0241      ADD      R2,R1,R1, LSL #+1
+   \   0000003C   0x0091             LSLS     R1,R2,#+2
+    329            uint32_t m_sec = 0;
+   \   0000003E   0x2200             MOVS     R2,#+0
+    330            int j;
+    331          	for(j = 1;j <= 12;j++)
+   \   00000040   0x2301             MOVS     R3,#+1
+   \   00000042   0x....             LDR.N    R5,??DataTable4  ;; 0x15180
+   \   00000044   0xE006             B.N      ??RTC_TimeRead_3
+    332          	{
+    333          		if(j == (RTC_DateStructure.RTC_Month)) break;
+    334              m_sec += (YearsMonthArray[i++]*86400L);
+   \                     ??RTC_TimeRead_4: (+1)
+   \   00000046   0x.... 0x....      ADR.W    R4,YearsMonthArray
+   \   0000004A   0x5D0C             LDRB     R4,[R1, R4]
+   \   0000004C   0xFB05 0x2204      MLA      R2,R5,R4,R2
+   \   00000050   0x1C49             ADDS     R1,R1,#+1
+   \   00000052   0x1C5B             ADDS     R3,R3,#+1
+   \                     ??RTC_TimeRead_3: (+1)
+   \   00000054   0x2B0D             CMP      R3,#+13
+   \   00000056   0xDA03             BGE.N    ??RTC_TimeRead_5
+   \   00000058   0xF89D 0x4001      LDRB     R4,[SP, #+1]
+   \   0000005C   0x42A3             CMP      R3,R4
+   \   0000005E   0xD1F2             BNE.N    ??RTC_TimeRead_4
+    335          	}
+    336          
+    337            uint32_t d_sec = ((uint32_t)RTC_DateStructure.RTC_Date - 1)*86400L;
+    338          
+    339            uint32_t h_sec = (uint32_t)RTC_TimeStructure.RTC_Hours*3600L;
+    340            uint32_t mi_sec = (uint32_t)RTC_TimeStructure.RTC_Minutes*60L;
+    341            uint32_t se_sec = (uint32_t)RTC_TimeStructure.RTC_Seconds;
+    342          
+    343            ret = y_sec + m_sec + d_sec + h_sec + mi_sec + se_sec;
+    344          
+    345            return ret;
+   \                     ??RTC_TimeRead_5: (+1)
+   \   00000060   0x1810             ADDS     R0,R2,R0
+   \   00000062   0xF89D 0x1002      LDRB     R1,[SP, #+2]
+   \   00000066   0x1E49             SUBS     R1,R1,#+1
+   \   00000068   0x462A             MOV      R2,R5
+   \   0000006A   0xFB02 0x0001      MLA      R0,R2,R1,R0
+   \   0000006E   0xF89D 0x1004      LDRB     R1,[SP, #+4]
+   \   00000072   0xF44F 0x6261      MOV      R2,#+3600
+   \   00000076   0xFB12 0x0001      SMLABB   R0,R2,R1,R0
+   \   0000007A   0xF89D 0x1005      LDRB     R1,[SP, #+5]
+   \   0000007E   0xEBC1 0x1201      RSB      R2,R1,R1, LSL #+4
+   \   00000082   0xEB00 0x0082      ADD      R0,R0,R2, LSL #+2
+   \   00000086   0xF89D 0x1006      LDRB     R1,[SP, #+6]
+   \   0000008A   0xFA50 0xF081      UXTAB    R0,R0,R1
+   \   0000008E   0xBD3E             POP      {R1-R5,PC}       ;; return
+    346          }
+    347          //------------------------------------------------------------------------------------
+    348          
+
+   \                                 In section .text, align 2, keep-with-next
+    349          void TRtc::RTC_TimeStampToTDMY(uint32_t ttime,int *year,int *month, int *day,int *hours,int *minutes,int *seconds)
+    350          {
+   \                     _ZN4TRtc19RTC_TimeStampToTDMYEjPiS0_S0_S0_S0_S0_: (+1)
+   \   00000000   0xB4F0             PUSH     {R4-R7}
+    351          	//find year
+    352          	uint32_t yearIndx = 0;
+   \   00000002   0x2500             MOVS     R5,#+0
+    353          	int i;
+    354          	for(i = 0;i < 27;i++)
+   \   00000004   0x462E             MOV      R6,R5
+   \   00000006   0x....             LDR.N    R4,??DataTable4  ;; 0x15180
+   \   00000008   0xE000             B.N      ??RTC_TimeStampToTDMY_0
+   \                     ??RTC_TimeStampToTDMY_1: (+1)
+   \   0000000A   0x1C76             ADDS     R6,R6,#+1
+   \                     ??RTC_TimeStampToTDMY_0: (+1)
+   \   0000000C   0x.... 0x....      ADR.W    R7,YearsDaysArray
+   \   00000010   0xF837 0x7016      LDRH     R7,[R7, R6, LSL #+1]
+   \   00000014   0x4367             MULS     R7,R4,R7
+   \   00000016   0x2E1B             CMP      R6,#+27
+   \   00000018   0xDA02             BGE.N    ??RTC_TimeStampToTDMY_2
+    355          	{
+    356          		yearIndx += (YearsDaysArray[i]*86400L);
+   \   0000001A   0x197D             ADDS     R5,R7,R5
+    357          		if(yearIndx > ttime) break;
+   \   0000001C   0x42A8             CMP      R0,R5
+   \   0000001E   0xD2F4             BCS.N    ??RTC_TimeStampToTDMY_1
+    358          	}
+    359          	yearIndx -= (YearsDaysArray[i]*86400L);
+   \                     ??RTC_TimeStampToTDMY_2: (+1)
+   \   00000020   0x1BED             SUBS     R5,R5,R7
+    360          	*year = 2010 + i;
+   \   00000022   0xF206 0x77DA      ADDW     R7,R6,#+2010
+   \   00000026   0x600F             STR      R7,[R1, #+0]
+    361          	i *= 12;//get month start Indx
+   \   00000028   0xEB06 0x0146      ADD      R1,R6,R6, LSL #+1
+   \   0000002C   0x0089             LSLS     R1,R1,#+2
+    362          	int j;
+    363          	uint32_t monthIndx = yearIndx;
+    364          	for(j = 0;j < 12;j++)
+   \   0000002E   0x2600             MOVS     R6,#+0
+   \   00000030   0x.... 0x....      ADR.W    R7,YearsMonthArray
+   \   00000034   0xE000             B.N      ??RTC_TimeStampToTDMY_3
+   \                     ??RTC_TimeStampToTDMY_4: (+1)
+   \   00000036   0x1C76             ADDS     R6,R6,#+1
+   \                     ??RTC_TimeStampToTDMY_3: (+1)
+   \   00000038   0x2E0C             CMP      R6,#+12
+   \   0000003A   0xDA06             BGE.N    ??RTC_TimeStampToTDMY_5
+    365          	{
+    366          		monthIndx += (YearsMonthArray[i++]*86400L);
+   \   0000003C   0xF811 0xC007      LDRB     R12,[R1, R7]
+   \   00000040   0xFB04 0x550C      MLA      R5,R4,R12,R5
+   \   00000044   0x1C49             ADDS     R1,R1,#+1
+    367          		if(monthIndx > ttime) break;
+   \   00000046   0x42A8             CMP      R0,R5
+   \   00000048   0xD2F5             BCS.N    ??RTC_TimeStampToTDMY_4
+    368          	}
+    369          	monthIndx -= (YearsMonthArray[i - 1]*86400L);
+   \                     ??RTC_TimeStampToTDMY_5: (+1)
+   \   0000004A   0x19C9             ADDS     R1,R1,R7
+   \   0000004C   0xF811 0x1C01      LDRB     R1,[R1, #-1]
+   \   00000050   0xFB04 0x5111      MLS      R1,R4,R1,R5
+    370          	*month = j + 1;
+   \   00000054   0x1C75             ADDS     R5,R6,#+1
+   \   00000056   0x6015             STR      R5,[R2, #+0]
+    371          	*day = (ttime - monthIndx) / (86400L);
+   \   00000058   0x1A42             SUBS     R2,R0,R1
+   \   0000005A   0x4625             MOV      R5,R4
+   \   0000005C   0xFBB2 0xF2F5      UDIV     R2,R2,R5
+   \   00000060   0x601A             STR      R2,[R3, #+0]
+    372          	int daysec = *day * 86400L;
+   \   00000062   0x4354             MULS     R4,R4,R2
+    373          	*day += 1;
+   \   00000064   0x1C52             ADDS     R2,R2,#+1
+   \   00000066   0x601A             STR      R2,[R3, #+0]
+    374          	monthIndx += daysec;
+   \   00000068   0x1861             ADDS     R1,R4,R1
+   \   0000006A   0x1A41             SUBS     R1,R0,R1
+   \   0000006C   0xF44F 0x6061      MOV      R0,#+3600
+   \   00000070   0xFB91 0xF2F0      SDIV     R2,R1,R0
+   \   00000074   0x9804             LDR      R0,[SP, #+16]
+   \   00000076   0x6002             STR      R2,[R0, #+0]
+    375          	daysec = (ttime - monthIndx);
+    376          	*hours = daysec / 3600L;
+    377          	int minsec = *hours * 3600L;
+    378          	monthIndx += minsec;
+    379          	minsec = (ttime - monthIndx);
+   \   00000078   0xF44F 0x6061      MOV      R0,#+3600
+   \   0000007C   0xFB00 0x1012      MLS      R0,R0,R2,R1
+    380          	*minutes = minsec / 60L;
+   \   00000080   0x213C             MOVS     R1,#+60
+   \   00000082   0xFB90 0xF1F1      SDIV     R1,R0,R1
+   \   00000086   0x9A05             LDR      R2,[SP, #+20]
+   \   00000088   0x6011             STR      R1,[R2, #+0]
+    381          	*seconds = minsec % 60L;
+   \   0000008A   0xEBC1 0x1201      RSB      R2,R1,R1, LSL #+4
+   \   0000008E   0xEBA0 0x0082      SUB      R0,R0,R2, LSL #+2
+   \   00000092   0x9906             LDR      R1,[SP, #+24]
+   \   00000094   0x6008             STR      R0,[R1, #+0]
+    382          }
+   \   00000096   0xBCF0             POP      {R4-R7}
+   \   00000098   0x4770             BX       LR               ;; return
+    383          //------------------------------------------------------------------------------------
+    384          
+
+   \                                 In section .text, align 2, keep-with-next
+    385          int TRtc::RTC_TimeStampToMM()
+    386          {
+   \                     _ZN4TRtc17RTC_TimeStampToMMEv: (+1)
+   \   00000000   0xB580             PUSH     {R7,LR}
+    387          	uint32_t ret = TRtc::RTC_TimeRead();
+   \   00000002   0x.... 0x....      BL       _ZN4TRtc12RTC_TimeReadEv
+    388          	return (ret%(3600*24))/60;
+   \   00000006   0x....             LDR.N    R1,??DataTable4  ;; 0x15180
+   \   00000008   0xFBB0 0xF1F1      UDIV     R1,R0,R1
+   \   0000000C   0x....             LDR.N    R2,??DataTable4  ;; 0x15180
+   \   0000000E   0xFB02 0x0011      MLS      R0,R2,R1,R0
+   \   00000012   0x213C             MOVS     R1,#+60
+   \   00000014   0xFBB0 0xF0F1      UDIV     R0,R0,R1
+   \   00000018   0xBD02             POP      {R1,PC}          ;; return
+    389          }
+    390          //------------------------------------------------------------------------------------
+    391          
+
+   \                                 In section .text, align 2, keep-with-next
+    392          void TRtc::RTC_GetTDMY(int *year,int *month, int *day,int *hours,int *minutes,int *seconds)
+    393          {
+   \                     _ZN4TRtc11RTC_GetTDMYEPiS0_S0_S0_S0_S0_: (+1)
+   \   00000000   0xB5FE             PUSH     {R1-R7,LR}
+   \   00000002   0x4604             MOV      R4,R0
+   \   00000004   0x460D             MOV      R5,R1
+   \   00000006   0x4616             MOV      R6,R2
+   \   00000008   0x461F             MOV      R7,R3
+    394          	uint32_t ret = TRtc::RTC_TimeRead();
+   \   0000000A   0x.... 0x....      BL       _ZN4TRtc12RTC_TimeReadEv
+    395          
+    396          	RTC_TimeStampToTDMY(ret,year,month,day,hours,minutes,seconds);
+   \   0000000E   0x9909             LDR      R1,[SP, #+36]
+   \   00000010   0x9102             STR      R1,[SP, #+8]
+   \   00000012   0x9908             LDR      R1,[SP, #+32]
+   \   00000014   0x9101             STR      R1,[SP, #+4]
+   \   00000016   0x9700             STR      R7,[SP, #+0]
+   \   00000018   0x4633             MOV      R3,R6
+   \   0000001A   0x462A             MOV      R2,R5
+   \   0000001C   0x4621             MOV      R1,R4
+   \   0000001E   0x.... 0x....      BL       _ZN4TRtc19RTC_TimeStampToTDMYEjPiS0_S0_S0_S0_S0_
+    397          }
+   \   00000022   0xBDF7             POP      {R0-R2,R4-R7,PC}  ;; return
+
+   \                                 In section .text, align 4, keep-with-next
+   \                     ??DataTable4:
+   \   00000000   0x00015180         DC32     0x15180
+    398          //------------------------------------------------------------------------------------
+
+   Maximum stack usage in bytes:
+
+   .cstack Function
+   ------- --------
+      32   TRtc::RTC_Configuration()
+        32   -> PWR_BackupAccessCmd
+        32   -> RCC_APB1PeriphClockCmd
+        32   -> RCC_LSEConfig
+        32   -> RCC_LSICmd
+        32   -> RCC_RTCCLKCmd
+        32   -> RCC_RTCCLKConfig
+        32   -> RTC_AlarmSubSecondConfig
+        32   -> RTC_Init
+        32   -> RTC_SetAlarm
+        32   -> TRtc::RTC_EXTI_Configuration()
+        32   -> TRtc::RTC_NVIC_Configuration()
+      16   TRtc::RTC_EXTI_Configuration()
+        16   -> EXTI_ClearITPendingBit
+        16   -> EXTI_Init
+      32   TRtc::RTC_GetTDMY(int *, int *, int *, int *, int *, int *)
+        32   -> TRtc::RTC_TimeRead()
+        32   -> TRtc::RTC_TimeStampToTDMY(uint32_t, int *, int *, int *, int *, int *, int *)
+       8   TRtc::RTC_NVIC_Configuration()
+         8   -> NVIC_Init
+      48   TRtc::RTC_TimeAdjust(uint32_t)
+        48   -> RTC_SetDate
+        48   -> RTC_SetTime
+        48   -> TRtc::RTC_TimeStampToTDMY(uint32_t, int *, int *, int *, int *, int *, int *)
+      24   TRtc::RTC_TimeRead()
+        24   -> RTC_GetDate
+        24   -> RTC_GetTime
+       8   TRtc::RTC_TimeStampToMM()
+         8   -> TRtc::RTC_TimeRead()
+      16   TRtc::RTC_TimeStampToTDMY(uint32_t, int *, int *, int *, int *, int *, int *)
+       8   TRtc::Rtc_Init()
+         0   -> EXTI_ClearITPendingBit
+         8   -> PWR_BackupAccessCmd
+         8   -> RCC_APB1PeriphClockCmd
+         8   -> RTC_ClearFlag
+         8   -> RTC_WaitForSynchro
+         8   -> TRtc::RTC_Configuration()
+
+
+   Section sizes:
+
+   Bytes  Function/Label
+   -----  --------------
+       4  ??DataTable4
+     128  TRtc::RTC_Configuration()
+      44  TRtc::RTC_EXTI_Configuration()
+      36  TRtc::RTC_GetTDMY(int *, int *, int *, int *, int *, int *)
+      34  TRtc::RTC_NVIC_Configuration()
+     128  TRtc::RTC_TimeAdjust(uint32_t)
+     144  TRtc::RTC_TimeRead()
+      26  TRtc::RTC_TimeStampToMM()
+     154  TRtc::RTC_TimeStampToTDMY(uint32_t, int *, int *, int *, int *, int *, int *)
+      46  TRtc::Rtc_Init()
+       4  TRtc::day
+       4  TRtc::hours
+       4  TRtc::minutes
+       4  TRtc::month
+       4  TRtc::seconds
+       4  TRtc::year
+      56  YearsDaysArray
+     324  YearsMonthArray
+
+ 
+    12 bytes in section .bss
+    12 bytes in section .data
+ 1 124 bytes in section .text
+ 
+ 1 124 bytes of CODE memory
+    24 bytes of DATA memory
+
+Errors: none
+Warnings: none

@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+
+<Workspace>
+  <ConfigDictionary>
+    
+  <CurrentConfigs><Project>kp02_proj/debug</Project></CurrentConfigs></ConfigDictionary>
+  <Desktop>
+    <Static>
+      <Workspace>
+        <ColumnWidths>
+          
+          
+          
+          
+        <Column0>256</Column0><Column1>1</Column1><Column2>27</Column2><Column3>0</Column3></ColumnWidths>
+      </Workspace>
+      <Build>
+        
+        
+        
+        
+      <ColumnWidth0>20</ColumnWidth0><ColumnWidth1>1036</ColumnWidth1><ColumnWidth2>276</ColumnWidth2><ColumnWidth3>69</ColumnWidth3></Build>
+    <Find-in-Files><ColumnWidth0>496</ColumnWidth0><ColumnWidth1>35</ColumnWidth1><ColumnWidth2>1285</ColumnWidth2></Find-in-Files><TerminalIO/><Debug-Log><ColumnWidth0>20</ColumnWidth0><ColumnWidth1>1382</ColumnWidth1></Debug-Log></Static>
+    <Windows>
+      
+      
+    <Wnd0>
+        <Tabs>
+          <Tab>
+            <Identity>TabID-19107-19110</Identity>
+            <TabName>Workspace</TabName>
+            <Factory>Workspace</Factory>
+            <Session>
+              
+            <NodeDict><ExpandedNode>kp02_proj</ExpandedNode><ExpandedNode>kp02_proj/Application</ExpandedNode><ExpandedNode>kp02_proj/FreeRTOS</ExpandedNode><ExpandedNode>kp02_proj/FreeRTOS/source</ExpandedNode><ExpandedNode>kp02_proj/Output</ExpandedNode></NodeDict></Session>
+          </Tab>
+        </Tabs>
+        
+      <SelectedTab>0</SelectedTab></Wnd0><Wnd1>
+        <Tabs>
+          <Tab>
+            <Identity>TabID-27241-19162</Identity>
+            <TabName>Build</TabName>
+            <Factory>Build</Factory>
+            <Session/>
+          </Tab>
+        <Tab><Identity>TabID-10861-12179</Identity><TabName>Find in Files</TabName><Factory>Find-in-Files</Factory><Session/></Tab></Tabs>
+        
+      <SelectedTab>1</SelectedTab></Wnd1></Windows>
+    <Editor>
+      
+      
+      
+      
+    <Pane><Tab><Factory>TextEditor</Factory><Filename>$WS_DIR$\FreeRTOSConfig.h</Filename><XPos>0</XPos><YPos>60</YPos><SelStart>0</SelStart><SelEnd>0</SelEnd></Tab><Tab><Factory>TextEditor</Factory><Filename>$WS_DIR$\FreeRTOS\Source\croutine.c</Filename><XPos>0</XPos><YPos>308</YPos><SelStart>12757</SelStart><SelEnd>12757</SelEnd></Tab><Tab><Factory>TextEditor</Factory><Filename>$WS_DIR$\FreeRTOS\Source\include\list.h</Filename><XPos>0</XPos><YPos>0</YPos><SelStart>8808</SelStart><SelEnd>8808</SelEnd></Tab><Tab><Factory>TextEditor</Factory><Filename>$WS_DIR$\FreeRTOS\Source\tasks.c</Filename><XPos>0</XPos><YPos>60</YPos><SelStart>3622</SelStart><SelEnd>3622</SelEnd></Tab><ActiveTab>3</ActiveTab><Tab><Factory>TextEditor</Factory><Filename>$WS_DIR$\main.cpp</Filename><XPos>0</XPos><YPos>26</YPos><SelStart>1839</SelStart><SelEnd>1839</SelEnd></Tab><Tab><Factory>TextEditor</Factory><Filename>$WS_DIR$\TADS1298.h</Filename><XPos>0</XPos><YPos>24</YPos><SelStart>1033</SelStart><SelEnd>1041</SelEnd></Tab></Pane><ActivePane>0</ActivePane><Sizes><Pane><X>1000000</X><Y>1000000</Y></Pane></Sizes><SplitMode>1</SplitMode></Editor>
+    <Positions>
+      
+      
+      
+      
+      
+    <Top><Row0><Sizes><Toolbar-01340168><key>iaridepm.enu1</key></Toolbar-01340168></Sizes></Row0></Top><Left><Row0><Sizes><Wnd0><Rect><Top>-2</Top><Left>-2</Left><Bottom>622</Bottom><Right>304</Right><x>-2</x><y>-2</y><xscreen>200</xscreen><yscreen>200</yscreen><sizeHorzCX>138889</sizeHorzCX><sizeHorzCY>240096</sizeHorzCY><sizeVertCX>212500</sizeVertCX><sizeVertCY>749100</sizeVertCY></Rect></Wnd0></Sizes></Row0></Left><Right><Row0><Sizes/></Row0></Right><Bottom><Row0><Sizes><Wnd1><Rect><Top>-2</Top><Left>-2</Left><Bottom>167</Bottom><Right>1442</Right><x>-2</x><y>-2</y><xscreen>1444</xscreen><yscreen>169</yscreen><sizeHorzCX>1002778</sizeHorzCX><sizeHorzCY>202881</sizeHorzCY><sizeVertCX>138889</sizeVertCX><sizeVertCY>240096</sizeVertCY></Rect></Wnd1></Sizes></Row0></Bottom><Float><Sizes/></Float></Positions>
+  </Desktop>
+</Workspace>
+
+

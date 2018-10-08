@@ -1,0 +1,354 @@
+###############################################################################
+#
+# IAR ANSI C/C++ Compiler V7.40.2.8542/W32 for ARM        08/Oct/2018  09:57:54
+# Copyright 1999-2015 IAR Systems AB.
+#
+#    Cpu mode     =  thumb
+#    Endian       =  little
+#    Source file  =  D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\FatFs\mmc.c
+#    Command line =  
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\FatFs\mmc.c -D
+#        IAR_ARM_CM4 -D USE_STDPERIPH_DRIVER -D STM32F40_41xxx -D HAVE_CONFIG_H
+#        -D SD_SPI_MODE -D USE_FULL_ASSERT -D DEVICE_2 -D TFT -D
+#        STENDBUY_NOT_USE -D SCREEN_NOT_ROTATE -D USE_ADS1292R -D DISPLAY_GPIO
+#        -D BUFFERED_TRANSFER -D LCD_TRACE -lCN
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\KP02_DEVICE_2\List\ -o
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\KP02_DEVICE_2\Obj\
+#        --no_unroll --no_inline --no_tbaa --no_scheduling --debug
+#        --endian=little --cpu=Cortex-M4F -e --fpu=VFPv4_sp --dlib_config
+#        "D:\Program Files (x86)\IAR Systems\Embedded Workbench
+#        7.2\arm\INC\c\DLib_Config_Normal.h" -I
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\ -I
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\FatFs\ -I
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\FreeRTOS\Source\include\
+#        -I
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\FreeRTOS\Source\portable\IAR\ARM_CM3\
+#        -I
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\Libraries\CMSIS\CM4\CoreSupport\
+#        -I
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\Libraries\CMSIS\CM4\DeviceSupport\STM32F4xx\
+#        -I
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\Libraries\STM32F4xx_StdPeriph_Driver\inc\
+#        -I
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\Libraries\STM32F10x_Speex_Lib\include\speex\
+#        -I
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\Libraries\STM32F10x_Speex_Lib\include\
+#        -I
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\Libraries\STM32F10x_Speex_Lib\libspeex\
+#        -I
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\Libraries\STM32F10x_Speex_Lib\STM32\include\speex\
+#        -I
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\Libraries\STM32F10x_Speex_Lib\STM32\include\
+#        -I
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\Libraries\STM32F10x_Speex_Lib\STM32\
+#        -I
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\Libraries\STM32F10x_Speex_Lib\STM32\libspeex\
+#        -I
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\Libraries\STM32F10x_Speex_Lib\STM32\libspeex\iar\
+#        -I D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\Fonts\ -Om --ec++
+#    List file    =  
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\KP02_DEVICE_2\List\mmc.lst
+#    Object file  =  
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\KP02_DEVICE_2\Obj\mmc.o
+#
+###############################################################################
+
+D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\FatFs\mmc.c
+      1          /************************************************************************************/
+      2          /* Title:		Low-Level functions for FatFs										*/
+      3          /* Author:		Cyber Genius														*/
+      4          /* Version:		1.0																	*/
+      5          /* Date:		06.07.2012															*/
+      6          /************************************************************************************/
+      7          /*																					*/
+      8          /************************************************************************************/
+      9          #include <string.h>
+     10          
+     11          #include "diskio.h"
+     12          
+     13          #ifdef SD_SDIO_MODE
+     14          	#include "sd_sdio.h"
+     15          #elif defined SD_SPI_MODE
+     16          	#include "sd_spi.h"
+     17          #else
+     18          	#error "No mode for SD card!"
+     19          #endif
+     20          
+     21          #include "ff.h"
+     22          #include "main.h"
+     23          
+     24          #define SECTOR_SIZE 512U
+     25          
+     26          
+     27          
+     28          /*----------------------------------------------------------------------------------*/
+     29          /* Inidialize a Drive      				                                            */
+     30          /*----------------------------------------------------------------------------------*/
+
+   \                                 In section .text, align 2, keep-with-next
+     31          DSTATUS disk_initialize (
+     32          	BYTE drv				/* Physical drive nmuber (0..) */
+     33          )
+     34          {
+     35          	DSTATUS res;
+     36          	
+     37          	res = SD_Init( drv );
+     38          	
+     39          	return ((DSTATUS)res);
+   \                     disk_initialize: (+1)
+   \   00000000   0x.... 0x....      B.W      SD_Init
+     40          }
+     41          
+     42          
+     43          
+     44          /*----------------------------------------------------------------------------------*/
+     45          /* Return Disk Status                                       			            */
+     46          /*----------------------------------------------------------------------------------*/
+
+   \                                 In section .text, align 2, keep-with-next
+     47          DSTATUS disk_status (
+     48          	BYTE drv		/* Physical drive nmuber (0..) */
+     49          )
+     50          {
+     51          	if (drv) return STA_NOINIT;		/* Supports only single drive */
+   \                     disk_status: (+1)
+   \   00000000   0x4601             MOV      R1,R0
+   \   00000002   0x1E49             SUBS     R1,R1,#+1
+   \   00000004   0x4189             SBCS     R1,R1,R1
+   \   00000006   0x43C9             MVNS     R1,R1
+   \   00000008   0x0FC9             LSRS     R1,R1,#+31
+   \   0000000A   0x4608             MOV      R0,R1
+     52          	return 0;
+   \   0000000C   0x4770             BX       LR               ;; return
+     53          }
+     54          
+     55          
+     56          
+     57          /*----------------------------------------------------------------------------------*/
+     58          /* Read Sector(s)                                                       			*/
+     59          /*----------------------------------------------------------------------------------*/
+
+   \                                 In section .text, align 2, keep-with-next
+     60          DRESULT disk_read (
+     61          	BYTE drv,		/* Physical drive nmuber (0..) */
+     62          	BYTE *buff,		/* Data buffer to store read data */
+     63          	DWORD sector,	/* Sector address (LBA) */
+     64          	BYTE count		/* Number of sectors to read (1..255) */
+     65          )
+     66          {
+     67          #ifdef SD_SDIO_MODE
+     68          	SD_Error status = SD_OK;
+     69          
+     70          	SD_ReadMultiBlocks( buff, sector << 9, 512, 1 );
+     71          
+     72          	/* Check if the Transfer is finished */
+     73          	status = SD_WaitReadOperation();
+     74          
+     75          	/* Обработка извлечение карты */
+     76          //	if( status == SD_DATA_TIMEOUT )
+     77          //		return RES_ERROR;
+     78          
+     79          	while( SD_GetStatus() != SD_TRANSFER_OK );
+     80          
+     81          	if( status == SD_OK ){
+     82          	  return RES_OK;
+     83          	}else{
+     84          	  return RES_ERROR;
+     85          	}
+     86          
+     87          #elif defined SD_SPI_MODE
+     88          	DRESULT res;
+     89          	
+     90          	res = SD_ReadMultiBlocks( drv, buff, sector, count );
+     91          	
+     92          	return res;
+   \                     disk_read: (+1)
+   \   00000000   0x.... 0x....      B.W      SD_ReadMultiBlocks
+     93          #endif
+     94          }
+     95          
+     96          
+     97          
+     98          /*----------------------------------------------------------------------------------*/
+     99          /* Write Sector(s)                                                   			    */
+    100          /*----------------------------------------------------------------------------------*/
+    101          #if _READONLY == 0
+
+   \                                 In section .text, align 2, keep-with-next
+    102          DRESULT disk_write (
+    103          	BYTE drv,			/* Physical drive nmuber (0..) */
+    104          	const BYTE *buff,	/* Data to be written */
+    105          	DWORD sector,		/* Sector address (LBA) */
+    106          	BYTE count			/* Number of sectors to write (1..255) */
+    107          )
+    108          {
+    109          #ifdef SD_SDIO_MODE
+    110          	SD_Error status = SD_OK;
+    111          
+    112          	SD_WriteMultiBlocks( (BYTE *)buff, sector << 9, 512, 1 );
+    113          
+    114          	/* Check if the Transfer is finished */
+    115          	status = SD_WaitWriteOperation();
+    116          	while( SD_GetStatus() != SD_TRANSFER_OK );
+    117          
+    118          	if( status == SD_OK )
+    119          	{
+    120          		return RES_OK;
+    121          	}
+    122          	else
+    123          	{
+    124          		return RES_ERROR;
+    125          	}
+    126          
+    127          #elif defined SD_SPI_MODE
+    128          	DRESULT res;
+    129          	
+    130          	res = SD_WriteMultiBlocks( drv, buff, sector, count );
+    131          
+    132          	return res;
+   \                     disk_write: (+1)
+   \   00000000   0x.... 0x....      B.W      SD_WriteMultiBlocks
+    133          #endif
+    134          }
+    135          #endif /* _READONLY */
+    136          
+    137          
+    138          
+    139          /*----------------------------------------------------------------------------------*/
+    140          /* ???							                                        			*/
+    141          /*----------------------------------------------------------------------------------*/
+
+   \                                 In section .text, align 2, keep-with-next
+    142          DRESULT disk_ioctl (
+    143          	BYTE drv,		/* Physical drive nmuber (0..) */
+    144          	BYTE ctrl,		/* Control code */
+    145          	void *buff		/* Buffer to send/receive control data */
+    146          )
+    147          {
+    148          #ifdef SD_SDIO_MODE
+    149          	DRESULT res = RES_OK;
+    150          	switch (ctrl) {
+    151          	case GET_SECTOR_COUNT :	  // Get number of sectors on the disk (DWORD)
+    152          		*(DWORD*)buff = 131072;	// 4*1024*32 = 131072
+    153          		res = RES_OK;
+    154          		break;
+    155          
+    156          	case GET_SECTOR_SIZE :	  // Get R/W sector size (WORD)
+    157          		*(WORD*)buff = 512;
+    158          		res = RES_OK;
+    159          		break;
+    160          
+    161          	case GET_BLOCK_SIZE :	    // Get erase block size in unit of sector (DWORD)
+    162          		*(DWORD*)buff = 32;
+    163          		res = RES_OK;
+    164          	  }
+    165          
+    166          	return res;
+    167          #elif defined SD_SPI_MODE
+    168          	DRESULT res;
+    169          	
+    170          	res = disk_control( drv, ctrl, buff );
+    171          					
+    172          	return res;
+   \                     disk_ioctl: (+1)
+   \   00000000   0x.... 0x....      B.W      disk_control
+    173          #endif /* SD_SDIO_MODE */
+    174          }
+    175          
+    176          
+    177          
+    178          /*----------------------------------------------------------------------------------*/
+    179          /* Write data creation file															*/
+    180          /*----------------------------------------------------------------------------------*/
+
+   \                                 In section .text, align 2, keep-with-next
+    181          DWORD get_fattime( void )
+    182          {
+    183          	return	((2006UL-1980) << 25)	      // Year = 2006
+    184          			| (2UL << 21)	      // Month = Feb
+    185          			| (9UL << 16)	      // Day = 9
+    186          			| (22U << 11)	      // Hour = 22
+    187          			| (30U << 5)	      // Min = 30
+    188          			| (0U >> 1)	      // Sec = 0
+    189          			;
+   \                     get_fattime: (+1)
+   \   00000000   0x....             LDR.N    R0,??DataTable0  ;; 0x3449b3c0
+   \   00000002   0x4770             BX       LR               ;; return
+    190          }
+    191          
+    192          
+    193          
+    194          /*----------------------------------------------------------------------------------*/
+    195          /* Returns a start sector adress of file											*/
+    196          /*----------------------------------------------------------------------------------*/
+
+   \                                 In section .text, align 2, keep-with-next
+    197          DWORD get_file_sector_pos( FIL *file )
+    198          {
+    199          	return (( file->clust - file->sclust ) * 512 );
+   \                     get_file_sector_pos: (+1)
+   \   00000000   0x6941             LDR      R1,[R0, #+20]
+   \   00000002   0x6900             LDR      R0,[R0, #+16]
+   \   00000004   0x1A08             SUBS     R0,R1,R0
+   \   00000006   0x0240             LSLS     R0,R0,#+9
+   \   00000008   0x4770             BX       LR               ;; return
+    200          }
+
+   \                                 In section .text, align 4, keep-with-next
+   \                     ??DataTable0:
+   \   00000000   0x3449B3C0         DC32     0x3449b3c0
+    201          
+    202          
+    203          
+    204          
+    205          
+    206          
+    207          
+    208          
+    209          
+    210          
+    211          
+    212          
+    213          
+    214          
+    215          
+    216          
+    217          
+
+   Maximum stack usage in bytes:
+
+   .cstack Function
+   ------- --------
+       0   disk_initialize
+         0   -> SD_Init
+       0   disk_ioctl
+         0   -> disk_control
+       0   disk_read
+         0   -> SD_ReadMultiBlocks
+       0   disk_status
+       0   disk_write
+         0   -> SD_WriteMultiBlocks
+       0   get_fattime
+       0   get_file_sector_pos
+
+
+   Section sizes:
+
+   Bytes  Function/Label
+   -----  --------------
+       4  ??DataTable0
+       4  disk_initialize
+       4  disk_ioctl
+       4  disk_read
+      14  disk_status
+       4  disk_write
+       4  get_fattime
+      10  get_file_sector_pos
+
+ 
+ 48 bytes in section .text
+ 
+ 48 bytes of CODE memory
+
+Errors: none
+Warnings: none

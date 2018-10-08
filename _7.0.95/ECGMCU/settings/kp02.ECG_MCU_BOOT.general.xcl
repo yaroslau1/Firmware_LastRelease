@@ -1,0 +1,15 @@
+"D:\Program Files\IAR Systems\Embedded Workbench 7.2\arm\bin\armproc.dll" 
+
+"D:\Program Files\IAR Systems\Embedded Workbench 7.2\arm\bin\armstlink.dll" 
+
+"D:\Projects\KSAD_411711_004_NEW_KR\_application_ECGMCU\ECG_MCU_BOOT\Exe\kp02.out" 
+
+--plugin "D:\Program Files\IAR Systems\Embedded Workbench 7.2\arm\bin\armbat.dll" 
+
+--device_macro "D:\Program Files\IAR Systems\Embedded Workbench 7.2\arm\config\debugger\ST\STM32F05xxx_06xxx.dmac" 
+
+--flash_loader "D:\Program Files\IAR Systems\Embedded Workbench 7.2\arm\config\flashloader\ST\FlashSTM32F03xx8.board" 
+
+
+
+

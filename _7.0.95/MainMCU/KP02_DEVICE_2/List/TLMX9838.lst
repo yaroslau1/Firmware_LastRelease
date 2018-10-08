@@ -1,0 +1,1701 @@
+###############################################################################
+#
+# IAR ANSI C/C++ Compiler V7.40.2.8542/W32 for ARM        08/Oct/2018  09:58:13
+# Copyright 1999-2015 IAR Systems AB.
+#
+#    Cpu mode     =  thumb
+#    Endian       =  little
+#    Source file  =  D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\TLMX9838.cpp
+#    Command line =  
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\TLMX9838.cpp -D
+#        IAR_ARM_CM4 -D USE_STDPERIPH_DRIVER -D STM32F40_41xxx -D HAVE_CONFIG_H
+#        -D SD_SPI_MODE -D USE_FULL_ASSERT -D DEVICE_2 -D TFT -D
+#        STENDBUY_NOT_USE -D SCREEN_NOT_ROTATE -D USE_ADS1292R -D DISPLAY_GPIO
+#        -D BUFFERED_TRANSFER -D LCD_TRACE -lCN
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\KP02_DEVICE_2\List\ -o
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\KP02_DEVICE_2\Obj\
+#        --no_unroll --no_inline --no_tbaa --no_scheduling --debug
+#        --endian=little --cpu=Cortex-M4F -e --fpu=VFPv4_sp --dlib_config
+#        "D:\Program Files (x86)\IAR Systems\Embedded Workbench
+#        7.2\arm\INC\c\DLib_Config_Normal.h" -I
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\ -I
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\FatFs\ -I
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\FreeRTOS\Source\include\
+#        -I
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\FreeRTOS\Source\portable\IAR\ARM_CM3\
+#        -I
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\Libraries\CMSIS\CM4\CoreSupport\
+#        -I
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\Libraries\CMSIS\CM4\DeviceSupport\STM32F4xx\
+#        -I
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\Libraries\STM32F4xx_StdPeriph_Driver\inc\
+#        -I
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\Libraries\STM32F10x_Speex_Lib\include\speex\
+#        -I
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\Libraries\STM32F10x_Speex_Lib\include\
+#        -I
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\Libraries\STM32F10x_Speex_Lib\libspeex\
+#        -I
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\Libraries\STM32F10x_Speex_Lib\STM32\include\speex\
+#        -I
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\Libraries\STM32F10x_Speex_Lib\STM32\include\
+#        -I
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\Libraries\STM32F10x_Speex_Lib\STM32\
+#        -I
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\Libraries\STM32F10x_Speex_Lib\STM32\libspeex\
+#        -I
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\Libraries\STM32F10x_Speex_Lib\STM32\libspeex\iar\
+#        -I D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\Fonts\ -Om --ec++
+#    List file    =  
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\KP02_DEVICE_2\List\TLMX9838.lst
+#    Object file  =  
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\KP02_DEVICE_2\Obj\TLMX9838.o
+#
+###############################################################################
+
+D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\TLMX9838.cpp
+      1          /*
+      2              Title:
+      3              Author:   VN Asliuk(Cardian)
+      4              Date:     24.08.2010 16:37:01
+      5              Purpose:
+      6              Software:
+      7              Hardware:
+      8              Note:
+      9          */
+     10          //------------------------------------------------------------------------------------
+     11          #include "TLMX9838.h"
+
+   \                                 In section .text, align 2
+   \   __interwork __softfp void __delay_cycles(int)
+   \                     _Z14__delay_cyclesi: (+1)
+   \   00000000   0xB401             PUSH     {R0}
+   \   00000002   0x2000             MOVS     R0,#+0
+   \   00000004   0xE001             B.N      ??__delay_cycles_0
+   \                     ??__delay_cycles_1: (+1)
+   \   00000006   0xBF00             Nop      
+   \   00000008   0x1C40             ADDS     R0,R0,#+1
+   \                     ??__delay_cycles_0: (+1)
+   \   0000000A   0x9900             LDR      R1,[SP, #+0]
+   \   0000000C   0x4288             CMP      R0,R1
+   \   0000000E   0xDBFA             BLT.N    ??__delay_cycles_1
+   \   00000010   0xB001             ADD      SP,SP,#+4
+   \   00000012   0x4770             BX       LR               ;; return
+     12          #include "TAppProcessor.h"
+     13          //#include "Pinout.h"
+     14          #include "THardware.h"
+     15          #include "TLcdTrace.h"
+     16          #include "TGuiObjectsV2.h"
+     17          #include "TFlash.h"
+
+   \                                 In section .text, align 2
+   \   __interwork __softfp unsigned char volatile *TFlash::SF_GetDataPtr(uint32_t)
+   \                     _ZN6TFlash13SF_GetDataPtrEj: (+1)
+   \   00000000   0x4770             BX       LR               ;; return
+     18          
+     19          //#ifdef EV_BOARD
+     20          #define TW01_NAME "Cardian KR01-SNXXXX-XXXX"    /* имя прибора по блютузу */
+     21          //#else
+     22          //  #define TW01_NAME "KP01_TST_OLED"    /* имя прибора по блютузу */
+     23          //#endif
+     24          //------------------------------------------------------------------------------------
+     25          bool TLMX9838::CFM_wait = false;
+     26          uint8_t TLMX9838::EventFilter = 0xFF;
+     27          uint8_t TLMX9838::SecurityMode = 0xFF;
+
+   \                                 In section .bss, align 1
+     28          bool TLMX9838::LMX9838_Connected = false;
+   \                     _ZN8TLMX983817LMX9838_ConnectedE:
+   \   00000000                      DS8 1
+
+   \                                 In section .bss, align 1
+     29          bool TLMX9838::LMX9838_Ready = false;
+   \                     _ZN8TLMX983813LMX9838_ReadyE:
+   \   00000000                      DS8 1
+     30          uint8_t *TLMX9838::DataPtr = NULL;
+     31          bool TLMX9838::BT_On = false;
+   \                     _ZN8TLMX98385BT_OnE:
+   \   00000001                      DS8 1
+
+   \                                 In section .data, align 4
+   \                     _ZN8TLMX98388CFM_waitE:
+   \   00000000   0x00               DC8 0
+   \                     _ZN8TLMX983811EventFilterE:
+   \   00000001   0xFF               DC8 255
+   \                     _ZN8TLMX983812SecurityModeE:
+   \   00000002   0xFF               DC8 255
+   \   00000003   0x00               DC8 0
+     32          uint8_t TLMX9838::LMX_BT_Addr[ 6 ];
+   \                     _ZN8TLMX983811LMX_BT_AddrE:
+   \   00000004   0x00 0x00          DC8 0, 0, 0, 0, 0, 0, 0, 0
+   \              0x00 0x00    
+   \              0x00 0x00    
+   \              0x00 0x00    
+   \                     _ZN8TLMX98387DataPtrE:
+   \   0000000C   0x00000000         DC32 0H
+     33          
+
+   \                                 In section .data, align 4
+     34          uint8_t TLMX9838::BDAddress[6] = {0x00,0x0b,0x0d,0x0c,0x63,0xaa};
+   \                     _ZN8TLMX98389BDAddressE:
+   \   00000000   0x00 0x0B          DC8 0, 11, 13, 12, 99, 170, 0, 0
+   \              0x0D 0x0C    
+   \              0x63 0xAA    
+   \              0x00 0x00    
+
+   \                                 In section .data, align 1
+     35          uint8_t TLMX9838::RemoteBTPort = 0x01;
+   \                     _ZN8TLMX983812RemoteBTPortE:
+   \   00000000   0x01               DC8 1
+     36          //------------------------------------------------------------------------------------
+     37          
+
+   \                                 In section .text, align 2, keep-with-next
+     38          void TLMX9838::BluetoothPHYInit()
+     39          {
+   \                     _ZN8TLMX983816BluetoothPHYInitEv: (+1)
+   \   00000000   0xB530             PUSH     {R4,R5,LR}
+   \   00000002   0xB089             SUB      SP,SP,#+36
+     40            GPIO_InitTypeDef GPIO_InitStructure;
+     41            NVIC_InitTypeDef NVIC_InitStructure;
+     42          
+     43            LMX_GPIO_RCC_ENABLE;
+   \   00000004   0x2101             MOVS     R1,#+1
+   \   00000006   0x2006             MOVS     R0,#+6
+   \   00000008   0x.... 0x....      BL       RCC_AHB1PeriphClockCmd
+     44            LMX_USART_RCC_ENABLE;
+   \   0000000C   0x2101             MOVS     R1,#+1
+   \   0000000E   0x2010             MOVS     R0,#+16
+   \   00000010   0x.... 0x....      BL       RCC_APB2PeriphClockCmd
+     45          
+     46            /* TX pin */
+     47            GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF;
+   \   00000014   0x2002             MOVS     R0,#+2
+   \   00000016   0xF88D 0x0004      STRB     R0,[SP, #+4]
+     48            GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
+   \   0000001A   0x2000             MOVS     R0,#+0
+   \   0000001C   0xF88D 0x0006      STRB     R0,[SP, #+6]
+     49            GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_UP;
+   \   00000020   0x2001             MOVS     R0,#+1
+   \   00000022   0xF88D 0x0007      STRB     R0,[SP, #+7]
+     50            GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+   \   00000026   0x2002             MOVS     R0,#+2
+   \   00000028   0xF88D 0x0005      STRB     R0,[SP, #+5]
+     51            GPIO_InitStructure.GPIO_Pin = LMX_TXD_GPIO_PIN;
+   \   0000002C   0x2040             MOVS     R0,#+64
+   \   0000002E   0x9000             STR      R0,[SP, #+0]
+     52            GPIO_PinAFConfig(LMX_TXD_GPIO_PORT, LMX_TXD_GPIO_PINSOURCE, LMX_USART_AF);
+   \   00000030   0x.... 0x....      LDR.W    R4,??DataTable13  ;; 0x40020400
+   \   00000034   0x2207             MOVS     R2,#+7
+   \   00000036   0x2106             MOVS     R1,#+6
+   \   00000038   0x4620             MOV      R0,R4
+   \   0000003A   0x.... 0x....      BL       GPIO_PinAFConfig
+     53            GPIO_Init( LMX_TXD_GPIO_PORT, &GPIO_InitStructure );
+   \   0000003E   0xA900             ADD      R1,SP,#+0
+   \   00000040   0x4620             MOV      R0,R4
+   \   00000042   0x.... 0x....      BL       GPIO_Init
+     54          
+     55            /* RX pin */
+     56            GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF;
+   \   00000046   0x2002             MOVS     R0,#+2
+   \   00000048   0xF88D 0x0004      STRB     R0,[SP, #+4]
+     57            GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
+   \   0000004C   0x2000             MOVS     R0,#+0
+   \   0000004E   0xF8AD 0x0006      STRH     R0,[SP, #+6]
+     58            GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_NOPULL;
+     59            GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+   \   00000052   0x2002             MOVS     R0,#+2
+   \   00000054   0xF88D 0x0005      STRB     R0,[SP, #+5]
+     60            GPIO_InitStructure.GPIO_Pin = LMX_RXD_GPIO_PIN;
+   \   00000058   0x2080             MOVS     R0,#+128
+   \   0000005A   0x9000             STR      R0,[SP, #+0]
+     61                  GPIO_PinAFConfig(LMX_RXD_GPIO_PORT, LMX_RXD_GPIO_PINSOURCE, LMX_USART_AF);
+   \   0000005C   0x2207             MOVS     R2,#+7
+   \   0000005E   0x4611             MOV      R1,R2
+   \   00000060   0x4620             MOV      R0,R4
+   \   00000062   0x.... 0x....      BL       GPIO_PinAFConfig
+     62            GPIO_Init( LMX_RXD_GPIO_PORT, &GPIO_InitStructure );
+   \   00000066   0xA900             ADD      R1,SP,#+0
+   \   00000068   0x4620             MOV      R0,R4
+   \   0000006A   0x.... 0x....      BL       GPIO_Init
+     63          
+     64            /* EN pin */
+     65            GPIO_SetBits( LMX_EN_GPIO_PORT, LMX_EN_GPIO_PIN );
+   \   0000006E   0x.... 0x....      LDR.W    R5,??DataTable13_1  ;; 0x40020800
+   \   00000072   0xF44F 0x5100      MOV      R1,#+8192
+   \   00000076   0x4628             MOV      R0,R5
+   \   00000078   0x.... 0x....      BL       GPIO_SetBits
+     66            GPIO_InitStructure.GPIO_Mode = GPIO_Mode_OUT;
+   \   0000007C   0x2001             MOVS     R0,#+1
+   \   0000007E   0xF88D 0x0004      STRB     R0,[SP, #+4]
+     67            GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
+   \   00000082   0x2000             MOVS     R0,#+0
+   \   00000084   0xF88D 0x0006      STRB     R0,[SP, #+6]
+     68            GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_UP;
+   \   00000088   0x2001             MOVS     R0,#+1
+   \   0000008A   0xF88D 0x0007      STRB     R0,[SP, #+7]
+     69            GPIO_InitStructure.GPIO_Speed = GPIO_Speed_2MHz;
+   \   0000008E   0x2000             MOVS     R0,#+0
+   \   00000090   0xF88D 0x0005      STRB     R0,[SP, #+5]
+     70            GPIO_InitStructure.GPIO_Pin = LMX_EN_GPIO_PIN;
+   \   00000094   0xF44F 0x5000      MOV      R0,#+8192
+   \   00000098   0x9000             STR      R0,[SP, #+0]
+     71            GPIO_Init( LMX_EN_GPIO_PORT, &GPIO_InitStructure );
+   \   0000009A   0xA900             ADD      R1,SP,#+0
+   \   0000009C   0x4628             MOV      R0,R5
+   \   0000009E   0x.... 0x....      BL       GPIO_Init
+     72          
+     73            /* RST pin */
+     74            GPIO_SetBits( LMX_RST_GPIO_PORT, LMX_RST_GPIO_PIN );
+   \   000000A2   0xF44F 0x4180      MOV      R1,#+16384
+   \   000000A6   0x4628             MOV      R0,R5
+   \   000000A8   0x.... 0x....      BL       GPIO_SetBits
+     75            GPIO_InitStructure.GPIO_Mode = GPIO_Mode_OUT;
+   \   000000AC   0x2001             MOVS     R0,#+1
+   \   000000AE   0xF88D 0x0004      STRB     R0,[SP, #+4]
+     76            GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
+   \   000000B2   0x2000             MOVS     R0,#+0
+   \   000000B4   0xF88D 0x0006      STRB     R0,[SP, #+6]
+     77            GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_UP;
+   \   000000B8   0x2001             MOVS     R0,#+1
+   \   000000BA   0xF88D 0x0007      STRB     R0,[SP, #+7]
+     78            GPIO_InitStructure.GPIO_Speed = GPIO_Speed_2MHz;
+   \   000000BE   0x2000             MOVS     R0,#+0
+   \   000000C0   0xF88D 0x0005      STRB     R0,[SP, #+5]
+     79            GPIO_InitStructure.GPIO_Pin = LMX_RST_GPIO_PIN;
+   \   000000C4   0xF44F 0x4080      MOV      R0,#+16384
+   \   000000C8   0x9000             STR      R0,[SP, #+0]
+     80            GPIO_Init( LMX_RST_GPIO_PORT, &GPIO_InitStructure );
+   \   000000CA   0xA900             ADD      R1,SP,#+0
+   \   000000CC   0x4628             MOV      R0,R5
+   \   000000CE   0x.... 0x....      BL       GPIO_Init
+     81          
+     82            /* LSTAT pin */
+     83            GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN;
+   \   000000D2   0x2000             MOVS     R0,#+0
+   \   000000D4   0xF88D 0x0004      STRB     R0,[SP, #+4]
+     84            GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
+   \   000000D8   0xF88D 0x0006      STRB     R0,[SP, #+6]
+     85            GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_UP;
+   \   000000DC   0x2001             MOVS     R0,#+1
+   \   000000DE   0xF88D 0x0007      STRB     R0,[SP, #+7]
+     86            GPIO_InitStructure.GPIO_Speed = GPIO_Speed_2MHz;
+   \   000000E2   0x2000             MOVS     R0,#+0
+   \   000000E4   0xF88D 0x0005      STRB     R0,[SP, #+5]
+     87            GPIO_InitStructure.GPIO_Pin = LMX_LSTAT_GPIO_PIN;
+   \   000000E8   0xF44F 0x7500      MOV      R5,#+512
+   \   000000EC   0x9500             STR      R5,[SP, #+0]
+     88            GPIO_Init( LMX_LSTAT_GPIO_PORT, &GPIO_InitStructure );
+   \   000000EE   0xA900             ADD      R1,SP,#+0
+   \   000000F0   0x4620             MOV      R0,R4
+   \   000000F2   0x.... 0x....      BL       GPIO_Init
+     89          
+     90          #ifndef BOOTLOADER
+     91            EXTI_InitTypeDef EXTI_InitStructure;
+     92            /* configuring LSTAT ext interrupt */
+     93            RCC_APB2PeriphClockCmd(RCC_APB2Periph_SYSCFG, ENABLE);
+   \   000000F6   0x2101             MOVS     R1,#+1
+   \   000000F8   0xF44F 0x4080      MOV      R0,#+16384
+   \   000000FC   0x.... 0x....      BL       RCC_APB2PeriphClockCmd
+     94            SYSCFG_EXTILineConfig( LMX_LSTAT_EXTI_PORT, LMX_LSTAT_EXTI_PIN);
+   \   00000100   0x2109             MOVS     R1,#+9
+   \   00000102   0x2001             MOVS     R0,#+1
+   \   00000104   0x.... 0x....      BL       SYSCFG_EXTILineConfig
+     95          
+     96            /* Configure LSTAT EXTI line */
+     97            EXTI_ClearITPendingBit( LMX_LSTAT_EXTI_LINE );       /* Clear the Key Button EXTI line pending bit */
+   \   00000108   0x4628             MOV      R0,R5
+   \   0000010A   0x.... 0x....      BL       EXTI_ClearITPendingBit
+     98            EXTI_InitStructure.EXTI_Line = LMX_LSTAT_EXTI_LINE;
+   \   0000010E   0x9503             STR      R5,[SP, #+12]
+     99            EXTI_InitStructure.EXTI_Mode = EXTI_Mode_Interrupt;
+   \   00000110   0x2000             MOVS     R0,#+0
+   \   00000112   0xF88D 0x0010      STRB     R0,[SP, #+16]
+    100            EXTI_InitStructure.EXTI_Trigger = EXTI_Trigger_Rising_Falling;
+   \   00000116   0x2010             MOVS     R0,#+16
+   \   00000118   0xF88D 0x0011      STRB     R0,[SP, #+17]
+    101            EXTI_InitStructure.EXTI_LineCmd = ENABLE;
+   \   0000011C   0x2001             MOVS     R0,#+1
+   \   0000011E   0xF88D 0x0012      STRB     R0,[SP, #+18]
+    102            EXTI_Init( &EXTI_InitStructure );
+   \   00000122   0xA803             ADD      R0,SP,#+12
+   \   00000124   0x.... 0x....      BL       EXTI_Init
+    103          
+    104            /* Enable and set Button EXTI Interrupt to the lowest priority */
+    105            NVIC_InitStructure.NVIC_IRQChannel = LMX_LSTAT_IRQChannel;
+   \   00000128   0x2017             MOVS     R0,#+23
+   \   0000012A   0xF88D 0x0008      STRB     R0,[SP, #+8]
+    106            NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 12;                    //14
+   \   0000012E   0x200C             MOVS     R0,#+12
+   \   00000130   0xF88D 0x0009      STRB     R0,[SP, #+9]
+    107            NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
+   \   00000134   0x2000             MOVS     R0,#+0
+   \   00000136   0xF88D 0x000A      STRB     R0,[SP, #+10]
+    108            NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
+   \   0000013A   0x2001             MOVS     R0,#+1
+   \   0000013C   0xF88D 0x000B      STRB     R0,[SP, #+11]
+    109            NVIC_Init( &NVIC_InitStructure );
+   \   00000140   0xA802             ADD      R0,SP,#+8
+   \   00000142   0x.... 0x....      BL       NVIC_Init
+    110          #endif /* BOOTLOADER */
+    111          
+    112            /* Configure one bit for preemption priority */
+    113            NVIC_PriorityGroupConfig( NVIC_PriorityGroup_4 );
+   \   00000146   0xF44F 0x7040      MOV      R0,#+768
+   \   0000014A   0x.... 0x....      BL       NVIC_PriorityGroupConfig
+    114          
+    115            /* Enable the USART2 Interrupt */
+    116            NVIC_InitStructure.NVIC_IRQChannel = LMX_USART_IRQChannel;
+   \   0000014E   0x2025             MOVS     R0,#+37
+   \   00000150   0xF88D 0x0008      STRB     R0,[SP, #+8]
+    117            NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;
+   \   00000154   0x2000             MOVS     R0,#+0
+   \   00000156   0xF88D 0x0009      STRB     R0,[SP, #+9]
+    118            NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
+   \   0000015A   0xF88D 0x000A      STRB     R0,[SP, #+10]
+    119            NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
+   \   0000015E   0x2001             MOVS     R0,#+1
+   \   00000160   0xF88D 0x000B      STRB     R0,[SP, #+11]
+    120            NVIC_Init( &NVIC_InitStructure );
+   \   00000164   0xA802             ADD      R0,SP,#+8
+   \   00000166   0x.... 0x....      BL       NVIC_Init
+    121          
+    122            USART_InitTypeDef USART_InitStructure;
+    123          
+    124            USART_InitStructure.USART_BaudRate = 921600;
+   \   0000016A   0xF44F 0x2061      MOV      R0,#+921600
+   \   0000016E   0x9005             STR      R0,[SP, #+20]
+    125            USART_InitStructure.USART_WordLength = USART_WordLength_8b;
+   \   00000170   0x2000             MOVS     R0,#+0
+   \   00000172   0x9006             STR      R0,[SP, #+24]
+    126            USART_InitStructure.USART_StopBits = USART_StopBits_1;
+    127            USART_InitStructure.USART_Parity = USART_Parity_No;
+   \   00000174   0xF8AD 0x001C      STRH     R0,[SP, #+28]
+    128            USART_InitStructure.USART_HardwareFlowControl = USART_HardwareFlowControl_None;
+   \   00000178   0xF8AD 0x0020      STRH     R0,[SP, #+32]
+    129            USART_InitStructure.USART_Mode = USART_Mode_Rx | USART_Mode_Tx;
+   \   0000017C   0x200C             MOVS     R0,#+12
+   \   0000017E   0xF8AD 0x001E      STRH     R0,[SP, #+30]
+    130            USART_Init( LMX_USART, &USART_InitStructure );
+   \   00000182   0x.... 0x....      LDR.W    R4,??DataTable13_2  ;; 0x40011000
+   \   00000186   0xA905             ADD      R1,SP,#+20
+   \   00000188   0x4620             MOV      R0,R4
+   \   0000018A   0x.... 0x....      BL       USART_Init
+    131          
+    132            USART_ITConfig( LMX_USART, USART_IT_RXNE, ENABLE );
+   \   0000018E   0x2201             MOVS     R2,#+1
+   \   00000190   0xF240 0x5125      MOVW     R1,#+1317
+   \   00000194   0x4620             MOV      R0,R4
+   \   00000196   0x.... 0x....      BL       USART_ITConfig
+    133          
+    134            /* Enable USART */
+    135            USART_Cmd( LMX_USART, ENABLE );
+   \   0000019A   0x2101             MOVS     R1,#+1
+   \   0000019C   0x4620             MOV      R0,R4
+   \   0000019E   0x.... 0x....      BL       USART_Cmd
+    136          
+    137          }
+   \   000001A2   0xB009             ADD      SP,SP,#+36
+   \   000001A4   0xBD30             POP      {R4,R5,PC}       ;; return
+    138          
+
+   \                                 In section .text, align 2, keep-with-next
+    139          void TLMX9838::BluetoothPHYDeinit()
+    140          {
+   \                     _ZN8TLMX983818BluetoothPHYDeinitEv: (+1)
+   \   00000000   0xB530             PUSH     {R4,R5,LR}
+   \   00000002   0xB085             SUB      SP,SP,#+20
+    141            GPIO_InitTypeDef GPIO_InitStructure;
+    142            EXTI_InitTypeDef EXTI_InitStructure;
+    143            NVIC_InitTypeDef NVIC_InitStructure;
+    144          
+    145            /* TX pin */
+    146            GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN;
+   \   00000004   0x2000             MOVS     R0,#+0
+   \   00000006   0xF88D 0x0004      STRB     R0,[SP, #+4]
+    147            GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
+   \   0000000A   0xF88D 0x0006      STRB     R0,[SP, #+6]
+    148            GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_DOWN;
+   \   0000000E   0x2002             MOVS     R0,#+2
+   \   00000010   0xF88D 0x0007      STRB     R0,[SP, #+7]
+    149            GPIO_InitStructure.GPIO_Speed = GPIO_Speed_2MHz;
+   \   00000014   0x2000             MOVS     R0,#+0
+   \   00000016   0xF88D 0x0005      STRB     R0,[SP, #+5]
+    150            GPIO_InitStructure.GPIO_Pin = LMX_TXD_GPIO_PIN;
+   \   0000001A   0x2040             MOVS     R0,#+64
+   \   0000001C   0x9000             STR      R0,[SP, #+0]
+    151            GPIO_Init( LMX_TXD_GPIO_PORT, &GPIO_InitStructure );
+   \   0000001E   0x.... 0x....      LDR.W    R4,??DataTable13  ;; 0x40020400
+   \   00000022   0xA900             ADD      R1,SP,#+0
+   \   00000024   0x4620             MOV      R0,R4
+   \   00000026   0x.... 0x....      BL       GPIO_Init
+    152          
+    153            /* RX pin */
+    154            GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN;
+   \   0000002A   0x2000             MOVS     R0,#+0
+   \   0000002C   0xF88D 0x0004      STRB     R0,[SP, #+4]
+    155            GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
+   \   00000030   0xF88D 0x0006      STRB     R0,[SP, #+6]
+    156            GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_DOWN;
+   \   00000034   0x2002             MOVS     R0,#+2
+   \   00000036   0xF88D 0x0007      STRB     R0,[SP, #+7]
+    157            GPIO_InitStructure.GPIO_Speed = GPIO_Speed_2MHz;
+   \   0000003A   0x2000             MOVS     R0,#+0
+   \   0000003C   0xF88D 0x0005      STRB     R0,[SP, #+5]
+    158            GPIO_InitStructure.GPIO_Pin = LMX_RXD_GPIO_PIN;
+   \   00000040   0x2080             MOVS     R0,#+128
+   \   00000042   0x9000             STR      R0,[SP, #+0]
+    159            GPIO_Init( LMX_RXD_GPIO_PORT, &GPIO_InitStructure );
+   \   00000044   0xA900             ADD      R1,SP,#+0
+   \   00000046   0x4620             MOV      R0,R4
+   \   00000048   0x.... 0x....      BL       GPIO_Init
+    160          
+    161          //  /* EN pin */
+    162          //  GPIO_SetBits( LMX_EN_GPIO_PORT, LMX_EN_GPIO_PIN );
+    163          //  GPIO_InitStructure.GPIO_Mode = GPIO_Mode_OUT;
+    164          //  GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
+    165          //  GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_UP;
+    166          //  GPIO_InitStructure.GPIO_Speed = GPIO_Speed_2MHz;
+    167          //  GPIO_InitStructure.GPIO_Pin = LMX_EN_GPIO_PIN;
+    168          //  GPIO_Init( LMX_EN_GPIO_PORT, &GPIO_InitStructure );
+    169          
+    170            /* RST pin */
+    171            GPIO_SetBits( LMX_RST_GPIO_PORT, LMX_RST_GPIO_PIN );
+   \   0000004C   0x.... 0x....      LDR.W    R5,??DataTable13_1  ;; 0x40020800
+   \   00000050   0xF44F 0x4180      MOV      R1,#+16384
+   \   00000054   0x4628             MOV      R0,R5
+   \   00000056   0x.... 0x....      BL       GPIO_SetBits
+    172            GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN;
+   \   0000005A   0x2000             MOVS     R0,#+0
+   \   0000005C   0xF88D 0x0004      STRB     R0,[SP, #+4]
+    173            GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
+   \   00000060   0xF88D 0x0006      STRB     R0,[SP, #+6]
+    174            GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_DOWN;
+   \   00000064   0x2002             MOVS     R0,#+2
+   \   00000066   0xF88D 0x0007      STRB     R0,[SP, #+7]
+    175            GPIO_InitStructure.GPIO_Speed = GPIO_Speed_2MHz;
+   \   0000006A   0x2000             MOVS     R0,#+0
+   \   0000006C   0xF88D 0x0005      STRB     R0,[SP, #+5]
+    176            GPIO_InitStructure.GPIO_Pin = LMX_RST_GPIO_PIN;
+   \   00000070   0xF44F 0x4080      MOV      R0,#+16384
+   \   00000074   0x9000             STR      R0,[SP, #+0]
+    177            GPIO_Init( LMX_RST_GPIO_PORT, &GPIO_InitStructure );
+   \   00000076   0xA900             ADD      R1,SP,#+0
+   \   00000078   0x4628             MOV      R0,R5
+   \   0000007A   0x.... 0x....      BL       GPIO_Init
+    178          
+    179            /* LSTAT pin */
+    180            GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN;
+   \   0000007E   0x2000             MOVS     R0,#+0
+   \   00000080   0xF88D 0x0004      STRB     R0,[SP, #+4]
+    181            GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
+   \   00000084   0xF88D 0x0006      STRB     R0,[SP, #+6]
+    182            GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_DOWN;
+   \   00000088   0x2002             MOVS     R0,#+2
+   \   0000008A   0xF88D 0x0007      STRB     R0,[SP, #+7]
+    183            GPIO_InitStructure.GPIO_Speed = GPIO_Speed_2MHz;
+   \   0000008E   0x2000             MOVS     R0,#+0
+   \   00000090   0xF88D 0x0005      STRB     R0,[SP, #+5]
+    184            GPIO_InitStructure.GPIO_Pin = LMX_LSTAT_GPIO_PIN;
+   \   00000094   0xF44F 0x7500      MOV      R5,#+512
+   \   00000098   0x9500             STR      R5,[SP, #+0]
+    185            GPIO_Init( LMX_LSTAT_GPIO_PORT, &GPIO_InitStructure );
+   \   0000009A   0xA900             ADD      R1,SP,#+0
+   \   0000009C   0x4620             MOV      R0,R4
+   \   0000009E   0x.... 0x....      BL       GPIO_Init
+    186          
+    187            EXTI_InitStructure.EXTI_Line = LMX_LSTAT_EXTI_LINE;
+   \   000000A2   0x9503             STR      R5,[SP, #+12]
+    188            EXTI_InitStructure.EXTI_Mode = EXTI_Mode_Interrupt;
+   \   000000A4   0x2000             MOVS     R0,#+0
+   \   000000A6   0xF88D 0x0010      STRB     R0,[SP, #+16]
+    189            EXTI_InitStructure.EXTI_Trigger = EXTI_Trigger_Rising_Falling;
+   \   000000AA   0x2010             MOVS     R0,#+16
+   \   000000AC   0xF88D 0x0011      STRB     R0,[SP, #+17]
+    190            EXTI_InitStructure.EXTI_LineCmd = DISABLE;
+   \   000000B0   0x2000             MOVS     R0,#+0
+   \   000000B2   0xF88D 0x0012      STRB     R0,[SP, #+18]
+    191            EXTI_Init( &EXTI_InitStructure );
+   \   000000B6   0xA803             ADD      R0,SP,#+12
+   \   000000B8   0x.... 0x....      BL       EXTI_Init
+    192          
+    193            NVIC_InitStructure.NVIC_IRQChannel = LMX_USART_IRQChannel;
+   \   000000BC   0x2025             MOVS     R0,#+37
+   \   000000BE   0xF88D 0x0008      STRB     R0,[SP, #+8]
+    194            NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 13;
+   \   000000C2   0x200D             MOVS     R0,#+13
+   \   000000C4   0xF88D 0x0009      STRB     R0,[SP, #+9]
+    195            NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
+   \   000000C8   0x2000             MOVS     R0,#+0
+   \   000000CA   0xF8AD 0x000A      STRH     R0,[SP, #+10]
+    196            NVIC_InitStructure.NVIC_IRQChannelCmd = DISABLE;
+    197            NVIC_Init( &NVIC_InitStructure );
+   \   000000CE   0xA802             ADD      R0,SP,#+8
+   \   000000D0   0x.... 0x....      BL       NVIC_Init
+    198          
+    199            USART_Cmd( LMX_USART, DISABLE );
+   \   000000D4   0x.... 0x....      LDR.W    R4,??DataTable13_2  ;; 0x40011000
+   \   000000D8   0x2100             MOVS     R1,#+0
+   \   000000DA   0x4620             MOV      R0,R4
+   \   000000DC   0x.... 0x....      BL       USART_Cmd
+    200          
+    201            USART_ITConfig( LMX_USART, USART_IT_RXNE, DISABLE );
+   \   000000E0   0x2200             MOVS     R2,#+0
+   \   000000E2   0xF240 0x5125      MOVW     R1,#+1317
+   \   000000E6   0x4620             MOV      R0,R4
+   \   000000E8   0x.... 0x....      BL       USART_ITConfig
+    202          
+    203            LMX_USART_RCC_DISABLE;
+   \   000000EC   0x2100             MOVS     R1,#+0
+   \   000000EE   0x2010             MOVS     R0,#+16
+   \   000000F0   0x.... 0x....      BL       RCC_APB2PeriphClockCmd
+    204          
+    205          }
+   \   000000F4   0xB005             ADD      SP,SP,#+20
+   \   000000F6   0xBD30             POP      {R4,R5,PC}       ;; return
+    206          
+    207          //------------------------------------------------------------------------------------
+    208          
+    209          //void TLMX9838::LMX9838EXTIInit()
+    210          //{
+    211          //  EXTI_InitTypeDef EXTI_InitStructure;
+    212          //#ifdef EV_BOARD
+    213          //  EXTI_InitStructure.EXTI_Line = EXTI_Line6;
+    214          //  EXTI_InitStructure.EXTI_Mode = EXTI_Mode_Interrupt;
+    215          //  EXTI_InitStructure.EXTI_Trigger = EXTI_Trigger_Rising;
+    216          //  EXTI_InitStructure.EXTI_LineCmd = ENABLE;
+    217          //  EXTI_Init( &EXTI_InitStructure );
+    218          //#else
+    219          //  // Configure Button EXTI line
+    220          //  EXTI_InitStructure.EXTI_Line = EXTI_Line3;
+    221          //  EXTI_InitStructure.EXTI_Mode = EXTI_Mode_Interrupt;
+    222          //  EXTI_InitStructure.EXTI_Trigger = EXTI_Trigger_Rising;
+    223          //  EXTI_InitStructure.EXTI_LineCmd = ENABLE;
+    224          //  EXTI_Init( &EXTI_InitStructure );
+    225          //#endif
+    226          //}
+    227          //------------------------------------------------------------------------------------
+    228          //
+    229          //void TLMX9838::LMX9838EXTIDeInit()
+    230          //{
+    231          //  EXTI_InitTypeDef EXTI_InitStructure;
+    232          //  #ifdef EV_BOARD
+    233          //  EXTI_InitStructure.EXTI_Line = EXTI_Line6;
+    234          //  EXTI_InitStructure.EXTI_Mode = EXTI_Mode_Interrupt;
+    235          //  EXTI_InitStructure.EXTI_Trigger = EXTI_Trigger_Rising;
+    236          //  EXTI_InitStructure.EXTI_LineCmd = DISABLE;
+    237          //  EXTI_Init(&EXTI_InitStructure);
+    238          //  #else
+    239          //  // Configure Button EXTI line
+    240          //  EXTI_InitStructure.EXTI_Line = EXTI_Line3;
+    241          //  EXTI_InitStructure.EXTI_Mode = EXTI_Mode_Interrupt;
+    242          //  EXTI_InitStructure.EXTI_Trigger = EXTI_Trigger_Rising;
+    243          //  EXTI_InitStructure.EXTI_LineCmd = DISABLE;
+    244          //  EXTI_Init( &EXTI_InitStructure );
+    245          //  #endif
+    246          //}
+    247          //------------------------------------------------------------------------------------
+    248          
+
+   \                                 In section .text, align 2, keep-with-next
+    249          void TLMX9838::BluetoothInit()
+    250          {
+   \                     _ZN8TLMX983813BluetoothInitEv: (+1)
+   \   00000000   0xB538             PUSH     {R3-R5,LR}
+    251          //  BluetoothPHYInit();
+    252            TurnOnBluetooth();
+   \   00000002   0x.... 0x....      BL       _ZN8TLMX983815TurnOnBluetoothEv
+    253          
+    254            TLcdTrace::AddLine(1,"Bluetooth Setup.");
+   \   00000006   0x.... 0x....      ADR.W    R1,?_0
+   \   0000000A   0x2001             MOVS     R0,#+1
+   \   0000000C   0x.... 0x....      BL       _ZN9TLcdTrace7AddLineEbPKc
+    255          
+    256            LMX9838_ReadEventFilter();
+   \   00000010   0x.... 0x....      BL       _ZN8TLMX983823LMX9838_ReadEventFilterEv
+    257            if(!LMX9838_WaitForCFM())
+   \   00000014   0x.... 0x....      BL       _ZN8TLMX983818LMX9838_WaitForCFMEv
+   \   00000018   0x2800             CMP      R0,#+0
+   \   0000001A   0xD101             BNE.N    ??BluetoothInit_0
+    258              {
+    259          //      TLcdTrace::AddLine("Set ReportAllEvents");
+    260                LMX9838_ReportAllEvents();
+   \   0000001C   0x.... 0x....      BL       _ZN8TLMX983823LMX9838_ReportAllEventsEv
+    261              }
+    262            if(EventFilter != 0)
+   \                     ??BluetoothInit_0: (+1)
+   \   00000020   0x.... 0x....      LDR.W    R4,??DataTable13_3
+   \   00000024   0x7860             LDRB     R0,[R4, #+1]
+   \   00000026   0x2800             CMP      R0,#+0
+   \   00000028   0xD005             BEQ.N    ??BluetoothInit_1
+    263              {
+    264                TLcdTrace::AddLine("Set ReportAllEvents");
+   \   0000002A   0x.... 0x....      ADR.W    R0,?_1
+   \   0000002E   0x.... 0x....      BL       _ZN9TLcdTrace7AddLineEPKc
+    265                LMX9838_ReportAllEvents();
+   \   00000032   0x.... 0x....      BL       _ZN8TLMX983823LMX9838_ReportAllEventsEv
+    266              }
+    267          
+    268            LMX9838_ReadDeviceName();
+   \                     ??BluetoothInit_1: (+1)
+   \   00000036   0x.... 0x....      BL       _ZN8TLMX983822LMX9838_ReadDeviceNameEv
+    269            LMX9838_WaitForCFM();
+   \   0000003A   0x.... 0x....      BL       _ZN8TLMX983818LMX9838_WaitForCFMEv
+    270             vTaskDelay(50/portTICK_RATE_MS);
+   \   0000003E   0x2032             MOVS     R0,#+50
+   \   00000040   0x.... 0x....      BL       vTaskDelay
+    271            stufSerialNumber *tw01_serialname;
+    272          
+    273             tw01_serialname = (stufSerialNumber*)TFlash::SF_GetDataPtr(SERIAL_NUM);
+   \   00000044   0x.... 0x....      LDR.W    R0,??DataTable13_4  ;; 0x8010005
+   \   00000048   0x.... 0x....      BL       _ZN6TFlash13SF_GetDataPtrEj
+   \   0000004C   0x4605             MOV      R5,R0
+    274          
+    275            if(tw01_serialname->DeviceName[0] == 'C')
+   \   0000004E   0x7828             LDRB     R0,[R5, #+0]
+   \   00000050   0x2843             CMP      R0,#+67
+   \   00000052   0xD108             BNE.N    ??BluetoothInit_2
+    276            {
+    277              if(strcmp((char const*)tw01_serialname->DeviceName,(char const*)DataPtr) != 0)
+   \   00000054   0x68E1             LDR      R1,[R4, #+12]
+   \   00000056   0x4628             MOV      R0,R5
+   \   00000058   0x.... 0x....      BL       strcmp
+   \   0000005C   0x2800             CMP      R0,#+0
+   \   0000005E   0xD002             BEQ.N    ??BluetoothInit_2
+    278                {
+    279                    LMX9838_SetDeviceName((char const*)tw01_serialname->DeviceName);
+   \   00000060   0x4628             MOV      R0,R5
+   \   00000062   0x.... 0x....      BL       _ZN8TLMX983821LMX9838_SetDeviceNameEPKc
+    280                }
+    281            }
+    282          
+    283            LMX9838_ReadSecurityMode();
+   \                     ??BluetoothInit_2: (+1)
+   \   00000066   0x.... 0x....      BL       _ZN8TLMX983824LMX9838_ReadSecurityModeEv
+    284            LMX9838_WaitForCFM();
+   \   0000006A   0x.... 0x....      BL       _ZN8TLMX983818LMX9838_WaitForCFMEv
+    285             vTaskDelay(50/portTICK_RATE_MS);
+   \   0000006E   0x2032             MOVS     R0,#+50
+   \   00000070   0x.... 0x....      BL       vTaskDelay
+    286            if(SecurityMode != 0x1)
+   \   00000074   0x78A0             LDRB     R0,[R4, #+2]
+   \   00000076   0x2801             CMP      R0,#+1
+   \   00000078   0xD005             BEQ.N    ??BluetoothInit_3
+    287              {
+    288          //      #ifdef LCD_TRACE
+    289                TLcdTrace::AddLine("Set Security mode 1");
+   \   0000007A   0x.... 0x....      ADR.W    R0,?_2
+   \   0000007E   0x.... 0x....      BL       _ZN9TLcdTrace7AddLineEPKc
+    290          //      #endif
+    291                LMX9838_SetSecurityMode1();
+   \   00000082   0x.... 0x....      BL       _ZN8TLMX983824LMX9838_SetSecurityMode1Ev
+    292              }
+    293          
+    294            TFrame::StartUpBluetooth = true;
+   \                     ??BluetoothInit_3: (+1)
+   \   00000086   0x2001             MOVS     R0,#+1
+   \   00000088   0x....             LDR.N    R1,??DataTable13_5
+   \   0000008A   0x7008             STRB     R0,[R1, #+0]
+    295          }
+   \   0000008C   0xBD31             POP      {R0,R4,R5,PC}    ;; return
+    296          //------------------------------------------------------------------------------------
+    297          
+
+   \                                 In section .text, align 2, keep-with-next
+    298          void TLMX9838::TurnOnBluetooth()  //Calling from Tasks only
+    299          {
+   \                     _ZN8TLMX983815TurnOnBluetoothEv: (+1)
+   \   00000000   0xB510             PUSH     {R4,LR}
+    300            if(BT_On) return;
+   \   00000002   0x....             LDR.N    R4,??DataTable13_6
+   \   00000004   0x7860             LDRB     R0,[R4, #+1]
+   \   00000006   0x2800             CMP      R0,#+0
+   \   00000008   0xD113             BNE.N    ??TurnOnBluetooth_0
+    301          
+    302            BT_On = true;
+   \   0000000A   0x2001             MOVS     R0,#+1
+   \   0000000C   0x7060             STRB     R0,[R4, #+1]
+    303          
+    304            GPIO_ResetBits( LMX_EN_GPIO_PORT, LMX_EN_GPIO_PIN );    /* активировать блютуз */
+   \   0000000E   0xF44F 0x5100      MOV      R1,#+8192
+   \   00000012   0x....             LDR.N    R0,??DataTable13_1  ;; 0x40020800
+   \   00000014   0x.... 0x....      BL       GPIO_ResetBits
+    305          
+    306          #ifndef BOOTLOADER
+    307            vTaskDelay(1000/portTICK_RATE_MS);
+   \   00000018   0xF44F 0x707A      MOV      R0,#+1000
+   \   0000001C   0x.... 0x....      BL       vTaskDelay
+    308          #else
+    309            __delay_cycles( 2500000 );
+    310          #endif
+    311          //  #ifdef LCD_TRACE
+    312          //    TLcdTrace::AddLine("Turn on LMX9838..Ok");
+    313          //  #endif
+    314            //Reset module
+    315             LMX9838_Reset();
+   \   00000020   0x.... 0x....      BL       _ZN8TLMX983813LMX9838_ResetEv
+    316          
+    317          //  #ifdef LCD_TRACE
+    318          //    TLcdTrace::AddLine("Reset LMX9838");
+    319          //    TLcdTrace::AddLine("Wait for ready...");
+    320          //  #endif
+    321          
+    322              LMX9838_Ready = true;
+   \   00000024   0x2001             MOVS     R0,#+1
+   \   00000026   0x7020             STRB     R0,[R4, #+0]
+    323          
+    324          //  #ifdef LCD_TRACE
+    325          //    if(LMX9838_Ready)
+    326          //      {
+    327          //        TLcdTrace::AddLine("READY");
+    328          //         #ifndef IAP_CFG
+    329          //          vTaskResume(TFrame::xhCmdProcessor);
+    330          //        #endif
+    331          //      }
+    332          //    else
+    333          //      {
+    334          //        TLcdTrace::AddLine("FAIL");
+    335          //        BT_On = false;
+    336          //      }
+    337          //  #endif
+    338          
+    339            #ifndef IAP_CFG
+    340              TGuiObjects::ToolbarSet(TBFM_BLUETOOTH,BT_On);
+   \   00000028   0x7861             LDRB     R1,[R4, #+1]
+   \   0000002A   0xE8BD 0x4010      POP      {R4,LR}
+   \   0000002E   0x.... 0x....      B.W      _ZN11TGuiObjects10ToolbarSetEib
+   \                     ??TurnOnBluetooth_0: (+1)
+   \   00000032   0xBD10             POP      {R4,PC}          ;; return
+    341            #endif
+    342          
+    343          }
+    344          //------------------------------------------------------------------------------------
+    345          
+
+   \                                 In section .text, align 2, keep-with-next
+    346          void TLMX9838::TurnOffBluetooth()
+    347          {
+   \                     _ZN8TLMX983816TurnOffBluetoothEv: (+1)
+   \   00000000   0xB580             PUSH     {R7,LR}
+    348            if(!BT_On) return;
+   \   00000002   0x....             LDR.N    R0,??DataTable13_6
+   \   00000004   0x7841             LDRB     R1,[R0, #+1]
+   \   00000006   0x2900             CMP      R1,#+0
+   \   00000008   0xD014             BEQ.N    ??TurnOffBluetooth_0
+    349          
+    350             BT_On = false;
+   \   0000000A   0x2100             MOVS     R1,#+0
+   \   0000000C   0x7041             STRB     R1,[R0, #+1]
+    351          
+    352             #ifndef IAP_CFG
+    353              vTaskDelay(50/portTICK_RATE_MS);
+   \   0000000E   0x2032             MOVS     R0,#+50
+   \   00000010   0x.... 0x....      BL       vTaskDelay
+    354            #endif
+    355          
+    356            BluetoothPHYDeinit();
+   \   00000014   0x.... 0x....      BL       _ZN8TLMX983818BluetoothPHYDeinitEv
+    357            GPIO_SetBits( LMX_EN_GPIO_PORT, LMX_EN_GPIO_PIN );    /* деактивировать блютуз */
+   \   00000018   0xF44F 0x5100      MOV      R1,#+8192
+   \   0000001C   0x....             LDR.N    R0,??DataTable13_1  ;; 0x40020800
+   \   0000001E   0x.... 0x....      BL       GPIO_SetBits
+    358          
+    359          //#ifdef IAP_CFG
+    360          //  IAP_Delay();
+    361          //#else
+    362            vTaskDelay(100/portTICK_RATE_MS);
+   \   00000022   0x2064             MOVS     R0,#+100
+   \   00000024   0x.... 0x....      BL       vTaskDelay
+    363          //  #endif
+    364          
+    365          //  #ifdef LCD_TRACE
+    366          //    TLcdTrace::AddLine("BT Turn Off");
+    367          //  #endif
+    368             #ifndef IAP_CFG
+    369              TGuiObjects::ToolbarSet(TBFM_BLUETOOTH|TBFM_BLUETOOTHONAIR,0);
+   \   00000028   0x2100             MOVS     R1,#+0
+   \   0000002A   0x2041             MOVS     R0,#+65
+   \   0000002C   0xE8BD 0x4004      POP      {R2,LR}
+   \   00000030   0x.... 0x....      B.W      _ZN11TGuiObjects10ToolbarSetEib
+   \                     ??TurnOffBluetooth_0: (+1)
+   \   00000034   0xBD01             POP      {R0,PC}          ;; return
+    370            #endif
+    371          }
+    372          //------------------------------------------------------------------------------------
+    373          
+
+   \                                 In section .text, align 2, keep-with-next
+    374          void TLMX9838::LMX9838_ReportAllEvents()
+    375          {
+   \                     _ZN8TLMX983823LMX9838_ReportAllEventsEv: (+1)
+   \   00000000   0xB580             PUSH     {R7,LR}
+    376            SendByte(STX_BT);
+   \   00000002   0x2002             MOVS     R0,#+2
+   \   00000004   0x.... 0x....      BL       _ZN8TLMX98388SendByteEh
+    377          
+    378            SendByte(0x52);
+   \   00000008   0x2052             MOVS     R0,#+82
+   \   0000000A   0x.... 0x....      BL       _ZN8TLMX98388SendByteEh
+    379            SendByte(0x4E);
+   \   0000000E   0x204E             MOVS     R0,#+78
+   \   00000010   0x.... 0x....      BL       _ZN8TLMX98388SendByteEh
+    380          
+    381            SendByte(0x1);
+   \   00000014   0x2001             MOVS     R0,#+1
+   \   00000016   0x.... 0x....      BL       _ZN8TLMX98388SendByteEh
+    382            SendByte(0);
+   \   0000001A   0x2000             MOVS     R0,#+0
+   \   0000001C   0x.... 0x....      BL       _ZN8TLMX98388SendByteEh
+    383          
+    384            SendByte(0xA1);
+   \   00000020   0x20A1             MOVS     R0,#+161
+   \   00000022   0x.... 0x....      BL       _ZN8TLMX98388SendByteEh
+    385            SendByte(0x00);
+   \   00000026   0x2000             MOVS     R0,#+0
+   \   00000028   0x.... 0x....      BL       _ZN8TLMX98388SendByteEh
+    386          
+    387            SendByte(ETX_BT);
+   \   0000002C   0x2003             MOVS     R0,#+3
+   \   0000002E   0xE8BD 0x4002      POP      {R1,LR}
+   \   00000032   0x....             B.N      _ZN8TLMX98388SendByteEh
+    388          }
+    389          //------------------------------------------------------------------------------------
+    390          
+
+   \                                 In section .text, align 2, keep-with-next
+    391          void TLMX9838::LMX9838_ReadDeviceName()
+    392          {
+   \                     _ZN8TLMX983822LMX9838_ReadDeviceNameEv: (+1)
+   \   00000000   0xB580             PUSH     {R7,LR}
+    393            SendByte(STX_BT);
+   \   00000002   0x2002             MOVS     R0,#+2
+   \   00000004   0x.... 0x....      BL       _ZN8TLMX98388SendByteEh
+    394          
+    395            SendByte(0x52);
+   \   00000008   0x2052             MOVS     R0,#+82
+   \   0000000A   0x.... 0x....      BL       _ZN8TLMX98388SendByteEh
+    396            SendByte(0x03);
+   \   0000000E   0x2003             MOVS     R0,#+3
+   \   00000010   0x.... 0x....      BL       _ZN8TLMX98388SendByteEh
+    397          
+    398            SendByte(0);
+   \   00000014   0x2000             MOVS     R0,#+0
+   \   00000016   0x.... 0x....      BL       _ZN8TLMX98388SendByteEh
+    399            SendByte(0);
+   \   0000001A   0x2000             MOVS     R0,#+0
+   \   0000001C   0x.... 0x....      BL       _ZN8TLMX98388SendByteEh
+    400          
+    401            SendByte(0x55);
+   \   00000020   0x2055             MOVS     R0,#+85
+   \   00000022   0x.... 0x....      BL       _ZN8TLMX98388SendByteEh
+    402          
+    403            SendByte(ETX_BT);
+   \   00000026   0x2003             MOVS     R0,#+3
+   \   00000028   0xE8BD 0x4002      POP      {R1,LR}
+   \   0000002C   0x....             B.N      _ZN8TLMX98388SendByteEh
+    404          }
+    405          //------------------------------------------------------------------------------------
+    406          
+
+   \                                 In section .text, align 2, keep-with-next
+    407          void TLMX9838::LMX9838_SetDeviceName(const char* DevN)
+    408          {
+   \                     _ZN8TLMX983821LMX9838_SetDeviceNameEPKc: (+1)
+   \   00000000   0xB570             PUSH     {R4-R6,LR}
+   \   00000002   0xB082             SUB      SP,SP,#+8
+   \   00000004   0x4604             MOV      R4,R0
+    409            int DevNLen = strlen(DevN);
+   \   00000006   0x.... 0x....      BL       strlen
+   \   0000000A   0x4605             MOV      R5,R0
+    410          
+    411            if(DevNLen > 38) return;
+   \   0000000C   0x2D27             CMP      R5,#+39
+   \   0000000E   0xDA27             BGE.N    ??LMX9838_SetDeviceName_0
+    412          
+    413            SendByte(STX_BT);
+   \   00000010   0x2002             MOVS     R0,#+2
+   \   00000012   0x.... 0x....      BL       _ZN8TLMX98388SendByteEh
+    414          
+    415            SendByte(0x52);
+   \   00000016   0x2052             MOVS     R0,#+82
+   \   00000018   0x.... 0x....      BL       _ZN8TLMX98388SendByteEh
+    416            SendByte(0x04);
+   \   0000001C   0x2004             MOVS     R0,#+4
+   \   0000001E   0x.... 0x....      BL       _ZN8TLMX98388SendByteEh
+    417          
+    418            SendByte((uint8_t)(DevNLen + 2));
+   \   00000022   0x1CA8             ADDS     R0,R5,#+2
+   \   00000024   0xB2C0             UXTB     R0,R0
+   \   00000026   0x.... 0x....      BL       _ZN8TLMX98388SendByteEh
+    419            SendByte(0);
+   \   0000002A   0x2000             MOVS     R0,#+0
+   \   0000002C   0x.... 0x....      BL       _ZN8TLMX98388SendByteEh
+    420          
+    421            CharInt crcBCC;
+    422            crcBCC.Int = 0x52 + 0x04 + (DevNLen + 2);
+   \   00000030   0xF105 0x0058      ADD      R0,R5,#+88
+   \   00000034   0xF8AD 0x0000      STRH     R0,[SP, #+0]
+    423            SendByte(crcBCC.Char[0]);
+   \   00000038   0xF89D 0x0000      LDRB     R0,[SP, #+0]
+   \   0000003C   0x.... 0x....      BL       _ZN8TLMX98388SendByteEh
+    424          
+    425            SendByte((uint8_t)(DevNLen + 1));
+   \   00000040   0x1C68             ADDS     R0,R5,#+1
+   \   00000042   0xB2C0             UXTB     R0,R0
+   \   00000044   0x.... 0x....      BL       _ZN8TLMX98388SendByteEh
+    426            for(int u = 0;u <= DevNLen;u++)
+   \   00000048   0x2600             MOVS     R6,#+0
+   \   0000004A   0xE003             B.N      ??LMX9838_SetDeviceName_1
+    427            {
+    428              SendByte((uint8_t)DevN[u]);
+   \                     ??LMX9838_SetDeviceName_2: (+1)
+   \   0000004C   0x5D30             LDRB     R0,[R6, R4]
+   \   0000004E   0x.... 0x....      BL       _ZN8TLMX98388SendByteEh
+    429            }
+   \   00000052   0x1C76             ADDS     R6,R6,#+1
+   \                     ??LMX9838_SetDeviceName_1: (+1)
+   \   00000054   0x42B5             CMP      R5,R6
+   \   00000056   0xDAF9             BGE.N    ??LMX9838_SetDeviceName_2
+    430          
+    431            SendByte(ETX_BT);
+   \   00000058   0x2003             MOVS     R0,#+3
+   \   0000005A   0xE8BD 0x4076      POP      {R1,R2,R4-R6,LR}
+   \   0000005E   0x....             B.N      _ZN8TLMX98388SendByteEh
+   \                     ??LMX9838_SetDeviceName_0: (+1)
+   \   00000060   0xBD73             POP      {R0,R1,R4-R6,PC}  ;; return
+    432          }
+    433          //------------------------------------------------------------------------------------
+    434          
+
+   \                                 In section .text, align 2, keep-with-next
+    435          void TLMX9838::LMX9838_ReadDeviceAddress()
+    436          {
+   \                     _ZN8TLMX983825LMX9838_ReadDeviceAddressEv: (+1)
+   \   00000000   0xB580             PUSH     {R7,LR}
+    437            SendByte(STX_BT);
+   \   00000002   0x2002             MOVS     R0,#+2
+   \   00000004   0x.... 0x....      BL       _ZN8TLMX98388SendByteEh
+    438          
+    439            SendByte(0x52);
+   \   00000008   0x2052             MOVS     R0,#+82
+   \   0000000A   0x.... 0x....      BL       _ZN8TLMX98388SendByteEh
+    440            SendByte(0x05);
+   \   0000000E   0x2005             MOVS     R0,#+5
+   \   00000010   0x.... 0x....      BL       _ZN8TLMX98388SendByteEh
+    441          
+    442            SendByte(0);
+   \   00000014   0x2000             MOVS     R0,#+0
+   \   00000016   0x.... 0x....      BL       _ZN8TLMX98388SendByteEh
+    443            SendByte(0);
+   \   0000001A   0x2000             MOVS     R0,#+0
+   \   0000001C   0x.... 0x....      BL       _ZN8TLMX98388SendByteEh
+    444          
+    445            SendByte(0x57);
+   \   00000020   0x2057             MOVS     R0,#+87
+   \   00000022   0x.... 0x....      BL       _ZN8TLMX98388SendByteEh
+    446          
+    447            SendByte(ETX_BT);
+   \   00000026   0x2003             MOVS     R0,#+3
+   \   00000028   0xE8BD 0x4002      POP      {R1,LR}
+   \   0000002C   0x....             B.N      _ZN8TLMX98388SendByteEh
+    448          }
+    449          //------------------------------------------------------------------------------------
+    450          
+
+   \                                 In section .text, align 2, keep-with-next
+    451          void TLMX9838::LMX9838_ChangeDeviceAddress(uint8_t *addr)
+    452          {
+   \                     _ZN8TLMX983827LMX9838_ChangeDeviceAddressEPh: (+1)
+   \   00000000   0xB538             PUSH     {R3-R5,LR}
+   \   00000002   0x4604             MOV      R4,R0
+    453            SendByte(STX_BT);
+   \   00000004   0x2002             MOVS     R0,#+2
+   \   00000006   0x.... 0x....      BL       _ZN8TLMX98388SendByteEh
+    454          
+    455            SendByte(0x52);
+   \   0000000A   0x2052             MOVS     R0,#+82
+   \   0000000C   0x.... 0x....      BL       _ZN8TLMX98388SendByteEh
+    456            SendByte(0x27);
+   \   00000010   0x2027             MOVS     R0,#+39
+   \   00000012   0x.... 0x....      BL       _ZN8TLMX98388SendByteEh
+    457          
+    458            SendByte(6);
+   \   00000016   0x2006             MOVS     R0,#+6
+   \   00000018   0x.... 0x....      BL       _ZN8TLMX98388SendByteEh
+    459            SendByte(0);
+   \   0000001C   0x2000             MOVS     R0,#+0
+   \   0000001E   0x.... 0x....      BL       _ZN8TLMX98388SendByteEh
+    460          
+    461            for(int u = 0;u < 6;u++)
+   \   00000022   0x2500             MOVS     R5,#+0
+   \   00000024   0xE003             B.N      ??LMX9838_ChangeDeviceAddress_0
+    462            {
+    463              SendByte(addr[u]);
+   \                     ??LMX9838_ChangeDeviceAddress_1: (+1)
+   \   00000026   0x5D28             LDRB     R0,[R5, R4]
+   \   00000028   0x.... 0x....      BL       _ZN8TLMX98388SendByteEh
+    464            }
+   \   0000002C   0x1C6D             ADDS     R5,R5,#+1
+   \                     ??LMX9838_ChangeDeviceAddress_0: (+1)
+   \   0000002E   0x2D06             CMP      R5,#+6
+   \   00000030   0xDBF9             BLT.N    ??LMX9838_ChangeDeviceAddress_1
+    465          
+    466            SendByte(ETX_BT);
+   \   00000032   0x2003             MOVS     R0,#+3
+   \   00000034   0xE8BD 0x4032      POP      {R1,R4,R5,LR}
+   \   00000038   0x....             B.N      _ZN8TLMX98388SendByteEh
+    467          }
+    468          //------------------------------------------------------------------------------------
+    469          
+
+   \                                 In section .text, align 2, keep-with-next
+    470          void TLMX9838::LMX9838_ReadEventFilter()
+    471          {
+   \                     _ZN8TLMX983823LMX9838_ReadEventFilterEv: (+1)
+   \   00000000   0xB580             PUSH     {R7,LR}
+    472            SendByte(STX_BT);
+   \   00000002   0x2002             MOVS     R0,#+2
+   \   00000004   0x.... 0x....      BL       _ZN8TLMX98388SendByteEh
+    473          
+    474            SendByte(0x52);
+   \   00000008   0x2052             MOVS     R0,#+82
+   \   0000000A   0x.... 0x....      BL       _ZN8TLMX98388SendByteEh
+    475            SendByte(0x4F);
+   \   0000000E   0x204F             MOVS     R0,#+79
+   \   00000010   0x.... 0x....      BL       _ZN8TLMX98388SendByteEh
+    476          
+    477            SendByte(0);
+   \   00000014   0x2000             MOVS     R0,#+0
+   \   00000016   0x.... 0x....      BL       _ZN8TLMX98388SendByteEh
+    478            SendByte(0);
+   \   0000001A   0x2000             MOVS     R0,#+0
+   \   0000001C   0x.... 0x....      BL       _ZN8TLMX98388SendByteEh
+    479          
+    480            SendByte(0xA1);
+   \   00000020   0x20A1             MOVS     R0,#+161
+   \   00000022   0x.... 0x....      BL       _ZN8TLMX98388SendByteEh
+    481          
+    482            SendByte(ETX_BT);
+   \   00000026   0x2003             MOVS     R0,#+3
+   \   00000028   0xE8BD 0x4002      POP      {R1,LR}
+   \   0000002C   0x....             B.N      _ZN8TLMX98388SendByteEh
+    483          }
+    484          //------------------------------------------------------------------------------------
+    485          
+
+   \                                 In section .text, align 2, keep-with-next
+    486          void TLMX9838::LMX9838_ReadSecurityMode()
+    487          {
+   \                     _ZN8TLMX983824LMX9838_ReadSecurityModeEv: (+1)
+   \   00000000   0xB580             PUSH     {R7,LR}
+    488            SendByte(STX_BT);
+   \   00000002   0x2002             MOVS     R0,#+2
+   \   00000004   0x.... 0x....      BL       _ZN8TLMX98388SendByteEh
+    489          
+    490            SendByte(0x52);
+   \   00000008   0x2052             MOVS     R0,#+82
+   \   0000000A   0x.... 0x....      BL       _ZN8TLMX98388SendByteEh
+    491            SendByte(0x18);
+   \   0000000E   0x2018             MOVS     R0,#+24
+   \   00000010   0x.... 0x....      BL       _ZN8TLMX98388SendByteEh
+    492          
+    493            SendByte(0);
+   \   00000014   0x2000             MOVS     R0,#+0
+   \   00000016   0x.... 0x....      BL       _ZN8TLMX98388SendByteEh
+    494            SendByte(0);
+   \   0000001A   0x2000             MOVS     R0,#+0
+   \   0000001C   0x.... 0x....      BL       _ZN8TLMX98388SendByteEh
+    495          
+    496            SendByte(0x6A);
+   \   00000020   0x206A             MOVS     R0,#+106
+   \   00000022   0x.... 0x....      BL       _ZN8TLMX98388SendByteEh
+    497          
+    498            SendByte(ETX_BT);
+   \   00000026   0x2003             MOVS     R0,#+3
+   \   00000028   0xE8BD 0x4002      POP      {R1,LR}
+   \   0000002C   0x....             B.N      _ZN8TLMX98388SendByteEh
+    499          }
+    500          //------------------------------------------------------------------------------------
+    501          
+
+   \                                 In section .text, align 2, keep-with-next
+    502          void TLMX9838::LMX9838_SetSecurityMode1()
+    503          {
+   \                     _ZN8TLMX983824LMX9838_SetSecurityMode1Ev: (+1)
+   \   00000000   0xB580             PUSH     {R7,LR}
+    504            SendByte(STX_BT);
+   \   00000002   0x2002             MOVS     R0,#+2
+   \   00000004   0x.... 0x....      BL       _ZN8TLMX98388SendByteEh
+    505          
+    506            SendByte(0x52);
+   \   00000008   0x2052             MOVS     R0,#+82
+   \   0000000A   0x.... 0x....      BL       _ZN8TLMX98388SendByteEh
+    507            SendByte(0x19);
+   \   0000000E   0x2019             MOVS     R0,#+25
+   \   00000010   0x.... 0x....      BL       _ZN8TLMX98388SendByteEh
+    508          
+    509            SendByte(0x01);
+   \   00000014   0x2001             MOVS     R0,#+1
+   \   00000016   0x.... 0x....      BL       _ZN8TLMX98388SendByteEh
+    510            SendByte(0);
+   \   0000001A   0x2000             MOVS     R0,#+0
+   \   0000001C   0x.... 0x....      BL       _ZN8TLMX98388SendByteEh
+    511          
+    512            SendByte(0x6C);
+   \   00000020   0x206C             MOVS     R0,#+108
+   \   00000022   0x.... 0x....      BL       _ZN8TLMX98388SendByteEh
+    513          
+    514            SendByte(0x01);
+   \   00000026   0x2001             MOVS     R0,#+1
+   \   00000028   0x.... 0x....      BL       _ZN8TLMX98388SendByteEh
+    515          
+    516            SendByte(ETX_BT);
+   \   0000002C   0x2003             MOVS     R0,#+3
+   \   0000002E   0xE8BD 0x4002      POP      {R1,LR}
+   \   00000032   0x....             B.N      _ZN8TLMX98388SendByteEh
+    517          }
+    518          //------------------------------------------------------------------------------------
+    519          
+
+   \                                 In section .text, align 2, keep-with-next
+    520          bool TLMX9838::LMX9838_WaitForCFM()
+    521          {
+   \                     _ZN8TLMX983818LMX9838_WaitForCFMEv: (+1)
+   \   00000000   0xB538             PUSH     {R3-R5,LR}
+    522            CFM_wait = false;
+   \   00000002   0x....             LDR.N    R4,??DataTable13_3
+   \   00000004   0x2000             MOVS     R0,#+0
+   \   00000006   0x7020             STRB     R0,[R4, #+0]
+    523            for(int i = 0;i < 100;i++)
+   \   00000008   0x4605             MOV      R5,R0
+   \   0000000A   0xE003             B.N      ??LMX9838_WaitForCFM_0
+    524            {
+    525              if(CFM_wait == true)
+    526                {
+    527                  CFM_wait = false;
+    528                  return true;
+    529                }
+    530               vTaskDelay(10/portTICK_RATE_MS);
+   \                     ??LMX9838_WaitForCFM_1: (+1)
+   \   0000000C   0x200A             MOVS     R0,#+10
+   \   0000000E   0x.... 0x....      BL       vTaskDelay
+   \   00000012   0x1C6D             ADDS     R5,R5,#+1
+   \                     ??LMX9838_WaitForCFM_0: (+1)
+   \   00000014   0x2D64             CMP      R5,#+100
+   \   00000016   0xDA06             BGE.N    ??LMX9838_WaitForCFM_2
+   \   00000018   0x7820             LDRB     R0,[R4, #+0]
+   \   0000001A   0x2800             CMP      R0,#+0
+   \   0000001C   0xD0F6             BEQ.N    ??LMX9838_WaitForCFM_1
+   \   0000001E   0x2000             MOVS     R0,#+0
+   \   00000020   0x7020             STRB     R0,[R4, #+0]
+   \   00000022   0x2001             MOVS     R0,#+1
+   \   00000024   0xBD32             POP      {R1,R4,R5,PC}
+    531            }
+    532          //  #ifdef LCD_TRACE
+    533          //    TLcdTrace::AddLine("CFM Failed!");
+    534          //  #endif
+    535            return false;
+   \                     ??LMX9838_WaitForCFM_2: (+1)
+   \   00000026   0x2000             MOVS     R0,#+0
+   \   00000028   0xBD32             POP      {R1,R4,R5,PC}    ;; return
+    536          }
+    537          //------------------------------------------------------------------------------------
+    538          
+
+   \                                 In section .text, align 2, keep-with-next
+    539          void TLMX9838::LMX9838_ParceEvents(uint8_t pckt,uint8_t id,uint8_t *_gdata)
+    540          {
+    541            #ifdef LCD_TRACE
+    542          //    char str[24];
+    543          //    char str2[8];
+    544          //    char numAddr[8];
+    545          //    char btAddr[32];
+    546            #endif
+    547            if(pckt == 0x69)
+    548              {
+    549                switch(id)
+    550                {
+    551                  case 0x50:
+    552          //          #ifdef LCD_TRACE
+    553          //            TLcdTrace::AddLine("CMD Link Established");
+    554          //            {
+    555          //              itos(_gdata[8],numAddr,2,HEXADECIMAL);
+    556          //              strcpy(btAddr,numAddr);
+    557          //              itos(_gdata[7],numAddr,2,HEXADECIMAL);
+    558          //              strcat(btAddr,numAddr);
+    559          //              itos(_gdata[6],numAddr,2,HEXADECIMAL);
+    560          //              strcat(btAddr,numAddr);
+    561          //              itos(_gdata[5],numAddr,2,HEXADECIMAL);
+    562          //              strcat(btAddr,numAddr);
+    563          //              itos(_gdata[4],numAddr,2,HEXADECIMAL);
+    564          //              strcat(btAddr,numAddr);
+    565          //              itos(_gdata[3],numAddr,2,HEXADECIMAL);
+    566          //              strcat(btAddr,numAddr);
+    567          //              TLcdTrace::AddLine(btAddr);
+    568          //            }
+    569          //          #endif
+    570                    break;
+    571                  case 0x0E:
+    572          //          #ifdef LCD_TRACE
+    573          //            TLcdTrace::AddLine("CMD Link Released");
+    574          //          #endif
+    575                    break;
+    576                }
+    577              }
+    578            if(pckt == 0x43)
+   \                     _ZN8TLMX983819LMX9838_ParceEventsEhhPh: (+1)
+   \   00000000   0x2843             CMP      R0,#+67
+   \   00000002   0xD121             BNE.N    ??LMX9838_ParceEvents_0
+    579              {
+    580                CFM_wait = true;
+   \   00000004   0x....             LDR.N    R0,??DataTable13_3
+   \   00000006   0x2301             MOVS     R3,#+1
+   \   00000008   0x7003             STRB     R3,[R0, #+0]
+    581                switch(id)
+   \   0000000A   0x2903             CMP      R1,#+3
+   \   0000000C   0xD006             BEQ.N    ??LMX9838_ParceEvents_1
+   \   0000000E   0x2905             CMP      R1,#+5
+   \   00000010   0xD009             BEQ.N    ??LMX9838_ParceEvents_2
+   \   00000012   0x2918             CMP      R1,#+24
+   \   00000014   0xD016             BEQ.N    ??LMX9838_ParceEvents_3
+   \   00000016   0x294F             CMP      R1,#+79
+   \   00000018   0xD011             BEQ.N    ??LMX9838_ParceEvents_4
+   \   0000001A   0x4770             BX       LR
+    582                {
+    583                  case 0x03: //read local name
+    584                    DataPtr = &_gdata[5];
+   \                     ??LMX9838_ParceEvents_1: (+1)
+   \   0000001C   0x1D51             ADDS     R1,R2,#+5
+   \   0000001E   0x60C1             STR      R1,[R0, #+12]
+    585                    #ifdef LCD_TRACE
+    586                      TLcdTrace::AddLine((char const*)&_gdata[5]);
+   \   00000020   0x1D50             ADDS     R0,R2,#+5
+   \   00000022   0x.... 0x....      B.W      _ZN9TLcdTrace7AddLineEPKc
+    587                    #endif
+    588                    break;
+    589                  case 0x05: //read local address
+    590                    DataPtr = &_gdata[4];
+   \                     ??LMX9838_ParceEvents_2: (+1)
+   \   00000026   0x1D11             ADDS     R1,R2,#+4
+   \   00000028   0x60C1             STR      R1,[R0, #+12]
+    591                    for(int s = 0;s < 6;s++)
+   \   0000002A   0x2100             MOVS     R1,#+0
+   \                     ??LMX9838_ParceEvents_5: (+1)
+   \   0000002C   0x2906             CMP      R1,#+6
+   \   0000002E   0xDA0B             BGE.N    ??LMX9838_ParceEvents_0
+    592                    {
+    593                      LMX_BT_Addr[s] = DataPtr[4+s];
+   \   00000030   0x68C2             LDR      R2,[R0, #+12]
+   \   00000032   0x188A             ADDS     R2,R1,R2
+   \   00000034   0x7912             LDRB     R2,[R2, #+4]
+   \   00000036   0x180B             ADDS     R3,R1,R0
+   \   00000038   0x711A             STRB     R2,[R3, #+4]
+    594                    }
+   \   0000003A   0x1C49             ADDS     R1,R1,#+1
+   \   0000003C   0xE7F6             B.N      ??LMX9838_ParceEvents_5
+    595          //          #ifdef LCD_TRACE
+    596          //            itos(_gdata[9],numAddr,2,HEXADECIMAL);
+    597          //            strcpy(btAddr,numAddr);
+    598          //            itos(_gdata[8],numAddr,2,HEXADECIMAL);
+    599          //            strcat(btAddr,numAddr);
+    600          //            itos(_gdata[7],numAddr,2,HEXADECIMAL);
+    601          //            strcat(btAddr,numAddr);
+    602          //            itos(_gdata[6],numAddr,2,HEXADECIMAL);
+    603          //            strcat(btAddr,numAddr);
+    604          //            itos(_gdata[5],numAddr,2,HEXADECIMAL);
+    605          //            strcat(btAddr,numAddr);
+    606          //            itos(_gdata[4],numAddr,2,HEXADECIMAL);
+    607          //            strcat(btAddr,numAddr);
+    608          //            TLcdTrace::AddLine(btAddr);
+    609          //          #endif
+    610                    break;
+    611                  case 0x4F: //read event filter
+    612                    DataPtr = &_gdata[3];
+   \                     ??LMX9838_ParceEvents_4: (+1)
+   \   0000003E   0x1CD1             ADDS     R1,R2,#+3
+   \   00000040   0x60C1             STR      R1,[R0, #+12]
+    613          //          #ifdef LCD_TRACE
+    614          //            {
+    615          //              strcpy(str,"CMD Event filter:");
+    616          //              EventFilter = _gdata[3];
+    617          //              itos(_gdata[3],str2,2,HEXADECIMAL);
+    618          //              strcat(str,str2);
+    619          //
+    620          //              TLcdTrace::AddLine(str);
+    621          //            }
+    622          //          #endif
+    623                    break;
+   \   00000042   0x4770             BX       LR
+    624                  case 0x18: //read event filter
+    625                    DataPtr = &_gdata[4];
+   \                     ??LMX9838_ParceEvents_3: (+1)
+   \   00000044   0x1D11             ADDS     R1,R2,#+4
+   \   00000046   0x60C1             STR      R1,[R0, #+12]
+    626          //          #ifdef LCD_TRACE
+    627          //            {
+    628          //              strcpy(str,"CMD Security mode:");
+    629          //              SecurityMode = _gdata[4];
+    630          //              itos(_gdata[4],str2,2,HEXADECIMAL);
+    631          //              strcat(str,str2);
+    632          //
+    633          //              TLcdTrace::AddLine(str);
+    634          //            }
+    635          //          #endif
+    636                    break;
+    637                }
+    638            }
+    639          }
+   \                     ??LMX9838_ParceEvents_0: (+1)
+   \   00000048   0x4770             BX       LR               ;; return
+    640          //------------------------------------------------------------------------------------
+    641          
+
+   \                                 In section .text, align 2, keep-with-next
+    642          void TLMX9838::LMX9838_Reset()
+    643          {
+   \                     _ZN8TLMX983813LMX9838_ResetEv: (+1)
+   \   00000000   0xB510             PUSH     {R4,LR}
+    644            GPIO_ResetBits( LMX_RST_GPIO_PORT, LMX_RST_GPIO_PIN );
+   \   00000002   0x....             LDR.N    R4,??DataTable13_1  ;; 0x40020800
+   \   00000004   0xF44F 0x4180      MOV      R1,#+16384
+   \   00000008   0x4620             MOV      R0,R4
+   \   0000000A   0x.... 0x....      BL       GPIO_ResetBits
+    645          #ifndef BOOTLOADER
+    646            vTaskDelay(100/portTICK_RATE_MS);
+   \   0000000E   0x2064             MOVS     R0,#+100
+   \   00000010   0x.... 0x....      BL       vTaskDelay
+    647            GPIO_SetBits( LMX_RST_GPIO_PORT, LMX_RST_GPIO_PIN );
+   \   00000014   0xF44F 0x4180      MOV      R1,#+16384
+   \   00000018   0x4620             MOV      R0,R4
+   \   0000001A   0x.... 0x....      BL       GPIO_SetBits
+    648            vTaskDelay(300/portTICK_RATE_MS);
+   \   0000001E   0xF44F 0x7096      MOV      R0,#+300
+   \   00000022   0xE8BD 0x4010      POP      {R4,LR}
+   \   00000026   0x.... 0x....      B.W      vTaskDelay
+    649          #else
+    650            __delay_cycles( 2500000 );
+    651            GPIO_SetBits( LMX_RST_GPIO_PORT, LMX_RST_GPIO_PIN );
+    652            __delay_cycles( 7500000 );
+    653          #endif
+    654          }
+    655          //------------------------------------------------------------------------------------
+    656          
+
+   \                                 In section .text, align 2, keep-with-next
+    657          void TLMX9838::SendByte( uint8_t data )
+    658          {
+   \                     _ZN8TLMX98388SendByteEh: (+1)
+   \   00000000   0xB510             PUSH     {R4,LR}
+    659            if( !BT_On ) return;
+   \   00000002   0x....             LDR.N    R1,??DataTable13_6
+   \   00000004   0x7849             LDRB     R1,[R1, #+1]
+   \   00000006   0x2900             CMP      R1,#+0
+   \   00000008   0xD00C             BEQ.N    ??SendByte_0
+    660          
+    661            LMX_USART->DR = ((uint16_t) data);
+   \   0000000A   0x....             LDR.N    R4,??DataTable13_2  ;; 0x40011000
+   \   0000000C   0x80A0             STRH     R0,[R4, #+4]
+    662          
+    663            //  USART_SendData( LMX_USART, data) ;
+    664            while(USART_GetFlagStatus( LMX_USART, USART_FLAG_TXE ) == RESET ) ;//taskYIELD(); //1093
+   \                     ??SendByte_1: (+1)
+   \   0000000E   0x2180             MOVS     R1,#+128
+   \   00000010   0x4620             MOV      R0,R4
+   \   00000012   0x.... 0x....      BL       USART_GetFlagStatus
+   \   00000016   0x2800             CMP      R0,#+0
+   \   00000018   0xD0F9             BEQ.N    ??SendByte_1
+    665          //  while(USART_GetFlagStatus( LMX_USART, USART_FLAG_TC ) == RESET ) ;//taskYIELD(); //1093
+    666          
+    667            __delay_cycles( 250 );
+   \   0000001A   0x20FA             MOVS     R0,#+250
+   \   0000001C   0xE8BD 0x4010      POP      {R4,LR}
+   \   00000020   0x.... 0x....      B.W      _Z14__delay_cyclesi
+   \                     ??SendByte_0: (+1)
+   \   00000024   0xBD10             POP      {R4,PC}          ;; return
+    668          
+    669          }
+    670          
+
+   \                                 In section .text, align 2, keep-with-next
+    671          void TLMX9838::SendByte( uint8_t data, bool pause )
+    672          {
+   \                     _ZN8TLMX98388SendByteEhb: (+1)
+   \   00000000   0xB538             PUSH     {R3-R5,LR}
+   \   00000002   0x460C             MOV      R4,R1
+    673            if( !BT_On ) return;
+   \   00000004   0x....             LDR.N    R1,??DataTable13_6
+   \   00000006   0x7849             LDRB     R1,[R1, #+1]
+   \   00000008   0x2900             CMP      R1,#+0
+   \   0000000A   0xD00E             BEQ.N    ??SendByte_2
+    674          
+    675            LMX_USART->DR = ((uint16_t) data);
+   \   0000000C   0x....             LDR.N    R5,??DataTable13_2  ;; 0x40011000
+   \   0000000E   0x80A8             STRH     R0,[R5, #+4]
+    676          
+    677            //  USART_SendData( LMX_USART, data) ;
+    678            while(USART_GetFlagStatus( LMX_USART, USART_FLAG_TXE ) == RESET ) ;//taskYIELD(); //1093
+   \                     ??SendByte_3: (+1)
+   \   00000010   0x2180             MOVS     R1,#+128
+   \   00000012   0x4628             MOV      R0,R5
+   \   00000014   0x.... 0x....      BL       USART_GetFlagStatus
+   \   00000018   0x2800             CMP      R0,#+0
+   \   0000001A   0xD0F9             BEQ.N    ??SendByte_3
+    679          //  while(USART_GetFlagStatus( LMX_USART, USART_FLAG_TC ) == RESET ) ;//taskYIELD(); //1093
+    680          
+    681            if(pause) __delay_cycles( 250 );
+   \   0000001C   0x2C00             CMP      R4,#+0
+   \   0000001E   0xD004             BEQ.N    ??SendByte_2
+   \   00000020   0x20FA             MOVS     R0,#+250
+   \   00000022   0xE8BD 0x4032      POP      {R1,R4,R5,LR}
+   \   00000026   0x.... 0x....      B.W      _Z14__delay_cyclesi
+    682            //else __delay_cycles( 250 );
+    683          
+    684          }
+   \                     ??SendByte_2: (+1)
+   \   0000002A   0xBD31             POP      {R0,R4,R5,PC}    ;; return
+    685          //------------------------------------------------------------------------------------
+    686          
+
+   \                                 In section .text, align 2, keep-with-next
+    687          bool TLMX9838::ReceiveByte( uint8_t *bt )
+    688          {
+   \                     _ZN8TLMX983811ReceiveByteEPh: (+1)
+   \   00000000   0xB538             PUSH     {R3-R5,LR}
+   \   00000002   0x4604             MOV      R4,R0
+    689            if( USART_GetFlagStatus( LMX_USART, USART_FLAG_RXNE ) == RESET )
+   \   00000004   0x....             LDR.N    R5,??DataTable13_2  ;; 0x40011000
+   \   00000006   0x2120             MOVS     R1,#+32
+   \   00000008   0x4628             MOV      R0,R5
+   \   0000000A   0x.... 0x....      BL       USART_GetFlagStatus
+   \   0000000E   0x2800             CMP      R0,#+0
+   \   00000010   0xD105             BNE.N    ??ReceiveByte_0
+    690              *bt = USART_ReceiveData( LMX_USART );
+   \   00000012   0x4628             MOV      R0,R5
+   \   00000014   0x.... 0x....      BL       USART_ReceiveData
+   \   00000018   0x7020             STRB     R0,[R4, #+0]
+    691            else return false;
+    692          
+    693            return true;
+   \   0000001A   0x2001             MOVS     R0,#+1
+   \   0000001C   0xBD32             POP      {R1,R4,R5,PC}
+   \                     ??ReceiveByte_0: (+1)
+   \   0000001E   0x2000             MOVS     R0,#+0
+   \   00000020   0xBD32             POP      {R1,R4,R5,PC}    ;; return
+    694          }
+
+   \                                 In section .text, align 4, keep-with-next
+   \                     ??DataTable13:
+   \   00000000   0x40020400         DC32     0x40020400
+
+   \                                 In section .text, align 4, keep-with-next
+   \                     ??DataTable13_1:
+   \   00000000   0x40020800         DC32     0x40020800
+
+   \                                 In section .text, align 4, keep-with-next
+   \                     ??DataTable13_2:
+   \   00000000   0x40011000         DC32     0x40011000
+
+   \                                 In section .text, align 4, keep-with-next
+   \                     ??DataTable13_3:
+   \   00000000   0x........         DC32     _ZN8TLMX98388CFM_waitE
+
+   \                                 In section .text, align 4, keep-with-next
+   \                     ??DataTable13_4:
+   \   00000000   0x08010005         DC32     0x8010005
+
+   \                                 In section .text, align 4, keep-with-next
+   \                     ??DataTable13_5:
+   \   00000000   0x........         DC32     _ZN6TFrame16StartUpBluetoothE
+
+   \                                 In section .text, align 4, keep-with-next
+   \                     ??DataTable13_6:
+   \   00000000   0x........         DC32     _ZN8TLMX983813LMX9838_ReadyE
+
+   \                                 In section .text, align 4, keep-with-next
+   \                     ?_0:
+   \   00000000   0x42 0x6C          DC8 "Bluetooth Setup."
+   \              0x75 0x65    
+   \              0x74 0x6F    
+   \              0x6F 0x74    
+   \              0x68 0x20    
+   \              0x53 0x65    
+   \              0x74 0x75    
+   \              0x70 0x2E    
+   \              0x00         
+   \   00000011   0x00 0x00          DC8 0, 0, 0
+   \              0x00         
+
+   \                                 In section .text, align 4, keep-with-next
+   \                     ?_1:
+   \   00000000   0x53 0x65          DC8 "Set ReportAllEvents"
+   \              0x74 0x20    
+   \              0x52 0x65    
+   \              0x70 0x6F    
+   \              0x72 0x74    
+   \              0x41 0x6C    
+   \              0x6C 0x45    
+   \              0x76 0x65    
+   \              0x6E 0x74    
+   \              0x73 0x00    
+
+   \                                 In section .text, align 4, keep-with-next
+   \                     ?_2:
+   \   00000000   0x53 0x65          DC8 "Set Security mode 1"
+   \              0x74 0x20    
+   \              0x53 0x65    
+   \              0x63 0x75    
+   \              0x72 0x69    
+   \              0x74 0x79    
+   \              0x20 0x6D    
+   \              0x6F 0x64    
+   \              0x65 0x20    
+   \              0x31 0x00    
+    695          //------------------------------------------------------------------------------------
+
+   Maximum stack usage in bytes:
+
+   .cstack Function
+   ------- --------
+       0   TFlash::SF_GetDataPtr(uint32_t)
+      16   TLMX9838::BluetoothInit()
+        16   -> TFlash::SF_GetDataPtr(uint32_t)
+        16   -> TLMX9838::LMX9838_ReadDeviceName()
+        16   -> TLMX9838::LMX9838_ReadEventFilter()
+        16   -> TLMX9838::LMX9838_ReadSecurityMode()
+        16   -> TLMX9838::LMX9838_ReportAllEvents()
+        16   -> TLMX9838::LMX9838_SetDeviceName(char const *)
+        16   -> TLMX9838::LMX9838_SetSecurityMode1()
+        16   -> TLMX9838::LMX9838_WaitForCFM()
+        16   -> TLMX9838::TurnOnBluetooth()
+        16   -> TLcdTrace::AddLine(bool, char const *)
+        16   -> TLcdTrace::AddLine(char const *)
+        16   -> strcmp
+        16   -> vTaskDelay
+      32   TLMX9838::BluetoothPHYDeinit()
+        32   -> EXTI_Init
+        32   -> GPIO_Init
+        32   -> GPIO_SetBits
+        32   -> NVIC_Init
+        32   -> RCC_APB2PeriphClockCmd
+        32   -> USART_Cmd
+        32   -> USART_ITConfig
+      48   TLMX9838::BluetoothPHYInit()
+        48   -> EXTI_ClearITPendingBit
+        48   -> EXTI_Init
+        48   -> GPIO_Init
+        48   -> GPIO_PinAFConfig
+        48   -> GPIO_SetBits
+        48   -> NVIC_Init
+        48   -> NVIC_PriorityGroupConfig
+        48   -> RCC_AHB1PeriphClockCmd
+        48   -> RCC_APB2PeriphClockCmd
+        48   -> SYSCFG_EXTILineConfig
+        48   -> USART_Cmd
+        48   -> USART_ITConfig
+        48   -> USART_Init
+      16   TLMX9838::LMX9838_ChangeDeviceAddress(uint8_t *)
+         0   -> TLMX9838::SendByte(uint8_t)
+        16   -> TLMX9838::SendByte(uint8_t)
+       0   TLMX9838::LMX9838_ParceEvents(uint8_t, uint8_t, uint8_t *)
+       8   TLMX9838::LMX9838_ReadDeviceAddress()
+         0   -> TLMX9838::SendByte(uint8_t)
+         8   -> TLMX9838::SendByte(uint8_t)
+       8   TLMX9838::LMX9838_ReadDeviceName()
+         0   -> TLMX9838::SendByte(uint8_t)
+         8   -> TLMX9838::SendByte(uint8_t)
+       8   TLMX9838::LMX9838_ReadEventFilter()
+         0   -> TLMX9838::SendByte(uint8_t)
+         8   -> TLMX9838::SendByte(uint8_t)
+       8   TLMX9838::LMX9838_ReadSecurityMode()
+         0   -> TLMX9838::SendByte(uint8_t)
+         8   -> TLMX9838::SendByte(uint8_t)
+       8   TLMX9838::LMX9838_ReportAllEvents()
+         0   -> TLMX9838::SendByte(uint8_t)
+         8   -> TLMX9838::SendByte(uint8_t)
+       8   TLMX9838::LMX9838_Reset()
+         8   -> GPIO_ResetBits
+         8   -> GPIO_SetBits
+         0   -> vTaskDelay
+         8   -> vTaskDelay
+      24   TLMX9838::LMX9838_SetDeviceName(char const *)
+        24   -> TLMX9838::SendByte(uint8_t)
+        24   -> strlen
+       8   TLMX9838::LMX9838_SetSecurityMode1()
+         0   -> TLMX9838::SendByte(uint8_t)
+         8   -> TLMX9838::SendByte(uint8_t)
+      16   TLMX9838::LMX9838_WaitForCFM()
+        16   -> vTaskDelay
+      16   TLMX9838::ReceiveByte(uint8_t *)
+        16   -> USART_GetFlagStatus
+        16   -> USART_ReceiveData
+       8   TLMX9838::SendByte(uint8_t)
+         8   -> USART_GetFlagStatus
+      16   TLMX9838::SendByte(uint8_t, bool)
+        16   -> USART_GetFlagStatus
+       8   TLMX9838::TurnOffBluetooth()
+         8   -> GPIO_SetBits
+         8   -> TLMX9838::BluetoothPHYDeinit()
+         8   -> vTaskDelay
+       8   TLMX9838::TurnOnBluetooth()
+         8   -> GPIO_ResetBits
+         8   -> TLMX9838::LMX9838_Reset()
+         8   -> vTaskDelay
+       4   __delay_cycles(int)
+
+
+   Section sizes:
+
+   Bytes  Function/Label
+   -----  --------------
+       4  ??DataTable13
+       4  ??DataTable13_1
+       4  ??DataTable13_2
+       4  ??DataTable13_3
+       4  ??DataTable13_4
+       4  ??DataTable13_5
+       4  ??DataTable13_6
+      20  ?_0
+      20  ?_1
+      20  ?_2
+       2  TFlash::SF_GetDataPtr(uint32_t)
+       8  TLMX9838::BDAddress
+     142  TLMX9838::BluetoothInit()
+     248  TLMX9838::BluetoothPHYDeinit()
+     422  TLMX9838::BluetoothPHYInit()
+      16  TLMX9838::CFM_wait
+          TLMX9838::EventFilter
+          TLMX9838::SecurityMode
+          TLMX9838::LMX_BT_Addr
+          TLMX9838::DataPtr
+      58  TLMX9838::LMX9838_ChangeDeviceAddress(uint8_t *)
+       1  TLMX9838::LMX9838_Connected
+      74  TLMX9838::LMX9838_ParceEvents(uint8_t, uint8_t, uint8_t *)
+      46  TLMX9838::LMX9838_ReadDeviceAddress()
+      46  TLMX9838::LMX9838_ReadDeviceName()
+      46  TLMX9838::LMX9838_ReadEventFilter()
+      46  TLMX9838::LMX9838_ReadSecurityMode()
+       2  TLMX9838::LMX9838_Ready
+          TLMX9838::BT_On
+      52  TLMX9838::LMX9838_ReportAllEvents()
+      42  TLMX9838::LMX9838_Reset()
+      98  TLMX9838::LMX9838_SetDeviceName(char const *)
+      52  TLMX9838::LMX9838_SetSecurityMode1()
+      42  TLMX9838::LMX9838_WaitForCFM()
+      34  TLMX9838::ReceiveByte(uint8_t *)
+       1  TLMX9838::RemoteBTPort
+      38  TLMX9838::SendByte(uint8_t)
+      44  TLMX9838::SendByte(uint8_t, bool)
+      54  TLMX9838::TurnOffBluetooth()
+      52  TLMX9838::TurnOnBluetooth()
+      20  __delay_cycles(int)
+
+ 
+     3 bytes in section .bss
+    25 bytes in section .data
+ 1 746 bytes in section .text
+ 
+ 1 724 bytes of CODE memory (+ 22 bytes shared)
+    28 bytes of DATA memory
+
+Errors: none
+Warnings: none
