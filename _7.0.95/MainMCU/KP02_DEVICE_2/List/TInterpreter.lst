@@ -1,6 +1,6 @@
 ###############################################################################
 #
-# IAR ANSI C/C++ Compiler V7.40.2.8542/W32 for ARM        08/Oct/2018  17:04:58
+# IAR ANSI C/C++ Compiler V7.40.2.8542/W32 for ARM        09/Oct/2018  16:32:48
 # Copyright 1999-2015 IAR Systems AB.
 #
 #    Cpu mode     =  thumb
@@ -1234,7 +1234,7 @@ D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\TInterpreter.cpp
    \   00000048   0x1843             ADDS     R3,R0,R1
    \   0000004A   0x7B5B             LDRB     R3,[R3, #+13]
    \   0000004C   0x72A3             STRB     R3,[R4, #+10]
-    535          	       TEcgProcessor::EcgData.Channel[1].ChannelBytes[1] =TInterpreter::IterpBuffer[index + 14];
+    535                               TEcgProcessor::EcgData.Channel[1].ChannelBytes[1] =TInterpreter::IterpBuffer[index + 14];
    \   0000004E   0x1843             ADDS     R3,R0,R1
    \   00000050   0x7B9B             LDRB     R3,[R3, #+14]
    \   00000052   0x7263             STRB     R3,[R4, #+9]

@@ -44,6 +44,8 @@ bool SD_On_Sound = true;
 
 bool SD_Off_Sound = true;
 
+bool buttonState = false;
+
 bool TAppProcessor::StartNow = false;
 
 bool TAppProcessor::ECGRecordingStarted = false;
@@ -769,6 +771,18 @@ void TAppProcessor::TASK_Init( void *pvParameters )
 
 /*----------------------------------------------------------------------------------*/
 
+void waitForSelectButtonPressed(){
+  vTaskDelay(200/portTICK_RATE_MS);
+   while(!buttonState){
+                    if(GPIO_ReadInputDataBit(UB2_BUTTON_PORT, UB2_BUTTON_PIN) == 0)
+                        {
+                           buttonState = true;
+                        }
+                }
+                buttonState = false;
+                TLcdTrace::Clear();
+}
+
 /*----------------------------------------------------------------------------------*/
 /* @brief  Задача инициализации-2                      */
 /* @param  None                                  */
@@ -845,35 +859,22 @@ void TAppProcessor::TASK_StartUp(void *pvParameters)
 	#ifdef LCD_TRACE
 		TLcdTrace::AddLine("Here and bellow");
                 TLcdTrace::AddLine("push button to continue...");
-                while(!buttonState){
-                    if(GPIO_ReadInputDataBit(UB2_BUTTON_PORT, UB2_BUTTON_PIN) == 0)
-                        {
-                           buttonState = true;
-                        }
-                }
-                buttonState = false;
+                waitForSelectButtonPressed();
 	#endif
 
 	
 
 	#ifdef LCD_TRACE
 		TLcdTrace::AddLine(1,"Start GUI Task.");
-                while(!buttonState){
-                    if(GPIO_ReadInputDataBit(UB2_BUTTON_PORT, UB2_BUTTON_PIN) == 0)
-                        {
-                           buttonState = true;
-                        }
-                }
-                buttonState = false;
-                TLcdTrace::Clear();
+                waitForSelectButtonPressed();
 	#endif
 	TGuiObjects::GUIObj_Init();
 
   
- /* TLcdTrace::AddLine("START_UP_SYSTEM:");
-  itos((int)TFlash::SF_GetData8(START_UP_SYSTEM),str2,19,DECIMAL);
-	TLcdTrace::AddLine(str2);
-      */
+//  TLcdTrace::AddLine("START_UP_SYSTEM:");
+//  itos((int)TFlash::SF_GetData8(START_UP_SYSTEM),str2,19,DECIMAL);
+//	TLcdTrace::AddLine(str2);
+      
   
 	#ifdef GUI_ENABLED
       
@@ -900,20 +901,60 @@ void TAppProcessor::TASK_StartUp(void *pvParameters)
                 TRtc::Rtc_Init();
                 itos((int)TRtc::RTC_TimeRead(),str2,19,DECIMAL);
 		TLcdTrace::AddLine(str2);
-                //TRtc::RTC_TimeRead();
+                
+                waitForSelectButtonPressed();
 	#endif		
 		
 
 	#ifdef LCD_TRACE
-		TLcdTrace::AddLine(1,"AD7799 Init...");
-                while(!buttonState){
-                    if(GPIO_ReadInputDataBit(UB2_BUTTON_PORT, UB2_BUTTON_PIN) == 0)
-                        {
-                           buttonState = true;
-                        }
-                }
-                buttonState = false;
-                TLcdTrace::Clear();
+                TLcdTrace::AddLine(1,"Start ADC Init...");
+                TADS1298::ADS1298_Init();
+                TEcgProcessor::GetConvertResult();
+                TInterpreter::SetStartUSARTMonitioring(true);
+                
+                 /* начать снятие ЭКГ сигнала с отведений */
+/*#ifdef LCD_TRACE
+    TLcdTrace::AddLine(1,"Start ECG.");
+#endif //LCD_TRACE
+    if( TDevice::DEVICE->Ecg.Status == true )
+    {
+      xTaskCreate( TEcgProcessor::TASK_WrProcessing, "ECGWrProcessing",
+        configMINIMAL_STACK_SIZE+0, NULL,
+        tskIDLE_PRIORITY+3, &TEcgProcessor::xhECGWrProcessing);
+
+
+//#ifdef USE_ADS1292R
+//      TADS1292::StartConversation();
+//#endif // USE_ADS1292R
+//      TADS1298::StartConversation();
+
+    }*/   
+                vTaskDelay(500/portTICK_RATE_MS);
+                itos((int)TEcgProcessor::EcgData.Channel[3].ChannelBytes[1],str2,19,DECIMAL);
+                TLcdTrace::AddLine(str2);
+		TLcdTrace::AddLine(1,"ADC Init Complete!");
+                
+                itos((int)TAppProcessor::SysVoltageValue,str2,19,DECIMAL);
+                TLcdTrace::AddLine(str2);
+                vTaskDelay(500/portTICK_RATE_MS);
+                itos((int)TAppProcessor::SysVoltageValue,str2,19,DECIMAL);
+                TLcdTrace::AddLine(str2);
+                
+               waitForSelectButtonPressed();
+               
+                itos((int)TAppProcessor::AnalogVoltageValue,str2,19,DECIMAL);
+                TLcdTrace::AddLine(str2);
+                itos((int)TAppProcessor::LiVoltageValue,str2,19,DECIMAL);
+                TLcdTrace::AddLine(str2);
+                itos((int)TAppProcessor::BatVoltageValue,str2,19,DECIMAL);
+                TLcdTrace::AddLine(str2);
+                
+                waitForSelectButtonPressed();
+                
+                
+                TInterpreter::SetStartUSARTMonitioring(false); 
+                
+                waitForSelectButtonPressed();
 	#endif
 		
 		
@@ -948,14 +989,8 @@ void TAppProcessor::TASK_StartUp(void *pvParameters)
 		
 	#ifdef LCD_TRACE
 		TLcdTrace::AddLine(1,"EEPROM(93Cxx) Init...");
-                while(!buttonState){
-                    if(GPIO_ReadInputDataBit(UB2_BUTTON_PORT, UB2_BUTTON_PIN) == 0)
-                        {
-                           buttonState = true;
-                        }
-                }
-                buttonState = false;
-                TLcdTrace::Clear();
+                
+                waitForSelectButtonPressed();
 	#endif
 	
 		
@@ -986,14 +1021,9 @@ void TAppProcessor::TASK_StartUp(void *pvParameters)
 
 	#ifdef LCD_TRACE
 		TLcdTrace::AddLine(1,"DataWrite Init...");
-                while(!buttonState){
-                    if(GPIO_ReadInputDataBit(UB2_BUTTON_PORT, UB2_BUTTON_PIN) == 0)
-                        {
-                           buttonState = true;
-                        }
-                }
-                buttonState = false;
-                TLcdTrace::Clear();
+                
+                waitForSelectButtonPressed();
+                
 	#endif
 	TNandWrite::NW_Init();
 
@@ -1016,14 +1046,8 @@ void TAppProcessor::TASK_StartUp(void *pvParameters)
 		itos((int)xPortGetFreeHeapSize(),str2,19,DECIMAL);
 		TLcdTrace::AddLine(str2);
 	#endif
-                while(!buttonState){
-                    if(GPIO_ReadInputDataBit(UB2_BUTTON_PORT, UB2_BUTTON_PIN) == 0)
-                        {
-                           buttonState = true;
-                        }
-                }
-                buttonState = false;
-                TLcdTrace::Clear();
+                waitForSelectButtonPressed();
+                
                 xTaskCreate( TAppProcessor::TASK_Loading, "Startup", configMINIMAL_STACK_SIZE+128, NULL,
                               tskIDLE_PRIORITY+0, NULL );
       }

@@ -532,7 +532,7 @@ void TInterpreter::MonitorDataParseFunc(int index)
 
 		     TEcgProcessor::EcgData.Channel[1].ChannelBytes[3] =TInterpreter::IterpBuffer[index + 12];
 		     TEcgProcessor::EcgData.Channel[1].ChannelBytes[2] =TInterpreter::IterpBuffer[index + 13];
-	       TEcgProcessor::EcgData.Channel[1].ChannelBytes[1] =TInterpreter::IterpBuffer[index + 14];
+                     TEcgProcessor::EcgData.Channel[1].ChannelBytes[1] =TInterpreter::IterpBuffer[index + 14];
 
 		     TEcgProcessor::EcgData.Channel[6].ChannelBytes[3] =TInterpreter::IterpBuffer[index + 15];
 		     TEcgProcessor::EcgData.Channel[6].ChannelBytes[2] =TInterpreter::IterpBuffer[index + 16];
