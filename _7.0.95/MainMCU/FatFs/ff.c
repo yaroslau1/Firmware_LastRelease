@@ -97,6 +97,7 @@
 
 #include "ff.h"			/* FatFs configurations and declarations */
 #include "diskio.h"		/* Declarations of low level disk I/O functions */
+#include "TLcdTrace.h"
 
 
 /*--------------------------------------------------------------------------
@@ -2291,9 +2292,10 @@ FRESULT f_open (
 	DIR dj;
 	BYTE *dir;
 	DEF_NAMEBUF;
+        TLcdTrace::AddLine("INSIDE f_open");
 
 
-	if (!fp) return FR_INVALID_OBJECT;
+	if (!fp){ TLcdTrace::AddLine("Pointer error"); return FR_INVALID_OBJECT; }
 	fp->fs = 0;			/* Clear file object */
 
 #if !_FS_READONLY

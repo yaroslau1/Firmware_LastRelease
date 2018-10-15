@@ -2065,9 +2065,6 @@
         <configuration>KP02_DEVICE_2_BOOT</configuration>
       </excluded>
       <file>
-        <name>$PROJ_DIR$\FatFs\diskio.h</name>
-      </file>
-      <file>
         <name>$PROJ_DIR$\FatFs\ff.c</name>
       </file>
       <file>
@@ -2075,6 +2072,15 @@
       </file>
       <file>
         <name>$PROJ_DIR$\FatFs\ffconf.h</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\FatFs\ffsystem.c</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\FatFs\ffunicode.c</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\FatFs\integer.h</name>
       </file>
       <file>
         <name>$PROJ_DIR$\FatFs\mmc.c</name>
@@ -2087,7 +2093,16 @@
         </excluded>
       </file>
       <file>
+        <name>$PROJ_DIR$\FatFs\sd_sdio.h</name>
+      </file>
+      <file>
         <name>$PROJ_DIR$\FatFs\sd_spi.c</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\FatFs\sd_spi.h</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\FatFs\sd_spi_eval.h</name>
       </file>
       <file>
         <name>$PROJ_DIR$\TMmc.cpp</name>

@@ -784,15 +784,18 @@ void waitForSelectButtonPressed(){
 }
 
 /*----------------------------------------------------------------------------------*/
-/* @brief  Задача инициализации-2                      */
+/* @brief  Задача последовательной инициализации и проверки устройства на работоспособность                      */
 /* @param  None                                  */
 /* @return  None                                  */
 /*----------------------------------------------------------------------------------*/
 
 void TAppProcessor::TASK_StartUp(void *pvParameters)
 {
-      bool buttonState = false;
       bool start = false;
+      bool buttonState = false; 
+      FIL CodedFile;
+                FATFS FATFS_Obj;
+                FRESULT res;
       if(!start){
                     if(GPIO_ReadInputDataBit(UB2_BUTTON_PORT, UB2_BUTTON_PIN) == 0)
                         {
@@ -806,18 +809,342 @@ void TAppProcessor::TASK_StartUp(void *pvParameters)
       if(start){
   
 	#ifdef LCD_TRACE
-		char str1[10];
+        char str1[10] = {'h','e','l','l','o'};
 		char str2[20];
+               // char testBuffer[16] = "SD write success";
+//                FIL CodedFile;
+//                FATFS FATFS_Obj;
+//                FRESULT res;
+                unsigned int BwW;
+                char SDPath[4];
 	#endif
 
 	TSound::SoundInit();
-	TSound::PlaySound(_modiStartUp);	
-	
-	
+	TSound::PlaySound(_modiStartUp);
 
-	TFlash::SF_Init();	
+	TFlash::SF_Init();
+         TNandWrite::NW_Init();    
+    TPoolingNand::PO_Init();        
+    TAudio::AUDIO_PHYInit(); 
+          
+    TGuiObjects::GUIDesktopShowTime();
+    
+   // while(1)
+    {      
+      if( disk_initialize(0) == RES_OK )
+      {
+        TLcdTrace::AddLine("CARD INIT OK.");
+        TLcdTrace::AddLineX("CARD Type ",CardType);
+          
+        TGuiObjects::ToolbarSet(TBFM_MEMCARD,1);
+          
+        while(StartRecording != true) 
+        {
+          static bool check_trv = true;
+          
+          if( disk_initialize(0) != RES_OK )
+          {
+            TGuiObjects::ToolbarSet(TBFM_MEMCARD,0);
+            
+            if (SD_Off_Sound)
+            {
+               TSound::PlaySound(_modiShortBeep);
+        
+               SD_Off_Sound = false;
+               
+               SD_On_Sound = true;
+            }
+                        
+            TGuiObjects::ToolbarSet(TBFM_STORED,0);
+            TSDProcessor::SDPresent = false;
+            check_trv = true;
+          }
+          else
+          {
+            TGuiObjects::ToolbarSet(TBFM_MEMCARD,1);
+            
+            if (SD_On_Sound)
+            {
+               TSound::PlaySound(_modiShortBeep);
+        
+               SD_On_Sound = false;
+               
+               SD_Off_Sound = true;
+            }            
+            
+            TSDProcessor::SDPresent = true;
+            if(check_trv)
+            {
+              TLcdTrace::AddLine("Check Trv File");
+              if( f_mount( 0, &FATFS_Obj ) == FR_OK )
+              {
+                if(f_open( &TrvFile,"KR01.TRE",FA_OPEN_EXISTING|FA_READ) == FR_OK )    // File NOT exists 
+                {
+                  unsigned int BwW;
+                  f_read( &TrvFile, TSDProcessor::EcgBuffer_1, 5, &BwW );
+                  if( TSDProcessor::EcgBuffer_1[0] == 1 )    
+                  {
+                    TSDProcessor::TrMode = trverrNotRead;
+                    TGuiObjects::ToolbarSet(TBFM_STORED,1);
+                  }
+                  else
+                  {
+                    TSDProcessor::TrMode = trverrGood;
+                    TGuiObjects::ToolbarSet(TBFM_STORED,0);
+                  }
+                  f_close( &TrvFile );
+                }
+//                else TGuiObjects::ToolbarSet(TBFM_ERROR,1);
+              }
+            }
+            check_trv = false;
+          }
+          vTaskDelay(1500/portTICK_RATE_MS);
+        }
+        
+        TNandWrite::FlashCardRemoved = false;
+        
+//        if( f_mount( 0, &FATFS_Obj ) == FR_OK )
+        {
+          unsigned int BwW;
+          
+          FIL CodedFile;
+          f_open( &CodedFile, "KR01.TXT", FA_CREATE_ALWAYS | FA_WRITE );
+          f_close( &CodedFile );
+          
+          TLcdTrace::AddLine("Create Trv File");
+          f_open( &TrvFile, "KR01.TRE", FA_CREATE_ALWAYS | FA_WRITE );    // Create file
+          
+          f_write( &TrvFile, str1, 5, &BwW );    // Write 1 in first byte, mean ECG file was read 
+          TSDProcessor::TrMode = trverrGood;
+          f_close( &TrvFile );
+          f_open( &PatCardFile, "KR01.ta", FA_CREATE_ALWAYS | FA_WRITE );    // Create file            
+          f_write( &PatCardFile, str1, 245, &BwW );    // Write 1 in first byte, mean ECG file was read 
+          f_close( &PatCardFile );
+        
+          TLcdTrace::AddLine("Write patient card.");
+          wfType pc_recType;
+          *((uint32_t *)&pc_recType) = 0;
+          pc_recType.IsDummy = 1;
+          pc_recType.Take = 0;
+          TPoolingNand::SetupPool(1,pc_recType);    
+          
+          for(int j = 0;j < 32;j++) //place racord
+          {  
+            TPoolingNand::AddDataToPool(1,(uint8_t*)&_ff_array[0],64,0);
+            vTaskDelay(5/portTICK_RATE_MS);
+          }
+          TPoolingNand::FinishPool(1);
+
+          vTaskDelay(200/portTICK_RATE_MS);
+          
+          *((uint32_t *)&pc_recType) = 0;
+          pc_recType.IsPatientCard = 1;
+          pc_recType.Take = 0;
+          TPoolingNand::SetupPool(1,pc_recType);    
+
+          TPoolingNand::AddDataToPool(1,(uint8_t*)&PatientCard,sizeof(stPatientCardV1),0);
+          TPoolingNand::AddDataToPool(1,(uint8_t*)&karta[0],1024,0);
+          TPoolingNand::FinishPool(1);
+          
+          vTaskDelay(200/portTICK_RATE_MS);
+                    
+          wfType recTypeEcg;
+          *((uint32_t *)&recTypeEcg) = 0;
+          recTypeEcg.IsECG = 1;
+          recTypeEcg.Take = 0;
+          TPoolingNand::SetupPool(1,recTypeEcg);  
+          TLcdTrace::AddLine("EcgPool Setup.");
+          
+          TSDProcessor::SDStartWrPool = true;
+          
+          // Send "CMD_SET_LEDMODE", LedMode = 2 - HR Indication  
+          BYTE EnMode[1];
+          
+          EnMode[0] = 2;          
+          
+          TInterpreter::SendFrameToHost(CMD_SET_LEDMODE,1,EnMode);
+          vTaskDelay(1/portTICK_RATE_MS);
+          TInterpreter::SendFrameToHost(CMD_SET_LEDMODE,1,EnMode);
+          vTaskDelay(1/portTICK_RATE_MS);
+          TInterpreter::SendFrameToHost(CMD_SET_LEDMODE,1,EnMode);
+          
+//        if (TFrame::StartMonitioring 
+  //|| TSDProcessor::SDStartWrPool || TGuiObjects::EcgOnScreen) TInterpreter::SetStartUSARTMonitioring(true);
+//          else TInterpreter::SetStartUSARTMonitioring(false);
+          
+          TInterpreter::SetStartECGWrite(true);
+          vTaskDelay(1/portTICK_RATE_MS);
+          TInterpreter::SetStartECGWrite(true);
+          vTaskDelay(1/portTICK_RATE_MS);
+          TInterpreter::SetStartECGWrite(true);
+          
+          TPoolingNand::Pool1WRConfirm = false;
+          vTaskDelay(100/portTICK_RATE_MS);
+          int start_timer = 0;
+          while(!TPoolingNand::Pool1WRConfirm)
+          {
+            start_timer++;
+            if(start_timer == 200)
+            {
+              TSound::PlaySound(_modiStopMeasureError);
+              vTaskDelay(2000/portTICK_RATE_MS);
+              TDevice::SystemReset();
+            }
+            vTaskDelay(200/portTICK_RATE_MS);
+          }
+
+          TSound::PlaySound(_modiSetUp);
+          ECGRecordingStarted = true;
+         
+          if(TGuiObjects::ButtonModeStart) 
+            TLMX9838::TurnOffBluetooth();
+          TGuiObjects::ButtonModeStart = false;
+
+//        TAudio::AUDIO_PHYInit();
+//
+          TGuiObjects::StandbyLedEnable = false;
+          
+          RecordInProgress = true;
+          
+          RTC_WriteBackupRegister(RTC_BKP_DR3,0x5555);
+          
+          while(TSDProcessor::SDPresent)
+          {  
+            if(AudioRec)
+            {
+              TLcdTrace::AddLine("Au Rec Start.");
+              wfType recType;
+              *((uint32_t *)&recType) = 0;
+              recType.IsSND = 1;
+              recType.Take = sndTakeN++;
+              TPoolingNand::SetupPool(2,recType);    
+              
+              audio_rec_start = true;
+
+              while(AudioRec)
+              {
+                vTaskDelay(100/portTICK_RATE_MS);
+              }
+              TPoolingNand::FinishPool(2);  
+              TLcdTrace::AddLine("Rec Stop.");
+
+              audio_rec_start = false;
+
+            }
+            vTaskDelay(50/portTICK_RATE_MS);
+          }
+          TPoolingNand::FinishPool(1);  
+          TLMX9838::TurnOnBluetooth();
+        }
+      }
+      else
+      {
+//#ifdef LCD_TRACE
+//        TLcdTrace::AddLine("CARD Not Present.");
+//#endif
+      }
+      
+      cable_state = CableCheck();
+      
+     
+      vTaskDelay(1000/portTICK_RATE_MS);
+    }
+        disk_initialize(0);
+
+        #ifdef LCD_TRACE
+		TLcdTrace::AddLine("SD-card init...");
+                
+                if( f_mount( 0, &FATFS_Obj ) == FR_OK )
+              {
+                if(f_open( &TrvFile,"KR01.TRE",FA_OPEN_EXISTING|FA_READ) == FR_OK )    // File NOT exists 
+                {
+                  //unsigned int BwW;
+                  //f_read( &TrvFile, TSDProcessor::EcgBuffer_1, 5, &BwW );
+                  f_open( &TrvFile, "KR01.TRE", FA_CREATE_ALWAYS | FA_WRITE );
+                  f_write(&TrvFile, str1, 16, &BwW);
+                  
+                  f_close( &TrvFile );
+                }
+//                else TGuiObjects::ToolbarSet(TBFM_ERROR,1);
+              }
+                
+                //if(f_mount( 0, &FATFS_Obj ) == FR_OK)
+                {
+                if(f_open( &TrvFile, "KR01.TRE", FA_CREATE_ALWAYS | FA_WRITE ) != FR_OK){
+                  TLcdTrace::AddLine("Writing error");
+                }
+                if(f_open( &CodedFile, "TEST.TXT", FA_READ ) != FR_OK){
+                  TLcdTrace::AddLine("Reading error");
+                }
+                res = f_open( &CodedFile, "test.txt", FA_CREATE_ALWAYS | FA_WRITE );
+//                TFlash::SF_UpdatePage();
+//                TFlash::SF_StoreDataArray( SERIAL_NUM, (uint8_t *)&ufSerialNumber, sizeof(stufSerialNumber));
+//                TFlash::SF_CommitPage();
+//                int err = f_putc('3',&CodedFile); 
+                res = f_write(&CodedFile, str1, 16, &BwW);    /* Write 1 in first byte, mean ECG file was read */
+                switch(res){
+                case FR_DISK_ERR :
+                  TLcdTrace::AddLine("FR_DISK_ERR");
+                  break;
+                case FR_INT_ERR :
+                  TLcdTrace::AddLine("FR_INT_ERR");
+                  break;
+                case FR_NOT_READY :
+                  TLcdTrace::AddLine("FR_NOT_READY");
+                  break;
+                case FR_NO_FILE :
+                  TLcdTrace::AddLine("FR_NO_FILE");
+                  break;
+                case FR_NO_PATH :
+                  TLcdTrace::AddLine("FR_NO_PATH");
+                  break;
+                case FR_DENIED :
+                  TLcdTrace::AddLine("FR_DENIED");
+                  break;
+                case FR_EXIST :
+                  TLcdTrace::AddLine("FR_EXIST");
+                  break;
+                case FR_INVALID_OBJECT :
+                  TLcdTrace::AddLine("FR_INVALID_OBJECT");
+                  break;
+                case FR_WRITE_PROTECTED :
+                  TLcdTrace::AddLine("FR_WRITE_PROTECTED");
+                  break;
+                case FR_INVALID_DRIVE :
+                  TLcdTrace::AddLine("FR_INVALID_DRIVE");
+                  break;
+                case FR_NOT_ENABLED:
+                  TLcdTrace::AddLine("FR_NOT_ENABLED");
+                  break;
+                case FR_NO_FILESYSTEM :
+                  TLcdTrace::AddLine("FR_NO_FILESYSTEM ");
+                  break;
+                case FR_MKFS_ABORTED:
+                  TLcdTrace::AddLine("FR_MKFS_ABORTED");
+                  break;
+                case FR_TIMEOUT:
+                  TLcdTrace::AddLine("FR_TIMEOUT");
+                  break;
+                }
+                res = f_close( &CodedFile );
+                }
+                //vTaskDelay(1000/portTICK_RATE_MS);
+                 while(!buttonState){
+                    if(GPIO_ReadInputDataBit(UB1_BUTTON_PORT, UB1_BUTTON_PIN) == 0)
+                        {
+                           buttonState = true;
+                        }
+                }
+                buttonState = false;
+                TLcdTrace::Clear();
+               // waitForSelectButtonPressed();
+	#endif	
 
     #ifdef LCD_TRACE
+                TLcdTrace::AddLine("Made in Belarus");
+                TLcdTrace::AddLine("Zrobliena u Belarusi");
+                vTaskDelay(100/portTICK_RATE_MS);
 		TLcdTrace::AddLine("Starting up system...");
 		//TLcdTrace::AddLine("(C) CARDIAN 2016 BRU");
 		strcpy(str2,"Firmware Ver:");
@@ -861,56 +1188,39 @@ void TAppProcessor::TASK_StartUp(void *pvParameters)
                 TLcdTrace::AddLine("push button to continue...");
                 waitForSelectButtonPressed();
 	#endif
-
-	
+        	
 
 	#ifdef LCD_TRACE
-		TLcdTrace::AddLine(1,"Start GUI Task.");
+                TLcdTrace::AddLine("Cable type:");
+                cable_state = CableCheck();
+                switch(cable_state){
+                case 0:
+                     TLcdTrace::AddLine("No Cable!");
+                     break;
+                case 1:
+                     TLcdTrace::AddLine("Cable with 5 leads!");
+                     break;
+                case 2:
+                     TLcdTrace::AddLine("Cable with 7 leads!");
+                     break;
+                case 3:
+                     TLcdTrace::AddLine("Cable with 10 leads!");
+                     break;
+                }
                 waitForSelectButtonPressed();
-	#endif
-	TGuiObjects::GUIObj_Init();
-
-  
-//  TLcdTrace::AddLine("START_UP_SYSTEM:");
-//  itos((int)TFlash::SF_GetData8(START_UP_SYSTEM),str2,19,DECIMAL);
-//	TLcdTrace::AddLine(str2);
-      
-  
-	#ifdef GUI_ENABLED
-      
-    if(TFlash::SF_GetData8(START_UP_SYSTEM) == 0x55)
-		{
-			#ifdef LCD_TRACE
-					TLcdTrace::AddLine("GUI Init...");
-					          
-          vTaskDelay(200/portTICK_RATE_MS);
-			#endif
-		
-			TGui::GUI_Init();
-			TGuiObjects::GUIDesktopShowProgressBar();
-		}
-	#endif		
-	
-	#ifdef LCD_TRACE
-		TLcdTrace::AddLine(1,"PWR Managment config...");
-	#endif
-	
-		
-	#ifdef LCD_TRACE
-		TLcdTrace::AddLine(1,"RT Clocks config...");
-                TRtc::Rtc_Init();
-                itos((int)TRtc::RTC_TimeRead(),str2,19,DECIMAL);
-		TLcdTrace::AddLine(str2);
+        #endif
                 
-                waitForSelectButtonPressed();
-	#endif		
-		
 
-	#ifdef LCD_TRACE
+         
+                
+                
+        #ifdef LCD_TRACE
+                
                 TLcdTrace::AddLine(1,"Start ADC Init...");
                 TADS1298::ADS1298_Init();
                 TEcgProcessor::GetConvertResult();
                 TInterpreter::SetStartUSARTMonitioring(true);
+                vTaskDelay(500/portTICK_RATE_MS);
                 
                  /* начать снятие ЭКГ сигнала с отведений */
 /*#ifdef LCD_TRACE
@@ -928,45 +1238,126 @@ void TAppProcessor::TASK_StartUp(void *pvParameters)
 //#endif // USE_ADS1292R
 //      TADS1298::StartConversation();
 
-    }*/   
-                vTaskDelay(500/portTICK_RATE_MS);
-                itos((int)TEcgProcessor::EcgData.Channel[3].ChannelBytes[1],str2,19,DECIMAL);
-                TLcdTrace::AddLine(str2);
+    }  */
+                switch(cable_state){
+                case 0:
+                      TLcdTrace::AddLine("Previous test FILED!");
+                      break;
+                case 1:
+                     vTaskDelay(500/portTICK_RATE_MS);
+                     itos((int)TEcgProcessor::EcgData.Channel[0].ChannelData,str2,19,DECIMAL);
+                     TLcdTrace::AddLine(str2);
+                     vTaskDelay(100/portTICK_RATE_MS);
+                     itos((int)TEcgProcessor::EcgData.Channel[1].ChannelData,str2,19,DECIMAL);
+                     TLcdTrace::AddLine(str2);
+                     vTaskDelay(100/portTICK_RATE_MS);
+                     itos((int)TEcgProcessor::EcgData.Channel[2].ChannelData,str2,19,DECIMAL);
+                     TLcdTrace::AddLine(str2);
+                     break;
+                case 2:
+                     vTaskDelay(500/portTICK_RATE_MS);
+                     itos((int)TEcgProcessor::EcgData.Channel[0].ChannelData,str2,19,DECIMAL);
+                     TLcdTrace::AddLine(str2);
+                     vTaskDelay(100/portTICK_RATE_MS);
+                     itos((int)TEcgProcessor::EcgData.Channel[1].ChannelData,str2,19,DECIMAL);
+                     TLcdTrace::AddLine(str2);
+                     vTaskDelay(100/portTICK_RATE_MS);
+                     itos((int)TEcgProcessor::EcgData.Channel[2].ChannelData,str2,19,DECIMAL);
+                     TLcdTrace::AddLine(str2);
+                     break;
+                case 3:
+                     waitForSelectButtonPressed();
+                     vTaskDelay(500/portTICK_RATE_MS);
+                     itos((int)TEcgProcessor::EcgData.Channel[0].ChannelData,str2,19,DECIMAL);
+                     TLcdTrace::AddLine(str2);
+                     vTaskDelay(100/portTICK_RATE_MS);
+                     itos((int)TEcgProcessor::EcgData.Channel[1].ChannelData,str2,19,DECIMAL);
+                     TLcdTrace::AddLine(str2);
+                     vTaskDelay(100/portTICK_RATE_MS);
+                     itos((int)TEcgProcessor::EcgData.Channel[2].ChannelData,str2,19,DECIMAL);
+                     TLcdTrace::AddLine(str2);
+                     vTaskDelay(100/portTICK_RATE_MS);
+                     itos((int)TEcgProcessor::EcgData.Channel[3].ChannelData,str2,19,DECIMAL);
+                     TLcdTrace::AddLine(str2);
+                     vTaskDelay(100/portTICK_RATE_MS);
+                     itos((int)TEcgProcessor::EcgData.Channel[4].ChannelData,str2,19,DECIMAL);
+                     TLcdTrace::AddLine(str2);
+                     vTaskDelay(100/portTICK_RATE_MS);
+                     itos((int)TEcgProcessor::EcgData.Channel[5].ChannelData,str2,19,DECIMAL);
+                     TLcdTrace::AddLine(str2);
+                     vTaskDelay(100/portTICK_RATE_MS);
+                     itos((int)TEcgProcessor::EcgData.Channel[6].ChannelData,str2,19,DECIMAL);
+                     TLcdTrace::AddLine(str2);
+                     vTaskDelay(100/portTICK_RATE_MS);
+                     itos((int)TEcgProcessor::EcgData.Channel[7].ChannelData,str2,19,DECIMAL);
+                     TLcdTrace::AddLine(str2);
+                     break;
+                }
+                 
 		TLcdTrace::AddLine(1,"ADC Init Complete!");
-                
-                itos((int)TAppProcessor::SysVoltageValue,str2,19,DECIMAL);
-                TLcdTrace::AddLine(str2);
-                vTaskDelay(500/portTICK_RATE_MS);
-                itos((int)TAppProcessor::SysVoltageValue,str2,19,DECIMAL);
-                TLcdTrace::AddLine(str2);
-                
-               waitForSelectButtonPressed();
-               
-                itos((int)TAppProcessor::AnalogVoltageValue,str2,19,DECIMAL);
-                TLcdTrace::AddLine(str2);
-                itos((int)TAppProcessor::LiVoltageValue,str2,19,DECIMAL);
-                TLcdTrace::AddLine(str2);
-                itos((int)TAppProcessor::BatVoltageValue,str2,19,DECIMAL);
-                TLcdTrace::AddLine(str2);
-                
                 waitForSelectButtonPressed();
                 
-                
-                TInterpreter::SetStartUSARTMonitioring(false); 
-                
-                waitForSelectButtonPressed();
 	#endif
 		
-		
+	 #ifdef LCD_TRACE
+                char sysV[15] = {'S','y','s','t','e','m','_','V',' ',' ',' '};
+                char anaV[15] = {'A','n','a','l','o','g','_','V',' ',' ',' '};
+                char ionV[15] = {'I','o','n','i','s','t','_','V',' ',' ',' '};
+                char batV[15] = {'B','a','t','a','r','y','_','V',' ',' ',' '};
+		TLcdTrace::AddLine("PWR config...");
+                //TLcdTrace::AddLine("System voltage:");
+                itos((int)TAppProcessor::SysVoltageValue,str2,19,DECIMAL);
+                strcat(sysV,str2);
+                TLcdTrace::AddLine(sysV);
+                itos((int)TAppProcessor::AnalogVoltageValue,str2,19,DECIMAL);
+                strcat(anaV,str2);
+                TLcdTrace::AddLine(anaV);
+                itos((int)TAppProcessor::LiVoltageValue,str2,19,DECIMAL);
+                strcat(ionV,str2);
+                TLcdTrace::AddLine(ionV);
+                itos((int)TAppProcessor::BatVoltageValue,str2,19,DECIMAL);
+                strcat(batV,str2);
+                TLcdTrace::AddLine(batV);
+                
+                waitForSelectButtonPressed();
+	#endif	
 
 	#ifdef LCD_TRACE
-		TLcdTrace::AddLine(1,"Pressure Sensor Init...");
+		TLcdTrace::AddLine("AX config...");
+                TLcdTrace::AddLine("Orient the device");
+                TLcdTrace::AddLine("along the X axis");
+                waitForSelectButtonPressed();
+                itos((int)TAppProcessor::AX_CoordWr[0],str2,19,DECIMAL);
+                TLcdTrace::AddLine(str2);
+                itos((int)TAppProcessor::AX_CoordWr[1],str2,19,DECIMAL);
+                TLcdTrace::AddLine(str2);
+                itos((int)TAppProcessor::AX_CoordWr[2],str2,19,DECIMAL);
+                TLcdTrace::AddLine(str2);
+                waitForSelectButtonPressed();
+                
+                TLcdTrace::AddLine("Orient the device");
+                TLcdTrace::AddLine("along the Y axis");
+                waitForSelectButtonPressed();
+                itos((int)TAppProcessor::AX_CoordWr[0],str2,19,DECIMAL);
+                TLcdTrace::AddLine(str2);
+                itos((int)TAppProcessor::AX_CoordWr[1],str2,19,DECIMAL);
+                TLcdTrace::AddLine(str2);
+                itos((int)TAppProcessor::AX_CoordWr[2],str2,19,DECIMAL);
+                TLcdTrace::AddLine(str2);
+                waitForSelectButtonPressed();
+                
+                TLcdTrace::AddLine("Orient the device");
+                TLcdTrace::AddLine("along the Z axis");
+                waitForSelectButtonPressed();
+                itos((int)TAppProcessor::AX_CoordWr[0],str2,19,DECIMAL);
+                TLcdTrace::AddLine(str2);
+                itos((int)TAppProcessor::AX_CoordWr[1],str2,19,DECIMAL);
+                TLcdTrace::AddLine(str2);
+                itos((int)TAppProcessor::AX_CoordWr[2],str2,19,DECIMAL);
+                TLcdTrace::AddLine(str2);
+                waitForSelectButtonPressed();
 	#endif
 	
-		
-	#ifdef ENABLE_WATCHDOG
-	  IWDG_ReloadCounter();
-	#endif
 
 	#ifdef LCD_TRACE
 		TLcdTrace::AddLine(1,"Bluetooth config...");
@@ -978,70 +1369,27 @@ void TAppProcessor::TASK_StartUp(void *pvParameters)
 							NULL,
 							tskIDLE_PRIORITY+1,
 							&TFrame::xhCmdProcessor);
+        
+        for(int i = 0; i < 20; i++) TLMX9838::SendByte(0x20);
 
 	TLMX9838::BluetoothInit();
-	
-	#ifdef LCD_TRACE
-		TLcdTrace::AddLine(1,"NAND Init...");
-	#endif
+        waitForSelectButtonPressed();
+	TLMX9838::TurnOffBluetooth();	
 
-	
-		
-	#ifdef LCD_TRACE
-		TLcdTrace::AddLine(1,"EEPROM(93Cxx) Init...");
-                
+        #ifdef LCD_TRACE
+		TLcdTrace::AddLine("SD-card init...");
+                TFlash::SF_Init();
+                TFlash::SF_UpdatePage();
+                TFlash::SF_StoreDataArray( SERIAL_NUM, (uint8_t *)&ufSerialNumber, sizeof(stufSerialNumber));
+                TFlash::SF_CommitPage();
                 waitForSelectButtonPressed();
 	#endif
-	
-		
-	#ifdef LCD_TRACE
-		TLcdTrace::AddLine(1,"Pump&Valve Init...");
-	#endif
-	
-//  TLMX9838::TurnOffBluetooth();
-//  TWinstarLcd::LcdBkLightOff();
-	
-		
-//  TWinstarLcd::LcdBkLightOn();
-  	
-	#ifdef LCD_TRACE
-		TLcdTrace::AddLine(1,"P Processor Init...");
-	#endif
-	
-
-	#ifdef LCD_TRACE
-		TLcdTrace::AddLine(1,"T Sensor & BattZond...");
-	#endif
-	
-
-	#ifdef LCD_TRACE
-		TLcdTrace::AddLine(1,"DataRead Init...");
-	#endif
-	
-
-	#ifdef LCD_TRACE
-		TLcdTrace::AddLine(1,"DataWrite Init...");
                 
-                waitForSelectButtonPressed();
-                
-	#endif
-	TNandWrite::NW_Init();
-
-	#ifdef LCD_TRACE
-		TLcdTrace::AddLine(1,"Nibp Store Init...");
-	#endif
-	
-
-	#ifdef LCD_TRACE
-		TLcdTrace::AddLine(1,"Virtual Machine Init.");
-	#endif
-	
-
-    #ifdef LCD_TRACE
+        #ifdef LCD_TRACE
 		TLcdTrace::AddLine(1,"StartUp Completed.");
-	#endif
+	#endif       
 			
-    #ifdef LCD_TRACE
+        #ifdef LCD_TRACE
 		TLcdTrace::AddLine(1,"Free heap size:");
 		itos((int)xPortGetFreeHeapSize(),str2,19,DECIMAL);
 		TLcdTrace::AddLine(str2);
@@ -1055,11 +1403,10 @@ void TAppProcessor::TASK_StartUp(void *pvParameters)
             xTaskCreate( TAppProcessor::TASK_Loading, "Startup", configMINIMAL_STACK_SIZE+128, NULL,
                               tskIDLE_PRIORITY+0, NULL );
             xTaskCreate( TFrame::TASK_CheckISRFlag, "CheckISR", configMINIMAL_STACK_SIZE+128, NULL,
-		tskIDLE_PRIORITY+2, NULL );
+                              tskIDLE_PRIORITY+2, NULL );
   
-  xTaskCreate( TInterpreter::TASK_CmdProcessor, "InterpProcessor", 
-				configMINIMAL_STACK_SIZE+1, NULL, 
-				tskIDLE_PRIORITY+2, NULL ); 
+            xTaskCreate( TInterpreter::TASK_CmdProcessor, "InterpProcessor", configMINIMAL_STACK_SIZE+1, NULL, 
+                               tskIDLE_PRIORITY+2, NULL ); 
   
   //vTaskStartScheduler();
       }
@@ -1291,20 +1638,20 @@ void TAppProcessor::TASK_Loading( void *pvParameters )
     TGuiObjects::GUIDesktopShowProgressBar();
     vTaskDelay( 100 / portTICK_RATE_MS );
 
-    /* Включение блютуза */
+    // Включение блютуза 
     if( TDevice::DEVICE->Bluetooth.Status == true )
     {
-      /* задача отсылки данных через блютуз */
+      // задача отсылки данных через блютуз 
       xTaskCreate( TFrame::TASK_SendDataToHost, "EDS",
         configMINIMAL_STACK_SIZE, NULL,
         tskIDLE_PRIORITY+2, &TFrame::xhECGDataSend);
 
-      /* задача обработки команд с блютуза */
+      // задача обработки команд с блютуза 
       xTaskCreate( TFrame::TASK_CmdProcessor, "CmdProcessor", 
         configMINIMAL_STACK_SIZE+64, NULL, 
         tskIDLE_PRIORITY+3, &TFrame::xhCmdProcessor );
 
-      /* инициализация блютуза */
+      // инициализация блютуза 
       TLMX9838::BluetoothInit();
 
 
@@ -1325,7 +1672,7 @@ void TAppProcessor::TASK_Loading( void *pvParameters )
     
     vTaskDelay( 1000 / portTICK_RATE_MS );
 
-    /* начать снятие ЭКГ сигнала с отведений */
+    // начать снятие ЭКГ сигнала с отведений 
 #ifdef LCD_TRACE
     TLcdTrace::AddLine(1,"Start ECG.");
 #endif //LCD_TRACE
@@ -1335,17 +1682,17 @@ void TAppProcessor::TASK_Loading( void *pvParameters )
         configMINIMAL_STACK_SIZE+0, NULL,
         tskIDLE_PRIORITY+3, &TEcgProcessor::xhECGWrProcessing);
 
-/*
-#ifdef USE_ADS1292R
-      TADS1292::StartConversation();
-#endif // USE_ADS1292R
-      TADS1298::StartConversation();
-*/
+
+//#ifdef USE_ADS1292R
+//      TADS1292::StartConversation();
+//#endif // USE_ADS1292R
+//      TADS1298::StartConversation();
+
     }
 
-    /* Инициализация записи во флэш */
+    // Инициализация записи во флэш 
     TFlash::SF_Init();
-//  TScreen::TimerTrigger = TFlash::SF_GetData16( LCDOFF_TIMER );    /* загрузка из флеш значения */
+//  TScreen::TimerTrigger = TFlash::SF_GetData16( LCDOFF_TIMER );    /* загрузка из флеш значения 
     
     TNandWrite::NW_Init();
     TLcdTrace::AddLine("NW_Init.");
@@ -1424,7 +1771,7 @@ void TAppProcessor::TASK_Loading( void *pvParameters )
               TLcdTrace::AddLine("Check Trv File");
               if( f_mount( 0, &FATFS_Obj ) == FR_OK )
               {
-                if(f_open( &TrvFile,"KR01.TRE",FA_OPEN_EXISTING|FA_READ) == FR_OK )    /* File NOT exists */
+                if(f_open( &TrvFile,"KR01.TRE",FA_OPEN_EXISTING|FA_READ) == FR_OK )    // File NOT exists 
                 {
                   unsigned int BwW;
                   f_read( &TrvFile, TSDProcessor::EcgBuffer_1, 5, &BwW );
@@ -1480,10 +1827,10 @@ void TAppProcessor::TASK_Loading( void *pvParameters )
 
           
           TLcdTrace::AddLine("Create Trv File");
-          f_open( &TrvFile, "KR01.TRE", FA_CREATE_ALWAYS | FA_WRITE );    /* Create file */           
+          f_open( &TrvFile, "KR01.TRE", FA_CREATE_ALWAYS | FA_WRITE );    // Create file            
           memset( TSDProcessor::EcgBuffer_1, 0x00, 5 );
           TSDProcessor::EcgBuffer_1[0] = 1;
-          f_write( &TrvFile, TSDProcessor::EcgBuffer_1, 5, &BwW );    /* Write 1 in first byte, mean ECG file was read */
+          f_write( &TrvFile, TSDProcessor::EcgBuffer_1, 5, &BwW );    // Write 1 in first byte, mean ECG file was read 
           TSDProcessor::TrMode = trverrGood;
           TGuiObjects::ToolbarSet(TBFM_STORED,0);
           f_close( &TrvFile );
@@ -1541,8 +1888,8 @@ void TAppProcessor::TASK_Loading( void *pvParameters )
 //          else PatientCard.ECGAdvancedOption |= 0x08;
 
           TLcdTrace::AddLine("Save PCard to SD.");
-          f_open( &PatCardFile, "KR01.PAT", FA_CREATE_ALWAYS | FA_WRITE );    /* Create file */           
-          f_write( &PatCardFile, (BYTE*)&PatientCard, 245, &BwW );    /* Write 1 in first byte, mean ECG file was read */
+          f_open( &PatCardFile, "KR01.PAT", FA_CREATE_ALWAYS | FA_WRITE );    // Create file            
+          f_write( &PatCardFile, (BYTE*)&PatientCard, 245, &BwW );    // Write 1 in first byte, mean ECG file was read 
           f_close( &PatCardFile );
         
           TLcdTrace::AddLine("Write patient card.");
@@ -1592,7 +1939,8 @@ void TAppProcessor::TASK_Loading( void *pvParameters )
           vTaskDelay(1/portTICK_RATE_MS);
           TInterpreter::SendFrameToHost(CMD_SET_LEDMODE,1,EnMode);
           
-//        if (TFrame::StartMonitioring /*|| TSDProcessor::SDStartWrPool*/ || TGuiObjects::EcgOnScreen) TInterpreter::SetStartUSARTMonitioring(true);
+//        if (TFrame::StartMonitioring 
+  //|| TSDProcessor::SDStartWrPool || TGuiObjects::EcgOnScreen) TInterpreter::SetStartUSARTMonitioring(true);
 //          else TInterpreter::SetStartUSARTMonitioring(false);
           
           TInterpreter::SetStartECGWrite(true);
@@ -1680,7 +2028,7 @@ void TAppProcessor::TASK_Loading( void *pvParameters )
     
 //    vTaskDelete( NULL );
   }
-}
+} 
 
 
 
@@ -1691,7 +2039,7 @@ void TAppProcessor::TASK_Loading( void *pvParameters )
 /* @return  None                                  */
 /*----------------------------------------------------------------------------------*/
 void TAppProcessor::TASK_LEDblink( void *pvParameters )
-{
+{ 
   static uint8_t blink_cnt = 2;
   
   while( 1 )
@@ -1707,7 +2055,7 @@ void TAppProcessor::TASK_LEDblink( void *pvParameters )
       TDevice::LedOff();
       vTaskDelay( 230 / portTICK_RATE_MS );
     }
-  }
+  }    
 }
 
 

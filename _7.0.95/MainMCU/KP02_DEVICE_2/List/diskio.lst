@@ -1,0 +1,285 @@
+###############################################################################
+#
+# IAR ANSI C/C++ Compiler V7.40.2.8542/W32 for ARM        11/Oct/2018  16:19:39
+# Copyright 1999-2015 IAR Systems AB.
+#
+#    Cpu mode     =  thumb
+#    Endian       =  little
+#    Source file  =  
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\FatFs\diskio.c
+#    Command line =  
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\FatFs\diskio.c -D
+#        IAR_ARM_CM4 -D USE_STDPERIPH_DRIVER -D STM32F40_41xxx -D HAVE_CONFIG_H
+#        -D SD_SPI_MODE -D USE_FULL_ASSERT -D DEVICE_2 -D TFT -D
+#        STENDBUY_NOT_USE -D SCREEN_NOT_ROTATE -D USE_ADS1292R -D DISPLAY_GPIO
+#        -D BUFFERED_TRANSFER -D LCD_TRACE -lCN
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\KP02_DEVICE_2\List\ -o
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\KP02_DEVICE_2\Obj\
+#        --no_unroll --no_inline --no_tbaa --no_scheduling --debug
+#        --endian=little --cpu=Cortex-M4F -e --fpu=VFPv4_sp --dlib_config
+#        "D:\Program Files (x86)\IAR Systems\Embedded Workbench
+#        7.2\arm\INC\c\DLib_Config_Normal.h" -I
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\ -I
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\FatFs\ -I
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\FreeRTOS\Source\include\
+#        -I
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\FreeRTOS\Source\portable\IAR\ARM_CM3\
+#        -I
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\Libraries\CMSIS\CM4\CoreSupport\
+#        -I
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\Libraries\CMSIS\CM4\DeviceSupport\STM32F4xx\
+#        -I
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\Libraries\STM32F4xx_StdPeriph_Driver\inc\
+#        -I
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\Libraries\STM32F10x_Speex_Lib\include\speex\
+#        -I
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\Libraries\STM32F10x_Speex_Lib\include\
+#        -I
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\Libraries\STM32F10x_Speex_Lib\libspeex\
+#        -I
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\Libraries\STM32F10x_Speex_Lib\STM32\include\speex\
+#        -I
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\Libraries\STM32F10x_Speex_Lib\STM32\include\
+#        -I
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\Libraries\STM32F10x_Speex_Lib\STM32\
+#        -I
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\Libraries\STM32F10x_Speex_Lib\STM32\libspeex\
+#        -I
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\Libraries\STM32F10x_Speex_Lib\STM32\libspeex\iar\
+#        -I D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\Fonts\ -Om --ec++
+#    List file    =  
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\KP02_DEVICE_2\List\diskio.lst
+#    Object file  =  
+#        D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\KP02_DEVICE_2\Obj\diskio.o
+#
+###############################################################################
+
+D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\FatFs\diskio.c
+      1          /*-----------------------------------------------------------------------*/
+      2          /* Low level disk I/O module skeleton for FatFs     (C)ChaN, 2016        */
+      3          /*-----------------------------------------------------------------------*/
+      4          /* If a working storage control module is available, it should be        */
+      5          /* attached to the FatFs via a glue function rather than modifying it.   */
+      6          /* This is an example of glue functions to attach various exsisting      */
+      7          /* storage control modules to the FatFs module with a defined API.       */
+      8          /*-----------------------------------------------------------------------*/
+      9          
+     10          #include "diskio.h"		/* FatFs lower layer API */
+     11          
+     12          /* Definitions of physical drive number for each drive */
+     13          #define DEV_RAM		0	/* Example: Map Ramdisk to physical drive 0 */
+     14          #define DEV_MMC		1	/* Example: Map MMC/SD card to physical drive 1 */
+     15          #define DEV_USB		2	/* Example: Map USB MSD to physical drive 2 */
+     16          
+     17          
+     18          /*-----------------------------------------------------------------------*/
+     19          /* Get Drive Status                                                      */
+     20          /*-----------------------------------------------------------------------*/
+     21          
+     22          DSTATUS disk_status (
+     23          	BYTE pdrv		/* Physical drive nmuber to identify the drive */
+     24          )
+     25          {
+     26          	DSTATUS stat;
+     27          	int result;
+     28          
+     29          	switch (pdrv) {
+     30          	case DEV_RAM :
+     31          		result = RAM_disk_status();
+     32          
+     33          		// translate the reslut code here
+     34          
+     35          		return stat;
+     36          
+     37          	case DEV_MMC :
+     38          		result = MMC_disk_status();
+     39          
+     40          		// translate the reslut code here
+     41          
+     42          		return stat;
+     43          
+     44          	case DEV_USB :
+     45          		result = USB_disk_status();
+     46          
+     47          		// translate the reslut code here
+     48          
+     49          		return stat;
+     50          	}
+     51          	return STA_NOINIT;
+     52          }
+     53          
+     54          
+     55          
+     56          /*-----------------------------------------------------------------------*/
+     57          /* Inidialize a Drive                                                    */
+     58          /*-----------------------------------------------------------------------*/
+     59          
+     60          DSTATUS disk_initialize (
+     61          	BYTE pdrv				/* Physical drive nmuber to identify the drive */
+     62          )
+     63          {
+     64          	DSTATUS stat;
+     65          	int result;
+     66          
+     67          	switch (pdrv) {
+     68          	case DEV_RAM :
+     69          		result = RAM_disk_initialize();
+     70          
+     71          		// translate the reslut code here
+     72          
+     73          		return stat;
+     74          
+     75          	case DEV_MMC :
+     76          		result = MMC_disk_initialize();
+     77          
+     78          		// translate the reslut code here
+     79          
+     80          		return stat;
+     81          
+     82          	case DEV_USB :
+     83          		result = USB_disk_initialize();
+     84          
+     85          		// translate the reslut code here
+     86          
+     87          		return stat;
+     88          	}
+     89          	return STA_NOINIT;
+     90          }
+     91          
+     92          
+     93          
+     94          /*-----------------------------------------------------------------------*/
+     95          /* Read Sector(s)                                                        */
+     96          /*-----------------------------------------------------------------------*/
+     97          
+     98          DRESULT disk_read (
+     99          	BYTE pdrv,		/* Physical drive nmuber to identify the drive */
+    100          	BYTE *buff,		/* Data buffer to store read data */
+    101          	DWORD sector,	/* Start sector in LBA */
+    102          	UINT count		/* Number of sectors to read */
+    103          )
+    104          {
+    105          	DRESULT res;
+    106          	int result;
+    107          
+    108          	switch (pdrv) {
+    109          	case DEV_RAM :
+    110          		// translate the arguments here
+    111          
+    112          		result = RAM_disk_read(buff, sector, count);
+    113          
+    114          		// translate the reslut code here
+    115          
+    116          		return res;
+    117          
+    118          	case DEV_MMC :
+    119          		// translate the arguments here
+    120          
+    121          		result = MMC_disk_read(buff, sector, count);
+    122          
+    123          		// translate the reslut code here
+    124          
+    125          		return res;
+    126          
+    127          	case DEV_USB :
+    128          		// translate the arguments here
+    129          
+    130          		result = USB_disk_read(buff, sector, count);
+    131          
+    132          		// translate the reslut code here
+    133          
+    134          		return res;
+    135          	}
+    136          
+    137          	return RES_PARERR;
+    138          }
+    139          
+    140          
+    141          
+    142          /*-----------------------------------------------------------------------*/
+    143          /* Write Sector(s)                                                       */
+    144          /*-----------------------------------------------------------------------*/
+    145          
+    146          DRESULT disk_write (
+    147          	BYTE pdrv,			/* Physical drive nmuber to identify the drive */
+    148          	const BYTE *buff,	/* Data to be written */
+    149          	DWORD sector,		/* Start sector in LBA */
+    150          	UINT count			/* Number of sectors to write */
+    151          )
+    152          {
+    153          	DRESULT res;
+    154          	int result;
+    155          
+    156          	switch (pdrv) {
+    157          	case DEV_RAM :
+    158          		// translate the arguments here
+    159          
+    160          		result = RAM_disk_write(buff, sector, count);
+    161          
+    162          		// translate the reslut code here
+    163          
+    164          		return res;
+    165          
+    166          	case DEV_MMC :
+    167          		// translate the arguments here
+    168          
+    169          		result = MMC_disk_write(buff, sector, count);
+    170          
+    171          		// translate the reslut code here
+    172          
+    173          		return res;
+    174          
+    175          	case DEV_USB :
+    176          		// translate the arguments here
+    177          
+    178          		result = USB_disk_write(buff, sector, count);
+    179          
+    180          		// translate the reslut code here
+    181          
+    182          		return res;
+    183          	}
+    184          
+    185          	return RES_PARERR;
+    186          }
+    187          
+    188          
+    189          
+    190          /*-----------------------------------------------------------------------*/
+    191          /* Miscellaneous Functions                                               */
+    192          /*-----------------------------------------------------------------------*/
+    193          
+    194          DRESULT disk_ioctl (
+    195          	BYTE pdrv,		/* Physical drive nmuber (0..) */
+    196          	BYTE cmd,		/* Control code */
+    197          	void *buff		/* Buffer to send/receive control data */
+    198          )
+    199          {
+    200          	DRESULT res;
+    201          	int result;
+    202          
+    203          	switch (pdrv) {
+    204          	case DEV_RAM :
+    205          
+    206          		// Process of the command for the RAM drive
+    207          
+    208          		return res;
+    209          
+    210          	case DEV_MMC :
+    211          
+    212          		// Process of the command for the MMC/SD card
+    213          
+    214          		return res;
+    215          
+    216          	case DEV_USB :
+    217          
+    218          		// Process of the command the USB drive
+    219          
+    220          		return res;
+    221          	}
+    222          
+    223          	return RES_PARERR;
+    224          }
+    225          
+
+Errors: 12
+Warnings: 10

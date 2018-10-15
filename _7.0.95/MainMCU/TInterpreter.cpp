@@ -707,7 +707,7 @@ bool TInterpreter::SendFrameToHost(BYTE FrameID)
 	crcBCC.Int = 0;
 
   #ifdef LCD_TRACE
-     TLcdTrace::AddLine("Send Frame To Host:");
+    // TLcdTrace::AddLine("Send Frame To Host:");
   #endif
 
   SendByte(0x55);

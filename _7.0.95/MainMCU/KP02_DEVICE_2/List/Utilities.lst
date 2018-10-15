@@ -1,6 +1,6 @@
 ###############################################################################
 #
-# IAR ANSI C/C++ Compiler V7.40.2.8542/W32 for ARM        09/Oct/2018  16:32:53
+# IAR ANSI C/C++ Compiler V7.40.2.8542/W32 for ARM        12/Oct/2018  15:54:37
 # Copyright 1999-2015 IAR Systems AB.
 #
 #    Cpu mode     =  thumb
@@ -320,55 +320,56 @@ D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\Utilities.cpp
    \   000000B2   0x4770             BX       LR               ;; return
     133          //------------------------------------------------------------------------------------
     134          
+    135          
 
    \                                 In section .text, align 2, keep-with-next
-    135          void itodts(int val,char *buf,int size)
-    136          {
+    136          void itodts(int val,char *buf,int size)
+    137          {
    \                     _Z6itodtsiPci: (+1)
    \   00000000   0xB4F0             PUSH     {R4-R7}
-    137          	char *offset = buf;   // a pointer to a string
-    138            char *first = offset; // a pointer to
+    138          	char *offset = buf;   // a pointer to a string
+    139            char *first = offset; // a pointer to
    \   00000002   0x460B             MOV      R3,R1
-    139                                  // the first digit
-    140            int delta_y;          // the value of a digit
-    141            int count = 0;        // a number of digits
+    140                                  // the first digit
+    141            int delta_y;          // the value of a digit
+    142            int count = 0;        // a number of digits
    \   00000004   0x2400             MOVS     R4,#+0
-    142                                  // in the string
-    143          
-    144          	int valfix = val;
+    143                                  // in the string
+    144          
+    145          	int valfix = val;
    \   00000006   0x4605             MOV      R5,R0
-    145            // val is negative, so let's add '-' to
-    146            // the begin of the string.
-    147            if(val <= 0) 
+    146            // val is negative, so let's add '-' to
+    147            // the begin of the string.
+    148            if(val <= 0) 
    \   00000008   0x2801             CMP      R0,#+1
    \   0000000A   0xDA09             BGE.N    ??itodts_0
-    148            	{
-    149            		buf[0] = '0';
+    149            	{
+    150            		buf[0] = '0';
    \   0000000C   0x2030             MOVS     R0,#+48
    \   0000000E   0x7008             STRB     R0,[R1, #+0]
-    150            		buf[1] = '0';
+    151            		buf[1] = '0';
    \   00000010   0x7048             STRB     R0,[R1, #+1]
-    151            		buf[2] = 0;
+    152            		buf[2] = 0;
    \   00000012   0x4620             MOV      R0,R4
    \   00000014   0x7088             STRB     R0,[R1, #+2]
-    152            		return;
+    153            		return;
    \   00000016   0xE037             B.N      ??itodts_1
-    153            	}  
-    154            	
-    155            // Read and store digits into the string.
-    156            while((val > 0) && (size-- >= 0))
-    157            	{
-    158              	delta_y = (int)(val % DECIMAL);
-    159                val /= DECIMAL;
-    160          
-    161                if (delta_y > 9) // The hexademical format.
-    162                	*offset++ = (delta_y - 10 + 'a');
-    163                else  // Binary, decimal and octople formats.
-    164                  *offset++ = (delta_y + '0');
+    154            	}  
+    155            	
+    156            // Read and store digits into the string.
+    157            while((val > 0) && (size-- >= 0))
+    158            	{
+    159              	delta_y = (int)(val % DECIMAL);
+    160                val /= DECIMAL;
+    161          
+    162                if (delta_y > 9) // The hexademical format.
+    163                	*offset++ = (delta_y - 10 + 'a');
+    164                else  // Binary, decimal and octople formats.
+    165                  *offset++ = (delta_y + '0');
    \                     ??itodts_2: (+1)
    \   00000018   0x3630             ADDS     R6,R6,#+48
    \   0000001A   0xF801 0x6B01      STRB     R6,[R1], #+1
-    165                count++;
+    166                count++;
    \                     ??itodts_3: (+1)
    \   0000001E   0x1C64             ADDS     R4,R4,#+1
    \                     ??itodts_0: (+1)
@@ -388,346 +389,346 @@ D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\Utilities.cpp
    \   00000040   0x3657             ADDS     R6,R6,#+87
    \   00000042   0xF801 0x6B01      STRB     R6,[R1], #+1
    \   00000046   0xE7EA             B.N      ??itodts_3
-    166              }
-    167            if(valfix < 10)
+    167              }
+    168            if(valfix < 10)
    \                     ??itodts_4: (+1)
    \   00000048   0x2D0A             CMP      R5,#+10
    \   0000004A   0xDA03             BGE.N    ??itodts_5
-    168            	{
-    169            		*offset++ = '0';
+    169            	{
+    170            		*offset++ = '0';
    \   0000004C   0x2030             MOVS     R0,#+48
    \   0000004E   0xF801 0x0B01      STRB     R0,[R1], #+1
-    170            		count++;
+    171            		count++;
    \   00000052   0x1C64             ADDS     R4,R4,#+1
-    171            	}	
-    172          
-    173            // Points to the last digit.
-    174            *offset-- = '\0';
+    172            	}	
+    173          
+    174            // Points to the last digit.
+    175            *offset-- = '\0';
    \                     ??itodts_5: (+1)
    \   00000054   0x2000             MOVS     R0,#+0
    \   00000056   0xF801 0x0901      STRB     R0,[R1], #-1
-    175          
-    176            // Now our string corresponds to the integer
-    177            // digits but it is in the reverse order. So make
-    178            // the backward transformation of it. If it has
-    179            // only two characters just swap them without any
-    180            // additional actions.
-    181            if(count == 1)
+    176          
+    177            // Now our string corresponds to the integer
+    178            // digits but it is in the reverse order. So make
+    179            // the backward transformation of it. If it has
+    180            // only two characters just swap them without any
+    181            // additional actions.
+    182            if(count == 1)
    \   0000005A   0x2C01             CMP      R4,#+1
    \   0000005C   0xD014             BEQ.N    ??itodts_1
-    182            	return;
-    183            else if (count == 2) 
+    183            	return;
+    184            else if (count == 2) 
    \   0000005E   0x2C02             CMP      R4,#+2
    \   00000060   0xD104             BNE.N    ??itodts_6
-    184            	{
-    185              	char temp = (char)*offset;
+    185            	{
+    186              	char temp = (char)*offset;
    \   00000062   0x7808             LDRB     R0,[R1, #+0]
-    186                *offset-- = *first;
+    187                *offset-- = *first;
    \   00000064   0x781A             LDRB     R2,[R3, #+0]
    \   00000066   0x700A             STRB     R2,[R1, #+0]
-    187                *first++ = temp;      
+    188                *first++ = temp;      
    \   00000068   0x7018             STRB     R0,[R3, #+0]
    \   0000006A   0xE00D             B.N      ??itodts_1
-    188              }
-    189            // For more than two characters in the string
-    190            // reverse full string in the folowing cycle.
-    191            else 
-    192            	{
-    193              	delta_y = count / 2;
+    189              }
+    190            // For more than two characters in the string
+    191            // reverse full string in the folowing cycle.
+    192            else 
+    193            	{
+    194              	delta_y = count / 2;
    \                     ??itodts_6: (+1)
    \   0000006C   0xEB04 0x70D4      ADD      R0,R4,R4, LSR #+31
    \   00000070   0x1046             ASRS     R6,R0,#+1
    \   00000072   0xE005             B.N      ??itodts_7
-    194          
-    195                while (delta_y--) 
-    196                	{
-    197                  	char temp = (char)*first;
+    195          
+    196                while (delta_y--) 
+    197                	{
+    198                  	char temp = (char)*first;
    \                     ??itodts_8: (+1)
    \   00000074   0x7818             LDRB     R0,[R3, #+0]
-    198                    *first++ = *offset;
+    199                    *first++ = *offset;
    \   00000076   0x780A             LDRB     R2,[R1, #+0]
    \   00000078   0xF803 0x2B01      STRB     R2,[R3], #+1
-    199                    *offset-- = temp;
+    200                    *offset-- = temp;
    \   0000007C   0xF801 0x0901      STRB     R0,[R1], #-1
-    200                  }
+    201                  }
    \                     ??itodts_7: (+1)
    \   00000080   0x4630             MOV      R0,R6
    \   00000082   0x1E46             SUBS     R6,R0,#+1
    \   00000084   0x2800             CMP      R0,#+0
    \   00000086   0xD1F5             BNE.N    ??itodts_8
-    201              }
-    202          }
+    202              }
+    203          }
    \                     ??itodts_1: (+1)
    \   00000088   0xBCF0             POP      {R4-R7}
    \   0000008A   0x4770             BX       LR               ;; return
-    203          //------------------------------------------------------------------------------------
-    204          
+    204          //------------------------------------------------------------------------------------
+    205          
 
    \                                 In section .text, align 2, keep-with-next
-    205          void ix10tosAsFloat(int val,char *buf,int size)
-    206          {
+    206          void ix10tosAsFloat(int val,char *buf,int size)
+    207          {
    \                     _Z14ix10tosAsFloatiPci: (+1)
    \   00000000   0xB538             PUSH     {R3-R5,LR}
    \   00000002   0x4605             MOV      R5,R0
    \   00000004   0x460C             MOV      R4,R1
-    207          	itos(val,buf,size);
+    208          	itos(val,buf,size);
    \   00000006   0x230A             MOVS     R3,#+10
    \   00000008   0x.... 0x....      BL       _Z4itosiPci5Radix
-    208          	
-    209          	int dlen = strlen(buf);
+    209          	
+    210          	int dlen = strlen(buf);
    \   0000000C   0x4620             MOV      R0,R4
    \   0000000E   0x.... 0x....      BL       strlen
-    210          	//Offset last digit and add point
-    211          	
+    211          	//Offset last digit and add point
     212          	
-    213          	if(val < 10)
+    213          	
+    214          	if(val < 10)
    \   00000012   0x1901             ADDS     R1,R0,R4
    \   00000014   0xF811 0x1C01      LDRB     R1,[R1, #-1]
    \   00000018   0x1902             ADDS     R2,R0,R4
    \   0000001A   0x1C52             ADDS     R2,R2,#+1
    \   0000001C   0x2D0A             CMP      R5,#+10
    \   0000001E   0xDA09             BGE.N    ??ix10tosAsFloat_0
-    214          		{
-    215          			buf[dlen+1] = buf[dlen-1];
+    215          		{
+    216          			buf[dlen+1] = buf[dlen-1];
    \   00000020   0x7011             STRB     R1,[R2, #+0]
-    216          			buf[dlen] = '.';
+    217          			buf[dlen] = '.';
    \   00000022   0x212E             MOVS     R1,#+46
    \   00000024   0x5501             STRB     R1,[R0, R4]
-    217          			buf[dlen-1] = '0';
+    218          			buf[dlen-1] = '0';
    \   00000026   0x2130             MOVS     R1,#+48
    \   00000028   0x1900             ADDS     R0,R0,R4
    \   0000002A   0xF800 0x1C01      STRB     R1,[R0, #-1]
-    218          			buf[dlen+2] = 0;
+    219          			buf[dlen+2] = 0;
    \   0000002E   0x2000             MOVS     R0,#+0
    \   00000030   0x7050             STRB     R0,[R2, #+1]
    \   00000032   0xBD31             POP      {R0,R4,R5,PC}
-    219          		}
-    220          	else
-    221          		{
-    222          			buf[dlen] = buf[dlen-1];
+    220          		}
+    221          	else
+    222          		{
+    223          			buf[dlen] = buf[dlen-1];
    \                     ??ix10tosAsFloat_0: (+1)
    \   00000034   0x5501             STRB     R1,[R0, R4]
-    223          			buf[dlen-1] = '.';
+    224          			buf[dlen-1] = '.';
    \   00000036   0x212E             MOVS     R1,#+46
    \   00000038   0x1900             ADDS     R0,R0,R4
    \   0000003A   0xF800 0x1C01      STRB     R1,[R0, #-1]
-    224          			buf[dlen+1] = 0;
+    225          			buf[dlen+1] = 0;
    \   0000003E   0x2000             MOVS     R0,#+0
    \   00000040   0x7010             STRB     R0,[R2, #+0]
-    225          		}	
-    226          }
+    226          		}	
+    227          }
    \   00000042   0xBD31             POP      {R0,R4,R5,PC}    ;; return
-    227          //------------------------------------------------------------------------------------
-    228          
-    229          #pragma diag_suppress=Pe940
+    228          //------------------------------------------------------------------------------------
+    229          
+    230          #pragma diag_suppress=Pe940
 
    \                                 In section .text, align 4, keep-with-next
-    230          int reverseBits(int val)
-    231          {
-    232            asm("rbit r0, r0");
+    231          int reverseBits(int val)
+    232          {
+    233            asm("rbit r0, r0");
    \                     _Z11reverseBitsi: (+1)
    \   00000000   0xFA90 0xF0A0      rbit r0, r0
-    233          //  asm("bx lr");
-    234          }
+    234          //  asm("bx lr");
+    235          }
    \   00000004   0x4770             BX       LR               ;; return
-    235          //------------------------------------------------------------------------------------
-    236          
+    236          //------------------------------------------------------------------------------------
+    237          
 
    \                                 In section .text, align 2, keep-with-next
-    237          char *ftoa(float f,int Fract)
-    238          {
+    238          char *ftoa(float f,int Fract)
+    239          {
    \                     _Z4ftoafi: (+1)
    \   00000000   0xB5F8             PUSH     {R3-R7,LR}
    \   00000002   0x4605             MOV      R5,R0
-    239          	long mantissa, int_part, frac_part;
-    240          	short exp2;
-    241          	LF_t x;
-    242          	char *p;
-    243          	static char outbuf[15];
-    244          
-    245          	if(f == 0.0)
+    240          	long mantissa, int_part, frac_part;
+    241          	short exp2;
+    242          	LF_t x;
+    243          	char *p;
+    244          	static char outbuf[15];
+    245          
+    246          	if(f == 0.0)
    \   00000004   0xEEB5 0x0A40      VCMP.F32 S0,#0.0
    \   00000008   0xEEF1 0xFA10      FMSTAT   
    \   0000000C   0xD10A             BNE.N    ??ftoa_0
-    246          		{
-    247          			outbuf[0] = '0';
+    247          		{
+    248          			outbuf[0] = '0';
    \   0000000E   0x....             LDR.N    R4,??DataTable0
    \   00000010   0x2030             MOVS     R0,#+48
    \   00000012   0x7020             STRB     R0,[R4, #+0]
-    248          			outbuf[1] = '.';
+    249          			outbuf[1] = '.';
    \   00000014   0x202E             MOVS     R0,#+46
    \   00000016   0x7060             STRB     R0,[R4, #+1]
-    249          			outbuf[2] = '0';
+    250          			outbuf[2] = '0';
    \   00000018   0x2030             MOVS     R0,#+48
    \   0000001A   0x70A0             STRB     R0,[R4, #+2]
-    250          			outbuf[3] = 0;
+    251          			outbuf[3] = 0;
    \   0000001C   0x2000             MOVS     R0,#+0
    \   0000001E   0x70E0             STRB     R0,[R4, #+3]
-    251          			return outbuf;
+    252          			return outbuf;
    \   00000020   0x4620             MOV      R0,R4
    \   00000022   0xBDF2             POP      {R1,R4-R7,PC}
-    252          		}
-    253          	
-    254          	x.F = f;
+    253          		}
+    254          	
+    255          	x.F = f;
    \                     ??ftoa_0: (+1)
    \   00000024   0xED8D 0x0A00      VSTR     S0,[SP, #+0]
-    255          	exp2 = (unsigned char)(x.L >> 23) - 127;
+    256          	exp2 = (unsigned char)(x.L >> 23) - 127;
    \   00000028   0x9800             LDR      R0,[SP, #+0]
    \   0000002A   0x15C0             ASRS     R0,R0,#+23
    \   0000002C   0xB2C0             UXTB     R0,R0
    \   0000002E   0xF1A0 0x017F      SUB      R1,R0,#+127
    \   00000032   0xB209             SXTH     R1,R1
-    256          	mantissa = (x.L & 0xFFFFFF) | 0x800000;
+    257          	mantissa = (x.L & 0xFFFFFF) | 0x800000;
    \   00000034   0x9800             LDR      R0,[SP, #+0]
    \   00000036   0x0200             LSLS     R0,R0,#+8
    \   00000038   0x0A00             LSRS     R0,R0,#+8
    \   0000003A   0xF440 0x0200      ORR      R2,R0,#0x800000
-    257          	frac_part = 0;
+    258          	frac_part = 0;
    \   0000003E   0x2600             MOVS     R6,#+0
-    258          	int_part = 0;
+    259          	int_part = 0;
    \   00000040   0x4630             MOV      R0,R6
-    259          
-    260          	if(exp2 >= 31)
+    260          
+    261          	if(exp2 >= 31)
    \   00000042   0x291F             CMP      R1,#+31
    \   00000044   0xDA5E             BGE.N    ??ftoa_1
-    261          	{
-    262          		return 0;
-    263          	}
-    264          	else if (exp2 < -23)
+    262          	{
+    263          		return 0;
+    264          	}
+    265          	else if (exp2 < -23)
    \   00000046   0xF111 0x0F17      CMN      R1,#+23
    \   0000004A   0xDB5B             BLT.N    ??ftoa_1
-    265          		{
-    266          			return 0;
-    267          		}
-    268          		else if (exp2 >= 23)
+    266          		{
+    267          			return 0;
+    268          		}
+    269          		else if (exp2 >= 23)
    \   0000004C   0x2917             CMP      R1,#+23
    \   0000004E   0xDB04             BLT.N    ??ftoa_2
-    269          			{
-    270          				int_part = mantissa << (exp2 - 23);
+    270          			{
+    271          				int_part = mantissa << (exp2 - 23);
    \   00000050   0xF1A1 0x0017      SUB      R0,R1,#+23
    \   00000054   0xFA02 0xF000      LSL      R0,R2,R0
    \   00000058   0xE00F             B.N      ??ftoa_3
-    271          			}	
-    272          			else if (exp2 >= 0) 
+    272          			}	
+    273          			else if (exp2 >= 0) 
    \                     ??ftoa_2: (+1)
    \   0000005A   0x2900             CMP      R1,#+0
    \   0000005C   0xD409             BMI.N    ??ftoa_4
-    273          				{
-    274          					int_part = mantissa >> (23 - exp2);
+    274          				{
+    275          					int_part = mantissa >> (23 - exp2);
    \   0000005E   0xF1C1 0x0317      RSB      R3,R1,#+23
    \   00000062   0x4610             MOV      R0,R2
    \   00000064   0x4118             ASRS     R0,R0,R3
-    275          					frac_part = (mantissa << (exp2 + 1)) & 0xFFFFFF;
+    276          					frac_part = (mantissa << (exp2 + 1)) & 0xFFFFFF;
    \   00000066   0x1C49             ADDS     R1,R1,#+1
    \   00000068   0xFA02 0xF101      LSL      R1,R2,R1
    \   0000006C   0x020E             LSLS     R6,R1,#+8
    \   0000006E   0x0A36             LSRS     R6,R6,#+8
    \   00000070   0xE003             B.N      ??ftoa_3
-    276          				}
-    277          				else /* if (exp2 < 0) */
-    278          					{
-    279          						frac_part = (mantissa & 0xFFFFFF) >> -(exp2 + 1);
+    277          				}
+    278          				else /* if (exp2 < 0) */
+    279          					{
+    280          						frac_part = (mantissa & 0xFFFFFF) >> -(exp2 + 1);
    \                     ??ftoa_4: (+1)
    \   00000072   0x1C49             ADDS     R1,R1,#+1
    \   00000074   0x4249             RSBS     R1,R1,#+0
    \   00000076   0x4616             MOV      R6,R2
    \   00000078   0x410E             ASRS     R6,R6,R1
-    280          					}
-    281          	
-    282          	p = outbuf;
+    281          					}
+    282          	
+    283          	p = outbuf;
    \                     ??ftoa_3: (+1)
    \   0000007A   0x....             LDR.N    R4,??DataTable0
    \   0000007C   0x4627             MOV      R7,R4
-    283          
-    284          	if(x.L < 0)
+    284          
+    285          	if(x.L < 0)
    \   0000007E   0x9900             LDR      R1,[SP, #+0]
    \   00000080   0x2900             CMP      R1,#+0
    \   00000082   0xD502             BPL.N    ??ftoa_5
-    285          		*p++ = '-';
+    286          		*p++ = '-';
    \   00000084   0x212D             MOVS     R1,#+45
    \   00000086   0x7021             STRB     R1,[R4, #+0]
    \   00000088   0x1C67             ADDS     R7,R4,#+1
-    286          
-    287          	if (int_part == 0)
+    287          
+    288          	if (int_part == 0)
    \                     ??ftoa_5: (+1)
    \   0000008A   0x2800             CMP      R0,#+0
    \   0000008C   0xD103             BNE.N    ??ftoa_6
-    288          		*p++ = '0';
+    289          		*p++ = '0';
    \   0000008E   0x2030             MOVS     R0,#+48
    \   00000090   0xF807 0x0B01      STRB     R0,[R7], #+1
    \   00000094   0xE009             B.N      ??ftoa_7
-    289          	else
-    290          		{
-    291          			itos(int_part,p,10);
+    290          	else
+    291          		{
+    292          			itos(int_part,p,10);
    \                     ??ftoa_6: (+1)
    \   00000096   0x230A             MOVS     R3,#+10
    \   00000098   0x461A             MOV      R2,R3
    \   0000009A   0x4639             MOV      R1,R7
    \   0000009C   0x.... 0x....      BL       _Z4itosiPci5Radix
    \   000000A0   0xE000             B.N      ??ftoa_8
-    292          			while (*p)
-    293          				p++;
+    293          			while (*p)
+    294          				p++;
    \                     ??ftoa_9: (+1)
    \   000000A2   0x1C7F             ADDS     R7,R7,#+1
    \                     ??ftoa_8: (+1)
    \   000000A4   0x7838             LDRB     R0,[R7, #+0]
    \   000000A6   0x2800             CMP      R0,#+0
    \   000000A8   0xD1FB             BNE.N    ??ftoa_9
-    294          		}
-    295          	*p++ = '.';
+    295          		}
+    296          	*p++ = '.';
    \                     ??ftoa_7: (+1)
    \   000000AA   0x202E             MOVS     R0,#+46
    \   000000AC   0xF807 0x0B01      STRB     R0,[R7], #+1
-    296          
-    297          	if(frac_part == 0)
+    297          
+    298          	if(frac_part == 0)
    \   000000B0   0x2E00             CMP      R6,#+0
    \   000000B2   0xD103             BNE.N    ??ftoa_10
-    298          		*p++ = '0';
+    299          		*p++ = '0';
    \   000000B4   0x2030             MOVS     R0,#+48
    \   000000B6   0xF807 0x0B01      STRB     R0,[R7], #+1
    \   000000BA   0xE020             B.N      ??ftoa_11
-    299          	else
-    300          		{
-    301          			char m, max;
-    302          
-    303          			max = sizeof (outbuf) - (p - outbuf) - 1;
+    300          	else
+    301          		{
+    302          			char m, max;
+    303          
+    304          			max = sizeof (outbuf) - (p - outbuf) - 1;
    \                     ??ftoa_10: (+1)
    \   000000BC   0x1BE0             SUBS     R0,R4,R7
    \   000000BE   0x300E             ADDS     R0,R0,#+14
    \   000000C0   0xB2C0             UXTB     R0,R0
-    304          			if (max > Fract)
+    305          			if (max > Fract)
    \   000000C2   0x4285             CMP      R5,R0
    \   000000C4   0xDA01             BGE.N    ??ftoa_12
-    305          			max = Fract;
+    306          			max = Fract;
    \   000000C6   0xB2ED             UXTB     R5,R5
    \   000000C8   0x4628             MOV      R0,R5
-    306          			/* print BCD */
-    307          			for(m = 0; m < max; m++)
+    307          			/* print BCD */
+    308          			for(m = 0; m < max; m++)
    \                     ??ftoa_12: (+1)
    \   000000CA   0x2100             MOVS     R1,#+0
    \   000000CC   0xE009             B.N      ??ftoa_13
-    308          				{
-    309          					/* frac_part *= 10; */
-    310          					frac_part = (frac_part << 3) + (frac_part << 1); 
+    309          				{
+    310          					/* frac_part *= 10; */
+    311          					frac_part = (frac_part << 3) + (frac_part << 1); 
    \                     ??ftoa_14: (+1)
    \   000000CE   0x0072             LSLS     R2,R6,#+1
    \   000000D0   0xEB02 0x02C6      ADD      R2,R2,R6, LSL #+3
-    311          
-    312          					*p++ = (frac_part >> 24) + '0';
+    312          
+    313          					*p++ = (frac_part >> 24) + '0';
    \   000000D4   0x1613             ASRS     R3,R2,#+24
    \   000000D6   0x3330             ADDS     R3,R3,#+48
    \   000000D8   0xF807 0x3B01      STRB     R3,[R7], #+1
-    313          					frac_part &= 0xFFFFFF;
+    314          					frac_part &= 0xFFFFFF;
    \   000000DC   0x0216             LSLS     R6,R2,#+8
    \   000000DE   0x0A36             LSRS     R6,R6,#+8
-    314          				}
+    315          				}
    \   000000E0   0x1C49             ADDS     R1,R1,#+1
    \                     ??ftoa_13: (+1)
    \   000000E2   0xB2C9             UXTB     R1,R1
    \   000000E4   0x4281             CMP      R1,R0
    \   000000E6   0xDBF2             BLT.N    ??ftoa_14
-    315          			/* delete ending zeroes */
-    316          			for (--p; p[0] == '0' && p[-1] != '.'; --p) ;
+    316          			/* delete ending zeroes */
+    317          			for (--p; p[0] == '0' && p[-1] != '.'; --p) ;
    \   000000E8   0x1E78             SUBS     R0,R7,#+1
    \   000000EA   0xE000             B.N      ??ftoa_15
    \                     ??ftoa_16: (+1)
@@ -739,21 +740,21 @@ D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\Utilities.cpp
    \   000000F4   0xF810 0x1C01      LDRB     R1,[R0, #-1]
    \   000000F8   0x292E             CMP      R1,#+46
    \   000000FA   0xD1F7             BNE.N    ??ftoa_16
-    317          			++p;
+    318          			++p;
    \                     ??ftoa_17: (+1)
    \   000000FC   0x1C47             ADDS     R7,R0,#+1
-    318          		}
-    319          
-    320          	*p = 0;
+    319          		}
+    320          
+    321          	*p = 0;
    \                     ??ftoa_11: (+1)
    \   000000FE   0x2000             MOVS     R0,#+0
    \   00000100   0x7038             STRB     R0,[R7, #+0]
-    321          
-    322          	return outbuf;
+    322          
+    323          	return outbuf;
    \   00000102   0x4620             MOV      R0,R4
    \                     ??ftoa_1: (+1)
    \   00000104   0xBDF2             POP      {R1,R4-R7,PC}    ;; return
-    323          }
+    324          }
 
    \                                 In section .bss, align 4
    \                     ??outbuf:
@@ -762,7 +763,7 @@ D:\WORK\Firmware_LastRelease\_7.0.95\MainMCU\Utilities.cpp
    \                                 In section .text, align 4, keep-with-next
    \                     ??DataTable0:
    \   00000000   0x........         DC32     ??outbuf
-    324          //------------------------------------------------------------------------------------
+    325          //------------------------------------------------------------------------------------
 
    Maximum stack usage in bytes:
 
